@@ -28,7 +28,13 @@ npm install
 
 ### 2. Environment Variables
 
-Create a `.env` file in the project root with the following variables:
+Copy the example environment file and update it with your values:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your actual database credentials and configuration:
 
 ```env
 # Database Configuration
@@ -44,11 +50,24 @@ DB_SSL=false
 NODE_ENV=development
 PORT=8081
 SESSION_SECRET=your-secret-key-change-in-production
+APP_BASE_URL=http://localhost:8081
 ```
 
 ### 3. Database Setup
 
-Ensure your PostgreSQL database is running and the schema has been created. The application expects the following tables:
+Ensure your PostgreSQL database is running and create the database:
+
+```bash
+createdb ella_rises  # or use your PostgreSQL client
+```
+
+Run the database migrations to create all required tables:
+
+```bash
+npx knex migrate:latest
+```
+
+The application expects the following tables (created by migrations):
 
 - `Participants`
 - `EventsTemplates`
@@ -59,6 +78,7 @@ Ensure your PostgreSQL database is running and the schema has been created. The 
 - `DonationsSummary`
 - `Milestones`
 - `MilestonesTypes`
+- `PasswordTokens`
 
 See the database schema in the project documentation for the exact structure.
 
