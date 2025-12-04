@@ -61,26 +61,38 @@ Ensure your PostgreSQL database is running and create the database:
 createdb ella_rises  # or use your PostgreSQL client
 ```
 
-Run the database migrations to create all required tables:
+**Option A: Using SQL Schema File (Recommended for quick setup)**
+
+Run the SQL schema file directly:
+
+```bash
+psql -U your_db_user -d ella_rises -f database/schema.sql
+```
+
+This will create all tables, indexes, and constraints in one go.
+
+**Option B: Using Knex Migrations**
+
+Alternatively, you can use Knex migrations:
 
 ```bash
 npx knex migrate:latest
 ```
 
-The application expects the following tables (created by migrations):
+The application expects the following tables:
 
-- `Participants`
-- `EventsTemplates`
-- `Events`
-- `Registrations`
-- `Surveys`
-- `Donations`
-- `DonationsSummary`
-- `Milestones`
-- `MilestonesTypes`
-- `PasswordTokens`
+- `Participants` - User accounts and participant information
+- `EventsTemplates` - Event type templates
+- `Events` - Individual event instances
+- `Registrations` - Participant event registrations
+- `Surveys` - Post-event survey responses
+- `Donations` - Individual donation records
+- `DonationsSummary` - Aggregated donation totals per participant
+- `Milestones` - Participant achievement milestones
+- `MilestonesTypes` - Available milestone types
+- `PasswordTokens` - Password creation/reset tokens
 
-See the database schema in the project documentation for the exact structure.
+See `database/schema.sql` for the complete database schema with all column definitions, constraints, and indexes.
 
 ### 4. Run the Application
 
