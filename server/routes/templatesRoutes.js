@@ -4,6 +4,55 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// List all templates with their event dates
+router.get('/with-dates', async (req, res, next) => {
+  try {
+    const templates = await db('EventsTemplates')
+      .select('*')
+      .orderBy('EventName', 'asc');
+    
+    // For each template, get its associated events
+    const templatesWithDates = await Promise.all(
+      templates.map(async (template) => {
+        // Get all events for this template
+        const allEventsRaw = await db('Events')
+          .where({ EventName: template.EventName })
+          .whereNotNull('EventDateTimeStart')
+          .select('EventID', 'EventDateTimeStart', 'EventDateTimeEnd', 'EventLocation')
+          .orderBy('EventDateTimeStart', 'asc');
+        
+        // Filter to only future events (using current time)
+        const now = new Date();
+        const futureEvents = allEventsRaw
+          .filter(event => {
+            if (!event.EventDateTimeStart) return false;
+            const eventDate = new Date(event.EventDateTimeStart);
+            if (isNaN(eventDate.getTime())) return false;
+            return eventDate > now;
+          })
+          .map(event => ({
+            EventID: event.EventID,
+            EventDateTimeStart: event.EventDateTimeStart,
+            EventDateTimeEnd: event.EventDateTimeEnd || null,
+            EventLocation: event.EventLocation || null
+          }));
+        
+        console.log(`Template "${template.EventName}": ${allEventsRaw.length} total events, ${futureEvents.length} future events`);
+        
+        return {
+          ...template,
+          events: futureEvents
+        };
+      })
+    );
+    
+    res.json(templatesWithDates);
+  } catch (error) {
+    console.error('Error fetching templates with dates:', error);
+    next(error);
+  }
+});
+
 // List all templates
 router.get('/', async (req, res, next) => {
   try {
