@@ -2,7 +2,8 @@
 
 export const requireAuth = (req, res, next) => {
   if (!req.session.user) {
-    if (req.path.startsWith('/api/')) {
+    // Check if it's an API request (check both path and originalUrl)
+    if (req.path.startsWith('/api/') || req.originalUrl.startsWith('/api/')) {
       return res.status(401).json({ message: 'Authentication required' });
     }
     return res.redirect('/portal/auth');
