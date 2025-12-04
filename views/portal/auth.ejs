@@ -1,128 +1,128 @@
-<%- include('../partials/head', { title: 'Ella Rises' }) %>
-<%- include('../partials/navbar', { currentPath: '/portal/auth' }) %>
-<div class="min-h-screen bg-background pt-28 pb-20">
-  <div class="container mx-auto px-6">
-    <div class="max-w-md mx-auto">
-      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 text-center">
-        Portal <span class="italic text-primary">Login</span>
-      </h1>
-      <div class="bg-card border border-border rounded-xl p-8 shadow-sm">
-        <form id="login-form" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-foreground mb-2">Email</label>
-            <input type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+<%- include('../partials/head', { title: 'Ella Rises - Login' }) %>
+<div class="min-h-screen flex">
+  <!-- Left Column - Login Form (50% width) -->
+  <div class="w-full lg:w-1/2 bg-ella-blush/40 flex flex-col">
+    <div class="flex-1 flex flex-col justify-center px-8 md:px-12 lg:px-16 xl:px-24 py-12">
+      <div class="max-w-lg mx-auto lg:mx-0 w-full">
+        <!-- Back to Home Link -->
+        <a href="/" class="inline-flex items-center gap-2 text-foreground/70 hover:text-primary mb-8 text-sm transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Back to Home
+        </a>
+
+        <!-- Branding -->
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-8">Ella Rises</h2>
+
+        <!-- Welcome Message -->
+        <h1 class="text-4xl md:text-5xl font-serif text-foreground mb-3">Welcome Back</h1>
+        <p class="text-foreground/70 mb-8 text-lg">Sign in to access the Ella Rises dashboard.</p>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-6 w-full">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Email</label>
+          <input 
+            type="email" 
+            name="email" 
+            required 
+            placeholder="you@example.com"
+            class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Password</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              name="password" 
+              id="password-input"
+              required 
+              class="w-full bg-white border border-border text-foreground h-12 px-4 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+            />
+            <button 
+              type="button" 
+              id="toggle-password"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50 hover:text-foreground"
+              aria-label="Toggle password visibility"
+            >
+              <svg id="eye-icon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg id="eye-off-icon" class="h-5 w-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+              </svg>
+            </button>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-foreground mb-2">Password</label>
-            <input type="password" name="password" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-          </div>
-          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
-            Login
-          </button>
-        </form>
-        <div class="mt-6 space-y-3 text-center">
-          <p class="text-foreground/60 text-sm">
-            Don't have an account?
-            <a href="/portal/auth?signup=true" class="text-primary hover:underline">Sign up</a>
+        </div>
+        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium transition-colors">
+          Sign In
+        </button>
+      </form>
+
+        <!-- Account Link -->
+        <div class="mt-6 space-y-2 text-sm">
+          <p class="text-foreground/70">
+            Don't have an account? 
+            <a href="/portal/auth?signup=true" class="text-primary hover:underline font-medium">Sign up</a>
           </p>
-          <p class="text-foreground/60 text-sm">
+          <p class="text-foreground/70">
             Not sure if you already have a participant record?
-            <a href="/account/start" class="text-primary hover:underline">
-              Access or create your account
-            </a>
+            <a href="/account/start" class="text-primary hover:underline font-medium">Access your account</a>
           </p>
         </div>
       </div>
     </div>
   </div>
-></div>
-<%- include('../partials/footer') %>
+
+  <!-- Right Column - Promotional (50% width) -->
+  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-ella-charcoal via-ella-charcoal to-ella-charcoal/90 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-center items-center px-8 md:px-12 lg:px-16 text-center text-white w-full">
+      <div class="max-w-md mx-auto">
+        <h2 class="text-4xl md:text-5xl font-serif mb-6">
+          Empowering the <span class="text-primary italic">Rising</span> Generation
+        </h2>
+        <p class="text-white/80 text-lg leading-relaxed">
+          Access participant data, manage events, track milestones, and view program impact all in one place.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 <%- include('../partials/footer-scripts') %>
 <script>
+  // Password visibility toggle
+  const togglePassword = document.getElementById('toggle-password');
+  const passwordInput = document.getElementById('password-input');
+  const eyeIcon = document.getElementById('eye-icon');
+  const eyeOffIcon = document.getElementById('eye-off-icon');
+
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      eyeIcon.classList.toggle('hidden');
+      eyeOffIcon.classList.toggle('hidden');
+    });
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const isSignup = urlParams.get('signup') === 'true';
   const prefillEmail = urlParams.get('email');
   
-  if (isSignup) {
-    document.querySelector('h1').innerHTML = 'Portal <span class="italic text-primary">Sign Up</span>';
-    const form = document.getElementById('login-form');
-    form.innerHTML = `
-      <div class="grid md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">First Name *</label>
-          <input type="text" name="firstName" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">Last Name *</label>
-          <input type="text" name="lastName" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Email *</label>
-        <input id="signup-email" type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
-        <input type="tel" name="phoneNumber" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Date of Birth *</label>
-        <input type="date" name="dateOfBirth" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Field of Interest *</label>
-        <select name="fieldOfInterest" required class="w-full bg-background border border-border text-foreground h-11 px-4 rounded-lg">
-          <option value="Arts">Arts</option>
-          <option value="STEM">STEM</option>
-          <option value="Both" selected>Both</option>
-        </select>
-      </div>
-      <div class="grid md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">City *</label>
-          <input type="text" name="city" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">State *</label>
-          <input type="text" name="state" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">Zip *</label>
-          <input type="text" name="zip" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">School or Employer</label>
-        <input type="text" name="schoolOrEmployer" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Password * (min 8 characters)</label>
-        <input type="password" name="password" required minlength="8" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-foreground mb-2">Confirm Password *</label>
-        <input type="password" name="confirmPassword" required minlength="8" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
-      </div>
-      <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
-        Create Account
-      </button>
-    `;
-  }
-
-  // Prefill email if provided in query string
-  if (prefillEmail) {
-    const emailInput = document.querySelector('input[name="email"]');
-    if (emailInput) emailInput.value = prefillEmail;
-  }
-
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
+  // Form submission handler
+  function handleFormSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
 
+    // Determine if this is signup based on form fields
+    const isSignupForm = data.firstName !== undefined;
+
     // Map form fields to API payload
     let payload;
-    if (isSignup) {
+    if (isSignupForm) {
       const password = data.password || '';
       const confirmPassword = data.confirmPassword || '';
       if (password.length < 8) {
@@ -157,7 +157,7 @@
     }
     
     try {
-      const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
+      const endpoint = isSignupForm ? '/api/auth/signup' : '/api/auth/login';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -168,11 +168,109 @@
         window.location.href = '/portal/dashboard';
       } else {
         const error = await response.json();
-        alert(error.message || 'Login failed');
+        alert(error.message || (isSignupForm ? 'Signup failed' : 'Login failed'));
       }
     } catch (err) {
       alert('An error occurred. Please try again.');
+      console.error(err);
     }
-  });
+  }
+
+  // Attach event listener to form
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', handleFormSubmit);
+  
+  if (isSignup) {
+    // Update heading and description for signup
+    document.querySelector('h1').textContent = 'Create Your Account';
+    document.querySelector('h1').nextElementSibling.textContent = 'Join the Ella Rises community and start your journey.';
+    
+    form.innerHTML = `
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">First Name *</label>
+          <input type="text" name="firstName" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Last Name *</label>
+          <input type="text" name="lastName" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Email *</label>
+        <input id="signup-email" type="email" name="email" required placeholder="you@example.com" class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
+        <input type="tel" name="phoneNumber" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Date of Birth *</label>
+        <input type="date" name="dateOfBirth" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Field of Interest *</label>
+        <select name="fieldOfInterest" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="Arts">Arts</option>
+          <option value="STEM">STEM</option>
+          <option value="Both" selected>Both</option>
+        </select>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">City *</label>
+          <input type="text" name="city" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">State *</label>
+          <input type="text" name="state" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Zip *</label>
+          <input type="text" name="zip" required class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">School or Employer</label>
+        <input type="text" name="schoolOrEmployer" class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Password * (min 8 characters)</label>
+        <input type="password" name="password" required minlength="8" class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Confirm Password *</label>
+        <input type="password" name="confirmPassword" required minlength="8" class="w-full bg-white border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium transition-colors">
+        Create Account
+      </button>
+    `;
+    
+    // Event listener persists because it's attached to the form element itself
+    // Update account link text
+    const accountLink = document.querySelector('.mt-6');
+    if (accountLink) {
+      accountLink.innerHTML = `
+        <p class="text-foreground/70 text-sm">
+          Already have an account? 
+          <a href="/portal/auth" class="text-primary hover:underline font-medium">Sign in</a>.
+        </p>
+        <p class="text-foreground/70 text-sm mt-2">
+          Not sure if you already have a participant record?
+          <a href="/account/start" class="text-primary hover:underline font-medium">Access or create your account</a>.
+        </p>
+      `;
+    }
+  }
+
+  // Prefill email if provided in query string
+  if (prefillEmail) {
+    // Wait a bit for form to be ready, then prefill
+    setTimeout(() => {
+      const emailInput = document.querySelector('input[name="email"]');
+      if (emailInput) emailInput.value = prefillEmail;
+    }, 100);
+  }
 </script>
 
