@@ -1,0 +1,68 @@
+<%- include('partials/head', { title: title }) %>
+<%- include('partials/navbar', { currentPath: '/donate' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Thank You Section -->
+  <section class="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-2xl mx-auto text-center">
+        <!-- Success Icon -->
+        <div class="mb-8 flex justify-center">
+          <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 leading-tight">
+          Thank <span class="italic text-primary">You</span>!
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 leading-relaxed mb-8">
+          Your generous donation helps us continue empowering young women through transformative programs and opportunities.
+        </p>
+        <p class="text-base text-foreground/60 mb-10">
+          A receipt has been sent to your email address.
+        </p>
+
+        <!-- Home Button -->
+        <a
+          href="/"
+          class="inline-block bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-8 py-3 text-sm font-medium transition-colors"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact Section -->
+  <section class="py-20 bg-muted/30">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-serif text-foreground mb-6">
+        Your Impact Matters
+      </h2>
+      <p class="text-foreground/70 max-w-2xl mx-auto mb-10 text-lg">
+        Every donation helps us provide STEAM education, arts programs, and mentorship opportunities to young women in our community.
+      </p>
+      <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-left">
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Education Programs</h3>
+          <p class="text-foreground/60">Supporting STEAM workshops and educational initiatives.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Arts & Culture</h3>
+          <p class="text-foreground/60">Preserving and celebrating cultural heritage through the arts.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Mentorship</h3>
+          <p class="text-foreground/60">Connecting young women with mentors and role models.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+

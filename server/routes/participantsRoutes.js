@@ -205,7 +205,7 @@ router.get('/:id/donations', requireAuth, async (req, res, next) => {
       .where({ ParticipantID: participantId })
       .orderBy('DonationDateRaw', 'desc');
 
-    const summary = await db('DonationsSummary')
+    const summary = await db('DonationSummary')
       .where({ ParticipantID: participantId })
       .first();
 

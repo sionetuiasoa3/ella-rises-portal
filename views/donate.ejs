@@ -32,11 +32,11 @@
           </div>
           <div class="bg-card border border-border rounded-xl p-6 space-y-4">
             <div class="flex items-center justify-between text-sm">
-              <span class="font-semibold text-foreground">$981</span>
-              <span class="text-muted-foreground text-xs">1% of $100,000 goal</span>
+              <span class="font-semibold text-foreground" id="current-raised">$0</span>
+              <span class="text-muted-foreground text-xs" id="goal-percent">0% of $100,000 goal</span>
             </div>
             <div class="h-2 rounded-full bg-muted overflow-hidden">
-              <div class="h-full bg-primary rounded-full" style="width: 1%;"></div>
+              <div class="h-full bg-primary rounded-full transition-all duration-500" id="progress-bar" style="width: 0%;"></div>
             </div>
             <div class="space-y-2">
               <h2 class="text-xl font-serif text-foreground">Empowering Futures Together</h2>
@@ -51,26 +51,10 @@
         <!-- Right side - Amount selector + form -->
         <div class="bg-card border border-border rounded-xl p-6 md:p-8 shadow-sm">
           <form id="donation-form" class="space-y-6">
-            <!-- Frequency -->
+            <!-- Preset amounts -->
             <div class="space-y-3">
               <p class="text-sm font-semibold text-foreground">Choose amount</p>
-              <div class="flex rounded-lg border border-border p-1 text-sm">
-                <button type="button" data-frequency="one-time" class="flex-1 py-2 px-3 rounded-md bg-foreground text-background font-medium">
-                  One-time
-                </button>
-                <button type="button" data-frequency="monthly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
-                  Monthly
-                </button>
-                <button type="button" data-frequency="quarterly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
-                  Quarterly
-                </button>
-                <button type="button" data-frequency="yearly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
-                  Yearly
-                </button>
-              </div>
             </div>
-
-            <!-- Preset amounts -->
             <div class="grid grid-cols-3 gap-3">
               <button type="button" data-amount="1000" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
                 $1,000
@@ -185,14 +169,20 @@
 <%- include('partials/footer-scripts') %>
 <script>
   (function () {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+    function init() {
     const PRESET_BUTTONS = Array.from(document.querySelectorAll('.preset-amount'));
     const customAmountInput = document.querySelector('input[name="customAmount"]');
-    const frequencyButtons = Array.from(document.querySelectorAll('[data-frequency]'));
     const form = document.getElementById('donation-form');
     const status = document.getElementById('donation-status');
 
     let selectedAmount = 100; // default
-    let frequency = 'one-time';
 
     function setActivePreset(button) {
       PRESET_BUTTONS.forEach((btn) => {
@@ -224,22 +214,47 @@
       });
     }
 
-    frequencyButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        frequencyButtons.forEach((b) => {
-          b.classList.remove('bg-foreground', 'text-background');
-          b.classList.add('text-muted-foreground');
-        });
-        btn.classList.add('bg-foreground', 'text-background');
-        btn.classList.remove('text-muted-foreground');
-        frequency = btn.getAttribute('data-frequency') || 'one-time';
-      });
-    });
+    // Load total donations for goal display
+    (async function loadDonationTotal() {
+      try {
+        const res = await fetch('/api/donations/total');
+        if (!res.ok) {
+          console.error('Failed to fetch donation total:', res.status, res.statusText);
+          return;
+        }
+        const data = await res.json();
+        console.log('Donation total API response:', data);
+        
+        // Ensure total is a number
+        const total = typeof data.total === 'number' ? data.total : parseFloat(data.total) || 0;
+        console.log('Parsed total:', total);
+        
+        const goal = 100000;
+        const percent = Math.min((total / goal) * 100, 100);
+        
+        const currentRaisedEl = document.getElementById('current-raised');
+        const goalPercentEl = document.getElementById('goal-percent');
+        const progressBarEl = document.getElementById('progress-bar');
+        
+        if (currentRaisedEl) {
+          currentRaisedEl.textContent = '$' + Math.round(total).toLocaleString();
+          console.log('Updated current-raised element:', currentRaisedEl.textContent);
+        }
+        if (goalPercentEl) {
+          goalPercentEl.textContent = percent.toFixed(1) + '% of $' + goal.toLocaleString() + ' goal';
+        }
+        if (progressBarEl) {
+          progressBarEl.style.width = percent + '%';
+          console.log('Updated progress bar width:', progressBarEl.style.width);
+        }
+      } catch (err) {
+        console.error('Error loading donation total', err);
+      }
+    })();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!status) return;
-      status.textContent = 'Submitting donation...';
 
       let actualAmount = selectedAmount;
       if (customAmountInput && customAmountInput.value) {
@@ -251,46 +266,15 @@
         return;
       }
 
+      // Redirect to payment page with donation details
       const formData = new FormData(form);
-      const payload = {
-        ParticipantID: null,
-        DonationAmountRaw: actualAmount,
-        DonationDateRaw: new Date().toISOString(),
-        Message: formData.get('message') || '',
-        Anonymous: false,
-        Frequency: frequency,
-      };
-
-      try {
-        const res = await fetch('/api/donations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.status === 401) {
-          status.textContent = 'Please log in to complete your donation. Redirecting to portal login...';
-          setTimeout(() => {
-            window.location.href = '/portal/auth';
-          }, 1500);
-          return;
-        }
-
-        if (!res.ok) {
-          const error = await res.json().catch(() => ({}));
-          status.textContent = error.message || 'There was a problem submitting your donation.';
-          return;
-        }
-
-        status.textContent = 'Thank you for your donation!';
-        form.reset();
-        // reset defaults
-        selectedAmount = 100;
-        setActivePreset(PRESET_BUTTONS.find((b) => b.getAttribute('data-amount') === '100') || null);
-      } catch (err) {
-        console.error(err);
-        status.textContent = 'An unexpected error occurred. Please try again.';
-      }
+      const params = new URLSearchParams({
+        amount: actualAmount,
+        message: formData.get('message') || ''
+      });
+      
+      window.location.href = '/donate/payment?' + params.toString();
     });
+    } // end init function
   })();
 </script>
