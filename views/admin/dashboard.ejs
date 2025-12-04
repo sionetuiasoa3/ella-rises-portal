@@ -1,5 +1,5 @@
-<%- include('partials/head', { title: 'Ella Rises' }) %>
-<%- include('partials/navbar', { currentPath: '/admin' }) %>
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/admin' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
     <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Admin Dashboard</h1>
@@ -21,40 +21,491 @@
         <p class="text-3xl font-bold text-primary" id="donations-total">-</p>
       </div>
     </div>
+    
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- Manage Participants -->
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-primary/10 p-3 rounded-lg">
+            <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-serif">Manage Participants</h3>
+        </div>
+        <p class="text-foreground/60 mb-4">View, edit, or delete participant accounts. Manage roles and permissions.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/admin/participants" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            View All
+          </a>
+          <button onclick="openAddParticipantModal()" class="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add New
+          </button>
+        </div>
+      </div>
+      
+      <!-- Manage Events -->
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="bg-primary/10 p-3 rounded-lg">
+            <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-serif">Manage Events</h3>
+        </div>
+        <p class="text-foreground/60 mb-4">Create, edit, or delete events. View registrations and manage capacity.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/admin/events" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            View All
+          </a>
+          <button onclick="openAddEventModal()" class="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add New
+          </button>
+          <a href="/admin/event-templates" class="inline-flex items-center gap-2 border border-border hover:bg-muted rounded-lg px-4 py-2 font-medium transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+            </svg>
+            Templates
+          </a>
+        </div>
+      </div>
+    </div>
+
     <div class="bg-card border border-border rounded-xl p-6">
-      <h2 class="text-2xl font-serif mb-4">Survey Results</h2>
-      <canvas id="survey-chart"></canvas>
+      <h2 class="text-2xl font-serif mb-4">Analytics Dashboard</h2>
+      <div class='tableauPlaceholder' id='viz1764877107525' style='position: relative'>
+        <noscript>
+          <a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/in/intex_17648771788090/Dashboard1/1_rss.png' style='border: none' /></a>
+        </noscript>
+        <object class='tableauViz' style='display:none;'>
+          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+          <param name='embed_code_version' value='3' />
+          <param name='site_root' value='' />
+          <param name='name' value='intex_17648771788090/Dashboard1' />
+          <param name='tabs' value='no' />
+          <param name='toolbar' value='yes' />
+          <param name='static_image' value='https://public.tableau.com/static/images/in/intex_17648771788090/Dashboard1/1.png' />
+          <param name='animate_transition' value='yes' />
+          <param name='display_static_image' value='yes' />
+          <param name='display_spinner' value='yes' />
+          <param name='display_overlay' value='yes' />
+          <param name='display_count' value='yes' />
+          <param name='language' value='en-US' />
+          <param name='filter' value='publish=yes' />
+        </object>
+      </div>
     </div>
   </div>
 </div>
-<%- include('partials/footer') %>
+<!-- Add/Edit Participant Modal -->
+<div id="add-participant-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="participant-modal-title">Add New Participant</h3>
+      <button onclick="closeAddParticipantModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <form id="add-participant-form" class="space-y-4">
+      <input type="hidden" name="ParticipantID" id="participant-id">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">First Name *</label>
+          <input type="text" name="ParticipantFirstName" id="p-firstname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Last Name *</label>
+          <input type="text" name="ParticipantLastName" id="p-lastname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Email *</label>
+          <input type="email" name="ParticipantEmail" id="p-email" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone</label>
+          <input type="tel" name="ParticipantPhone" id="p-phone" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Date of Birth</label>
+          <input type="date" name="ParticipantDOB" id="p-dob" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Role</label>
+          <select name="ParticipantRole" id="p-role" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+            <option value="participant">Participant</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">City</label>
+          <input type="text" name="ParticipantCity" id="p-city" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">State</label>
+          <input type="text" name="ParticipantState" id="p-state" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Zip</label>
+          <input type="text" name="ParticipantZip" id="p-zip" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">School or Employer</label>
+        <input type="text" name="ParticipantSchoolOrEmployer" id="p-school" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Field of Interest</label>
+        <select name="ParticipantFieldOfInterest" id="p-interest" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <option value="Both">Both (STEAM & Arts)</option>
+          <option value="STEAM">STEAM</option>
+          <option value="Arts">Arts</option>
+        </select>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeAddParticipantModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" id="participant-submit-btn" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Add Participant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add/Edit Event Modal -->
+<div id="add-event-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="event-modal-title">Add New Event</h3>
+      <button onclick="closeAddEventModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <form id="add-event-form" class="space-y-4">
+      <input type="hidden" name="EventID" id="event-id">
+      <div>
+        <label class="block text-sm font-medium mb-1">Event Template (Name) *</label>
+        <select name="EventName" id="event-template-select" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <option value="">-- Select Event Template --</option>
+        </select>
+        <p class="text-xs text-foreground/50 mt-1">Select from existing templates or <a href="/admin/event-templates" class="text-primary hover:underline">create a new template</a></p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Start Date/Time *</label>
+          <input type="datetime-local" name="EventDateTimeStart" id="e-start" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">End Date/Time</label>
+          <input type="datetime-local" name="EventDateTimeEnd" id="e-end" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Location</label>
+        <input type="text" name="EventLocation" id="e-location" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Capacity</label>
+          <input type="number" name="EventCapacity" id="e-capacity" min="1" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Registration Deadline</label>
+          <input type="datetime-local" name="EventRegistrationDeadline" id="e-deadline" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeAddEventModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" id="event-submit-btn" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Add Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <h3 class="text-xl font-serif mb-4">Confirm Delete</h3>
+    <p class="text-foreground/70 mb-6" id="delete-message">Are you sure you want to delete this item?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-medium transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
 <script>
   // Load dashboard stats
   Promise.all([
     fetch('/api/participants').then(r => r.json()),
     fetch('/api/events').then(r => r.json()),
+    fetch('/api/registrations').then(r => r.json()).catch(() => []),
     fetch('/api/donations/summary').then(r => r.json())
-  ]).then(([participants, events, donations]) => {
-    document.getElementById('participants-count').textContent = participants.length;
-    document.getElementById('events-count').textContent = events.length;
+  ]).then(([participants, events, registrations, donations]) => {
+    document.getElementById('participants-count').textContent = participants.length.toLocaleString();
+    document.getElementById('events-count').textContent = events.length.toLocaleString();
+    document.getElementById('registrations-count').textContent = registrations.length.toLocaleString();
     const total = donations.reduce((sum, d) => sum + parseFloat(d.TotalDonations || 0), 0);
-    document.getElementById('donations-total').textContent = '$' + total.toLocaleString();
+    document.getElementById('donations-total').textContent = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }).catch(err => {
+    console.error('Error loading dashboard stats:', err);
   });
 
-  // Chart.js for survey results
-  const ctx = document.getElementById('survey-chart');
-  if (ctx) {
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Satisfaction', 'Usefulness', 'Instructor', 'Recommendation'],
-        datasets: [{
-          label: 'Average Score',
-          data: [4.5, 4.3, 4.7, 4.6],
-          backgroundColor: 'rgba(206, 50, 91, 0.5)'
-        }]
-      }
-    });
+  // Tableau embed initialization
+  var divElement = document.getElementById('viz1764877107525');
+  var vizElement = divElement.getElementsByTagName('object')[0];
+  if (divElement.offsetWidth > 800) {
+    vizElement.style.minWidth = '1000px';
+    vizElement.style.maxWidth = '1400px';
+    vizElement.style.width = '100%';
+    vizElement.style.minHeight = '587px';
+    vizElement.style.maxHeight = '887px';
+    vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+  } else if (divElement.offsetWidth > 500) {
+    vizElement.style.minWidth = '1000px';
+    vizElement.style.maxWidth = '1400px';
+    vizElement.style.width = '100%';
+    vizElement.style.minHeight = '587px';
+    vizElement.style.maxHeight = '887px';
+    vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+  } else {
+    vizElement.style.width = '100%';
+    vizElement.style.height = '1577px';
   }
+  var scriptElement = document.createElement('script');
+  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+  vizElement.parentNode.insertBefore(scriptElement, vizElement);
+
+  // Track edit mode
+  let editingParticipantId = null;
+  let editingEventId = null;
+  let deleteType = null;
+  let deleteId = null;
+
+  // ========== PARTICIPANT MODAL FUNCTIONS ==========
+  function openAddParticipantModal() {
+    editingParticipantId = null;
+    document.getElementById('participant-modal-title').textContent = 'Add New Participant';
+    document.getElementById('participant-submit-btn').textContent = 'Add Participant';
+    document.getElementById('add-participant-form').reset();
+    document.getElementById('add-participant-modal').classList.remove('hidden');
+    document.getElementById('add-participant-modal').classList.add('flex');
+  }
+
+  function openEditParticipantModal(participant) {
+    editingParticipantId = participant.ParticipantID;
+    document.getElementById('participant-modal-title').textContent = 'Edit Participant';
+    document.getElementById('participant-submit-btn').textContent = 'Save Changes';
+    document.getElementById('participant-id').value = participant.ParticipantID;
+    document.getElementById('p-firstname').value = participant.ParticipantFirstName || '';
+    document.getElementById('p-lastname').value = participant.ParticipantLastName || '';
+    document.getElementById('p-email').value = participant.ParticipantEmail || '';
+    document.getElementById('p-phone').value = participant.ParticipantPhone || '';
+    document.getElementById('p-dob').value = participant.ParticipantDOB ? participant.ParticipantDOB.split('T')[0] : '';
+    document.getElementById('p-role').value = participant.ParticipantRole || 'participant';
+    document.getElementById('p-city').value = participant.ParticipantCity || '';
+    document.getElementById('p-state').value = participant.ParticipantState || '';
+    document.getElementById('p-zip').value = participant.ParticipantZip || '';
+    document.getElementById('p-school').value = participant.ParticipantSchoolOrEmployer || '';
+    document.getElementById('p-interest').value = participant.ParticipantFieldOfInterest || 'Both';
+    document.getElementById('add-participant-modal').classList.remove('hidden');
+    document.getElementById('add-participant-modal').classList.add('flex');
+  }
+
+  function closeAddParticipantModal() {
+    editingParticipantId = null;
+    document.getElementById('add-participant-modal').classList.add('hidden');
+    document.getElementById('add-participant-modal').classList.remove('flex');
+    document.getElementById('add-participant-form').reset();
+  }
+
+  // ========== EVENT MODAL FUNCTIONS ==========
+  function openAddEventModal() {
+    editingEventId = null;
+    document.getElementById('event-modal-title').textContent = 'Add New Event';
+    document.getElementById('event-submit-btn').textContent = 'Add Event';
+    document.getElementById('add-event-form').reset();
+    document.getElementById('add-event-modal').classList.remove('hidden');
+    document.getElementById('add-event-modal').classList.add('flex');
+    loadEventTemplates();
+  }
+
+  function openEditEventModal(event) {
+    editingEventId = event.EventID;
+    document.getElementById('event-modal-title').textContent = 'Edit Event';
+    document.getElementById('event-submit-btn').textContent = 'Save Changes';
+    document.getElementById('event-id').value = event.EventID;
+    loadEventTemplates(event.EventName);
+    document.getElementById('e-start').value = event.EventDateTimeStart ? event.EventDateTimeStart.slice(0, 16) : '';
+    document.getElementById('e-end').value = event.EventDateTimeEnd ? event.EventDateTimeEnd.slice(0, 16) : '';
+    document.getElementById('e-location').value = event.EventLocation || '';
+    document.getElementById('e-capacity').value = event.EventCapacity || '';
+    document.getElementById('e-deadline').value = event.EventRegistrationDeadline ? event.EventRegistrationDeadline.slice(0, 16) : '';
+    document.getElementById('add-event-modal').classList.remove('hidden');
+    document.getElementById('add-event-modal').classList.add('flex');
+  }
+
+  function closeAddEventModal() {
+    editingEventId = null;
+    document.getElementById('add-event-modal').classList.add('hidden');
+    document.getElementById('add-event-modal').classList.remove('flex');
+    document.getElementById('add-event-form').reset();
+  }
+
+  // ========== DELETE MODAL FUNCTIONS ==========
+  function openDeleteModal(type, id, name) {
+    deleteType = type;
+    deleteId = id;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete ${type} "${name}"? This action cannot be undone.`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    deleteType = null;
+    deleteId = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+    document.getElementById('delete-modal').classList.remove('flex');
+  }
+
+  async function confirmDelete() {
+    if (!deleteType || !deleteId) return;
+    
+    const endpoint = deleteType === 'participant' ? `/api/participants/${deleteId}` : `/api/events/${deleteId}`;
+    
+    try {
+      const response = await fetch(endpoint, { method: 'DELETE' });
+      if (response.ok) {
+        alert(`${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} deleted successfully!`);
+        closeDeleteModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to delete'));
+      }
+    } catch (err) {
+      alert('Error deleting ' + deleteType);
+      console.error(err);
+    }
+  }
+
+  // ========== LOAD EVENT TEMPLATES ==========
+  function loadEventTemplates(selectedValue = '') {
+    fetch('/api/event-templates')
+      .then(r => r.json())
+      .then(templates => {
+        const select = document.getElementById('event-template-select');
+        select.innerHTML = '<option value="">-- Select Event Template --</option>';
+        templates.forEach(t => {
+          const selected = t.EventName === selectedValue ? 'selected' : '';
+          select.innerHTML += `<option value="${t.EventName}" ${selected}>${t.EventName}</option>`;
+        });
+      })
+      .catch(err => console.error('Error loading templates:', err));
+  }
+
+  // ========== FORM SUBMISSIONS ==========
+  document.getElementById('add-participant-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    // Remove empty values and ID if not editing
+    Object.keys(data).forEach(key => {
+      if (data[key] === '') delete data[key];
+    });
+    
+    const isEditing = !!editingParticipantId;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `/api/participants/${editingParticipantId}` : '/api/participants';
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        alert(isEditing ? 'Participant updated successfully!' : 'Participant added successfully!');
+        closeAddParticipantModal();
+        window.location.href = '/admin/participants';
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to save participant'));
+      }
+    } catch (err) {
+      alert('Error saving participant');
+      console.error(err);
+    }
+  });
+
+  document.getElementById('add-event-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    // Remove empty values
+    Object.keys(data).forEach(key => {
+      if (data[key] === '') delete data[key];
+    });
+    
+    const isEditing = !!editingEventId;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `/api/events/${editingEventId}` : '/api/events';
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        alert(isEditing ? 'Event updated successfully!' : 'Event added successfully!');
+        closeAddEventModal();
+        window.location.href = '/admin/events';
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to save event'));
+      }
+    } catch (err) {
+      alert('Error saving event');
+      console.error(err);
+    }
+  });
+
+  // Close modals when clicking outside
+  document.getElementById('add-participant-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeAddParticipantModal();
+  });
+  document.getElementById('add-event-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeAddEventModal();
+  });
+  document.getElementById('delete-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDeleteModal();
+  });
 </script>
 

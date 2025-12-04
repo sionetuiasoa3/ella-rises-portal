@@ -1,5 +1,5 @@
-<%- include('partials/head', { title: 'Ella Rises' }) %>
-<%- include('partials/navbar', { currentPath: '/admin/login' }) %>
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/admin/login' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
     <div class="max-w-md mx-auto">
@@ -24,7 +24,7 @@
     </div>
   </div>
 </div>
-<%- include('partials/footer') %>
+<%- include('../partials/footer') %>
 <script>
   document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
     e.preventDefault();

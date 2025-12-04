@@ -17,6 +17,58 @@ router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   }
 });
 
+// Create new participant (admin only)
+router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const {
+      ParticipantFirstName,
+      ParticipantLastName,
+      ParticipantEmail,
+      ParticipantPhone,
+      ParticipantRole,
+      ParticipantDOB,
+      ParticipantCity,
+      ParticipantState,
+      ParticipantZip,
+      ParticipantSchoolOrEmployer,
+      ParticipantFieldOfInterest
+    } = req.body;
+
+    if (!ParticipantFirstName || !ParticipantLastName || !ParticipantEmail) {
+      return res.status(400).json({ message: 'First name, last name, and email are required' });
+    }
+
+    // Check if email already exists
+    const existing = await db('Participants')
+      .where({ ParticipantEmail })
+      .first();
+
+    if (existing) {
+      return res.status(400).json({ message: 'A participant with this email already exists' });
+    }
+
+    const [participant] = await db('Participants')
+      .insert({
+        ParticipantFirstName,
+        ParticipantLastName,
+        ParticipantEmail,
+        ParticipantPhone: ParticipantPhone || null,
+        ParticipantRole: ParticipantRole || 'participant',
+        ParticipantDOB: ParticipantDOB || null,
+        ParticipantCity: ParticipantCity || null,
+        ParticipantState: ParticipantState || null,
+        ParticipantZip: ParticipantZip || null,
+        ParticipantSchoolOrEmployer: ParticipantSchoolOrEmployer || null,
+        ParticipantFieldOfInterest: ParticipantFieldOfInterest || 'Both'
+      })
+      .returning('*');
+
+    res.status(201).json(participant);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get participant by ID (admin or self)
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {
