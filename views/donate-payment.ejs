@@ -1,0 +1,254 @@
+<%- include('partials/head', { title: title }) %>
+<%- include('partials/navbar', { currentPath: '/donate' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Hero Section -->
+  <section class="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 leading-tight">
+          Complete Your <span class="italic text-primary">Donation</span>
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 leading-relaxed">
+          Please provide your payment information to complete your donation of <strong>$<%= amount.toLocaleString() %></strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Form Section -->
+  <section class="py-12 md:py-20">
+    <div class="container mx-auto px-6">
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-card border border-border rounded-xl p-6 md:p-8 shadow-sm">
+          <!-- Security Notice -->
+          <div class="bg-muted/30 border border-border rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+              </svg>
+              <div class="text-sm text-foreground/70">
+                <p class="font-medium text-foreground mb-1">Secure Payment</p>
+                <p>Your payment information is encrypted and secure. We do not store your credit card details.</p>
+              </div>
+            </div>
+          </div>
+
+          <form id="payment-form" class="space-y-6" novalidate>
+            <!-- Donation Summary -->
+            <div class="bg-muted/50 rounded-lg p-4 mb-6">
+              <div class="flex justify-between items-center">
+                <span class="text-foreground/70">Donation Amount</span>
+                <span class="text-2xl font-semibold text-foreground">$<%= amount.toLocaleString() %></span>
+              </div>
+            </div>
+
+            <!-- Credit Card Information -->
+            <div class="space-y-4">
+              <h2 class="text-xl font-serif text-foreground mb-4">Payment Information</h2>
+              
+              <!-- Card Number -->
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Card Number</label>
+                <input
+                  type="text"
+                  name="cardNumber"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  autocomplete="cc-number"
+                  inputmode="numeric"
+                  pattern="[0-9\s]{13,19}"
+                  class="w-full bg-background border border-border rounded-lg px-4 py-2 h-11 text-sm"
+                  required
+                />
+              </div>
+
+              <!-- Cardholder Name -->
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Cardholder Name</label>
+                <input
+                  type="text"
+                  name="cardholderName"
+                  placeholder="John Doe"
+                  autocomplete="cc-name"
+                  class="w-full bg-background border border-border rounded-lg px-4 py-2 h-11 text-sm"
+                  required
+                />
+              </div>
+
+              <!-- Expiry and CVV -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-2">Expiry Date</label>
+                  <input
+                    type="text"
+                    name="expiryDate"
+                    placeholder="MM/YY"
+                    maxlength="5"
+                    autocomplete="cc-exp"
+                    inputmode="numeric"
+                    pattern="[0-9]{2}/[0-9]{2}"
+                    class="w-full bg-background border border-border rounded-lg px-4 py-2 h-11 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-2">CVV</label>
+                  <input
+                    type="text"
+                    name="cvv"
+                    placeholder="123"
+                    maxlength="4"
+                    autocomplete="cc-csc"
+                    inputmode="numeric"
+                    pattern="[0-9]{3,4}"
+                    class="w-full bg-background border border-border rounded-lg px-4 py-2 h-11 text-sm"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Email for Receipt -->
+            <div class="space-y-4 pt-4 border-t border-border">
+              <h2 class="text-xl font-serif text-foreground mb-4">Receipt Information</h2>
+              
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Email for Receipt</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="your.email@example.com"
+                  autocomplete="email"
+                  class="w-full bg-background border border-border rounded-lg px-4 py-2 h-11 text-sm"
+                  required
+                />
+                <p class="text-xs text-muted-foreground mt-1">We'll send a receipt to this email address</p>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium mt-6"
+              id="confirm-button"
+            >
+              Confirm Donation
+            </button>
+            <p id="payment-status" class="text-sm mt-2 text-foreground/70 text-center"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+<script>
+  (function () {
+    const form = document.getElementById('payment-form');
+    const status = document.getElementById('payment-status');
+    const confirmButton = document.getElementById('confirm-button');
+
+    // Format card number with spaces
+    const cardNumberInput = form.querySelector('input[name="cardNumber"]');
+    if (cardNumberInput) {
+      cardNumberInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\s/g, '');
+        if (value.length > 16) value = value.slice(0, 16);
+        value = value.replace(/(.{4})/g, '$1 ').trim();
+        e.target.value = value;
+      });
+    }
+
+    // Format expiry date
+    const expiryInput = form.querySelector('input[name="expiryDate"]');
+    if (expiryInput) {
+      expiryInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+        e.target.value = value;
+      });
+    }
+
+    // Only allow numbers for CVV
+    const cvvInput = form.querySelector('input[name="cvv"]');
+    if (cvvInput) {
+      cvvInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!status || !confirmButton) return;
+
+      const formData = new FormData(form);
+      const cardNumber = formData.get('cardNumber').replace(/\s/g, '');
+      const cardholderName = formData.get('cardholderName');
+      const expiryDate = formData.get('expiryDate');
+      const cvv = formData.get('cvv');
+      const email = formData.get('email');
+
+      // Basic validation
+      if (cardNumber.length < 13 || cardNumber.length > 19) {
+        status.textContent = 'Please enter a valid card number.';
+        status.classList.add('text-destructive');
+        return;
+      }
+
+      if (expiryDate.length !== 5) {
+        status.textContent = 'Please enter a valid expiry date (MM/YY).';
+        status.classList.add('text-destructive');
+        return;
+      }
+
+      if (cvv.length < 3) {
+        status.textContent = 'Please enter a valid CVV.';
+        status.classList.add('text-destructive');
+        return;
+      }
+
+      confirmButton.disabled = true;
+      status.textContent = 'Processing donation...';
+      status.classList.remove('text-destructive');
+
+      const donationData = {
+        DonationAmountRaw: <%= amount %>,
+        DonationDateRaw: new Date().toISOString(),
+        Message: <%- JSON.stringify(message) %>,
+        DonorEmail: email,
+        // Note: In a real implementation, you would process the payment through a payment gateway
+        // For now, we'll just create the donation record
+      };
+
+      try {
+        const res = await fetch('/api/donations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(donationData),
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          status.textContent = error.message || 'There was a problem processing your donation.';
+          status.classList.add('text-destructive');
+          confirmButton.disabled = false;
+          return;
+        }
+
+        // Success - redirect to thank you page
+        window.location.href = '/donate/thank-you';
+      } catch (err) {
+        console.error(err);
+        status.textContent = 'An unexpected error occurred. Please try again.';
+        status.classList.add('text-destructive');
+        confirmButton.disabled = false;
+      }
+    });
+  })();
+</script>
+

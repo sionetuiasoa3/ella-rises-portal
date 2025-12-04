@@ -32,6 +32,26 @@ router.get('/donate', (req, res) => {
   res.render('donate', { title: 'Donate - Ella Rises' });
 });
 
+router.get('/donate/payment', (req, res) => {
+  const amount = parseFloat(req.query.amount) || 0;
+  const message = req.query.message || '';
+  
+  // Validate amount
+  if (!amount || amount <= 0 || isNaN(amount)) {
+    return res.redirect('/donate?error=invalid_amount');
+  }
+  
+  res.render('donate-payment', { 
+    title: 'Payment Information - Ella Rises',
+    amount: amount,
+    message
+  });
+});
+
+router.get('/donate/thank-you', (req, res) => {
+  res.render('donate-thank-you', { title: 'Thank You - Ella Rises' });
+});
+
 // Portal routes
 router.get('/portal/auth', (req, res) => {
   if (req.session.user) {

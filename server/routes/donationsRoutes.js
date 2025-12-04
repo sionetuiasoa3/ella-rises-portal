@@ -22,75 +22,134 @@ router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   }
 });
 
+// Get total donations (public endpoint for goal display)
+router.get('/total', async (req, res, next) => {
+  try {
+    // Sum all donations from DonationSummary table
+    const result = await db('DonationSummary')
+      .sum('TotalDonations as total')
+      .first();
+    
+    // Handle different database return formats
+    let total = 0;
+    if (result && result.total !== null && result.total !== undefined) {
+      // PostgreSQL returns the sum as a string or number
+      if (typeof result.total === 'string') {
+        total = parseFloat(result.total);
+      } else if (typeof result.total === 'number') {
+        total = result.total;
+      } else if (typeof result.total === 'object' && result.total !== null) {
+        // Sometimes PostgreSQL returns an object, try to extract the value
+        const value = result.total.toString();
+        total = parseFloat(value) || 0;
+      } else {
+        total = 0;
+      }
+      
+      if (isNaN(total)) {
+        total = 0;
+      }
+    }
+    
+    console.log('Donation total fetched - raw result:', result);
+    console.log('Donation total fetched - parsed total:', total);
+    res.json({ total: Number(total) });
+  } catch (error) {
+    console.error('Error fetching donation total:', error);
+    res.json({ total: 0 });
+  }
+});
+
 // Get donation summary
 router.get('/summary', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
-    const summary = await db('DonationsSummary')
-      .join('Participants', 'DonationsSummary.ParticipantID', 'Participants.ParticipantID')
+    const summary = await db('DonationSummary')
+      .join('Participants', 'DonationSummary.ParticipantID', 'Participants.ParticipantID')
       .select(
-        'DonationsSummary.*',
+        'DonationSummary.*',
         'Participants.ParticipantFirstName',
         'Participants.ParticipantLastName',
         'Participants.ParticipantEmail'
       )
-      .orderBy('DonationsSummary.TotalDonations', 'desc');
+      .orderBy('DonationSummary.TotalDonations', 'desc');
     res.json(summary);
   } catch (error) {
     next(error);
   }
 });
 
-// Create donation (participant or admin)
-router.post('/', requireAuth, async (req, res, next) => {
+// Create donation (participant or admin, or anonymous)
+router.post('/', async (req, res, next) => {
   try {
-    const { ParticipantID, DonationDateRaw, DonationAmountRaw, Message, Anonymous } = req.body;
+    const { ParticipantID, DonationDateRaw, DonationAmountRaw, Message, Anonymous, DonorEmail } = req.body;
 
-    // Determine participant ID: from body or current user session
-    const participantId = ParticipantID || req.session.user?.participantId;
+    // Determine participant ID: from body, current user session, or null for anonymous
+    const participantId = ParticipantID || req.session.user?.participantId || null;
 
-    if (!participantId || !DonationAmountRaw) {
+    if (!DonationAmountRaw) {
       return res.status(400).json({ 
-        message: 'ParticipantID and DonationAmountRaw are required' 
+        message: 'DonationAmountRaw is required' 
       });
     }
 
-    // Get the next donation number for this participant
-    const lastDonation = await db('Donations')
-      .where({ ParticipantID: participantId })
-      .orderBy('DonationNumber', 'desc')
-      .first();
-
-    const nextDonationNumber = lastDonation ? lastDonation.DonationNumber + 1 : 1;
-
-    const [donation] = await db('Donations')
-      .insert({
-        ParticipantID: participantId,
-        DonationNumber: nextDonationNumber,
-        DonationDateRaw: DonationDateRaw || new Date(),
-        DonationAmountRaw
-      })
-      .returning('*');
-
-    // Update or create summary
-    const summary = await db('DonationsSummary')
-      .where({ ParticipantID: participantId })
-      .first();
-
-    if (summary) {
-      await db('DonationsSummary')
+    // If user is logged in, create donation record and update their summary
+    if (participantId) {
+      // Get the next donation number for this participant
+      const lastDonation = await db('Donations')
         .where({ ParticipantID: participantId })
-        .update({
-          TotalDonations: db.raw('?? + ?', ['TotalDonations', DonationAmountRaw])
-        });
-    } else {
-      await db('DonationsSummary')
+        .orderBy('DonationNumber', 'desc')
+        .first();
+
+      const nextDonationNumber = lastDonation ? lastDonation.DonationNumber + 1 : 1;
+
+      const [donation] = await db('Donations')
         .insert({
           ParticipantID: participantId,
-          TotalDonations: DonationAmountRaw
-        });
-    }
+          DonationNumber: nextDonationNumber,
+          DonationDateRaw: DonationDateRaw || new Date(),
+          DonationAmountRaw
+        })
+        .returning('*');
 
-    res.status(201).json(donation);
+      // Update or create summary - TotalDonations should reflect sum of all their donations
+      const summary = await db('DonationSummary')
+        .where({ ParticipantID: participantId })
+        .first();
+
+      if (summary) {
+        // Recalculate total from all donations to ensure accuracy
+        const allDonations = await db('Donations')
+          .where({ ParticipantID: participantId })
+          .sum('DonationAmountRaw as total')
+          .first();
+        
+        const newTotal = allDonations?.total ? parseFloat(allDonations.total) : 0;
+        
+        await db('DonationSummary')
+          .where({ ParticipantID: participantId })
+          .update({
+            TotalDonations: newTotal
+          });
+      } else {
+        await db('DonationSummary')
+          .insert({
+            ParticipantID: participantId,
+            TotalDonations: DonationAmountRaw
+          });
+      }
+
+      res.status(201).json(donation);
+    } else {
+      // Anonymous donation - return success
+      // Note: Anonymous donations don't create Donations records or update DonationSummary
+      // The total endpoint sums from DonationSummary, so anonymous donations won't be counted
+      // If you want to track anonymous donations, you'd need to create Donations records with null ParticipantID
+      res.status(201).json({ 
+        message: 'Donation received',
+        amount: DonationAmountRaw,
+        anonymous: true 
+      });
+    }
   } catch (error) {
     next(error);
   }
