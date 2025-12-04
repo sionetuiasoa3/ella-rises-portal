@@ -193,6 +193,30 @@ router.put('/:id/toggle-admin', requireAuth, requireRole('admin'), async (req, r
   }
 });
 
+// Get current user's registrations
+router.get('/me/registrations', requireAuth, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+
+    const registrations = await db('Registrations')
+      .join('Events', 'Registrations.EventID', 'Events.EventID')
+      .where({ 'Registrations.ParticipantID': participantId })
+      .select(
+        'Registrations.*',
+        'Events.EventID',
+        'Events.EventName',
+        'Events.EventDateTimeStart',
+        'Events.EventDateTimeEnd',
+        'Events.EventLocation'
+      )
+      .orderBy('Events.EventDateTimeStart', 'desc');
+
+    res.json(registrations);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get participant registrations
 router.get('/:id/registrations', requireAuth, async (req, res, next) => {
   try {
