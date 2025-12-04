@@ -1,26 +1,259 @@
-<%- include('partials/head', { title: 'Ella Rises' }) %>
-<%- include('partials/navbar', { currentPath: '/admin/participants' }) %>
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/admin/participants' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Participants</h1>
-    <div id="participants-container" class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Loading participants...</p>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground">Participants</h1>
+      <button onclick="openAddParticipantModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Participant
+      </button>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="mb-6">
+      <div class="relative max-w-md">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search by name or email..." 
+          class="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+          oninput="filterParticipants()">
+      </div>
+      <p class="text-sm text-foreground/50 mt-2" id="search-results-count"></p>
+    </div>
+    <div id="participants-container" class="bg-card border border-border rounded-xl overflow-hidden">
+      <p class="text-foreground/60 p-6">Loading participants...</p>
     </div>
   </div>
 </div>
-<%- include('partials/footer') %>
+
+<!-- Add/Edit Participant Modal -->
+<div id="add-participant-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="participant-modal-title">Add New Participant</h3>
+      <button onclick="closeAddParticipantModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form id="add-participant-form" class="space-y-4">
+      <input type="hidden" name="ParticipantID" id="participant-id">
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">First Name *</label><input type="text" name="ParticipantFirstName" id="p-firstname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Last Name *</label><input type="text" name="ParticipantLastName" id="p-lastname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">Email *</label><input type="email" name="ParticipantEmail" id="p-email" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Phone</label><input type="tel" name="ParticipantPhone" id="p-phone" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">Date of Birth</label><input type="date" name="ParticipantDOB" id="p-dob" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Role</label><select name="ParticipantRole" id="p-role" class="w-full border border-border rounded-lg px-3 py-2 bg-background"><option value="participant">Participant</option><option value="admin">Admin</option></select></div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div><label class="block text-sm font-medium mb-1">City</label><input type="text" name="ParticipantCity" id="p-city" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">State</label><input type="text" name="ParticipantState" id="p-state" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Zip</label><input type="text" name="ParticipantZip" id="p-zip" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      </div>
+      <div><label class="block text-sm font-medium mb-1">School or Employer</label><input type="text" name="ParticipantSchoolOrEmployer" id="p-school" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      <div><label class="block text-sm font-medium mb-1">Field of Interest</label><select name="ParticipantFieldOfInterest" id="p-interest" class="w-full border border-border rounded-lg px-3 py-2 bg-background"><option value="Both">Both (STEAM & Arts)</option><option value="STEAM">STEAM</option><option value="Arts">Arts</option></select></div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeAddParticipantModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" id="participant-submit-btn" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Add Participant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <h3 class="text-xl font-serif mb-4">Confirm Delete</h3>
+    <p class="text-foreground/70 mb-6" id="delete-message">Are you sure you want to delete this participant?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-medium transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
 <script>
+  let participantsData = [];
+  let editingParticipantId = null;
+  let deleteId = null;
+
+  // Load participants
   fetch('/api/participants')
     .then(r => r.json())
     .then(participants => {
-      const container = document.getElementById('participants-container');
-      container.innerHTML = participants.map(p => `
-        <div class="border-b border-border py-4">
-          <a href="/admin/participants/${p.ParticipantID}" class="text-primary hover:underline">
-            ${p.ParticipantFirstName} ${p.ParticipantLastName} (${p.ParticipantEmail})
-          </a>
-        </div>
-      `).join('');
+      participantsData = participants;
+      renderParticipants(participants);
+      updateResultsCount(participants.length, participants.length);
     });
+
+  function filterParticipants() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+      renderParticipants(participantsData);
+      updateResultsCount(participantsData.length, participantsData.length);
+      return;
+    }
+    
+    const filtered = participantsData.filter(p => {
+      const fullName = `${p.ParticipantFirstName} ${p.ParticipantLastName}`.toLowerCase();
+      const email = (p.ParticipantEmail || '').toLowerCase();
+      return fullName.includes(searchTerm) || email.includes(searchTerm);
+    });
+    
+    renderParticipants(filtered);
+    updateResultsCount(filtered.length, participantsData.length);
+  }
+
+  function updateResultsCount(shown, total) {
+    const countEl = document.getElementById('search-results-count');
+    if (shown === total) {
+      countEl.textContent = `Showing all ${total} participants`;
+    } else {
+      countEl.textContent = `Showing ${shown} of ${total} participants`;
+    }
+  }
+
+  function renderParticipants(participants) {
+    const container = document.getElementById('participants-container');
+    if (participants.length === 0) {
+      container.innerHTML = '<p class="text-foreground/60 p-6">No participants found.</p>';
+      return;
+    }
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Name</th>
+            <th class="text-left p-4 font-medium">Email</th>
+            <th class="text-left p-4 font-medium">Role</th>
+            <th class="text-left p-4 font-medium">City</th>
+            <th class="text-right p-4 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${participants.map(p => `
+            <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4">
+                <a href="/admin/participants/${p.ParticipantID}" class="text-primary hover:underline font-medium">
+                  ${p.ParticipantFirstName} ${p.ParticipantLastName}
+                </a>
+              </td>
+              <td class="p-4 text-foreground/70">${p.ParticipantEmail}</td>
+              <td class="p-4">
+                <span class="px-2 py-1 rounded-full text-xs font-medium ${p.ParticipantRole === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}">
+                  ${p.ParticipantRole || 'participant'}
+                </span>
+              </td>
+              <td class="p-4 text-foreground/70">${p.ParticipantCity || '-'}</td>
+              <td class="p-4 text-right">
+                <button onclick='openEditParticipantModal(${JSON.stringify(p).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="openDeleteModal(${p.ParticipantID}, '${p.ParticipantFirstName} ${p.ParticipantLastName}')" class="text-red-600 hover:text-red-800" title="Delete">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openAddParticipantModal() {
+    editingParticipantId = null;
+    document.getElementById('participant-modal-title').textContent = 'Add New Participant';
+    document.getElementById('participant-submit-btn').textContent = 'Add Participant';
+    document.getElementById('add-participant-form').reset();
+    document.getElementById('add-participant-modal').classList.remove('hidden');
+    document.getElementById('add-participant-modal').classList.add('flex');
+  }
+
+  function openEditParticipantModal(p) {
+    editingParticipantId = p.ParticipantID;
+    document.getElementById('participant-modal-title').textContent = 'Edit Participant';
+    document.getElementById('participant-submit-btn').textContent = 'Save Changes';
+    document.getElementById('participant-id').value = p.ParticipantID;
+    document.getElementById('p-firstname').value = p.ParticipantFirstName || '';
+    document.getElementById('p-lastname').value = p.ParticipantLastName || '';
+    document.getElementById('p-email').value = p.ParticipantEmail || '';
+    document.getElementById('p-phone').value = p.ParticipantPhone || '';
+    document.getElementById('p-dob').value = p.ParticipantDOB ? p.ParticipantDOB.split('T')[0] : '';
+    document.getElementById('p-role').value = p.ParticipantRole || 'participant';
+    document.getElementById('p-city').value = p.ParticipantCity || '';
+    document.getElementById('p-state').value = p.ParticipantState || '';
+    document.getElementById('p-zip').value = p.ParticipantZip || '';
+    document.getElementById('p-school').value = p.ParticipantSchoolOrEmployer || '';
+    document.getElementById('p-interest').value = p.ParticipantFieldOfInterest || 'Both';
+    document.getElementById('add-participant-modal').classList.remove('hidden');
+    document.getElementById('add-participant-modal').classList.add('flex');
+  }
+
+  function closeAddParticipantModal() {
+    document.getElementById('add-participant-modal').classList.add('hidden');
+    document.getElementById('add-participant-modal').classList.remove('flex');
+  }
+
+  function openDeleteModal(id, name) {
+    deleteId = id;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This action cannot be undone.`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+    document.getElementById('delete-modal').classList.remove('flex');
+  }
+
+  async function confirmDelete() {
+    try {
+      const response = await fetch(`/api/participants/${deleteId}`, { method: 'DELETE' });
+      if (response.ok) {
+        alert('Participant deleted successfully!');
+        closeDeleteModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to delete'));
+      }
+    } catch (err) {
+      alert('Error deleting participant');
+    }
+  }
+
+  document.getElementById('add-participant-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    Object.keys(data).forEach(key => { if (data[key] === '') delete data[key]; });
+    
+    const isEditing = !!editingParticipantId;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `/api/participants/${editingParticipantId}` : '/api/participants';
+    
+    try {
+      const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      if (response.ok) {
+        alert(isEditing ? 'Participant updated!' : 'Participant added!');
+        closeAddParticipantModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to save'));
+      }
+    } catch (err) { alert('Error saving participant'); }
+  });
+
+  document.getElementById('add-participant-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddParticipantModal(); });
+  document.getElementById('delete-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDeleteModal(); });
 </script>
 

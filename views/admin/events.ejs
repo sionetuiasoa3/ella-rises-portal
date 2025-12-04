@@ -1,26 +1,342 @@
-<%- include('partials/head', { title: 'Ella Rises' }) %>
-<%- include('partials/navbar', { currentPath: '/admin/events' }) %>
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/admin/events' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Events</h1>
-    <div id="events-container" class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Loading events...</p>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground">Events</h1>
+      <button onclick="openAddEventModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Event
+      </button>
+    </div>
+    
+    <!-- Search & Filter Bar -->
+    <div class="mb-6 flex flex-wrap gap-4 items-end">
+      <div class="w-64">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Event Template</label>
+        <select id="template-filter" onchange="selectTemplate(this.value)" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="">All Event Templates</option>
+        </select>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Search by name</label>
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="search-name" placeholder="Search event name..." 
+            class="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+            oninput="filterEvents()">
+        </div>
+      </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">From date</label>
+        <input type="date" id="search-date-from" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+          onchange="filterEvents()">
+      </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">To date</label>
+        <input type="date" id="search-date-to" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+          onchange="filterEvents()">
+      </div>
+      <button onclick="clearFilters()" class="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-foreground/70">
+        Clear All
+      </button>
+    </div>
+    <p class="text-sm text-foreground/50 mb-4" id="search-results-count"></p>
+    <div id="events-container" class="bg-card border border-border rounded-xl overflow-hidden">
+      <p class="text-foreground/60 p-6">Loading events...</p>
     </div>
   </div>
 </div>
-<%- include('partials/footer') %>
+
+<!-- Add/Edit Event Modal -->
+<div id="add-event-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="event-modal-title">Add New Event</h3>
+      <button onclick="closeAddEventModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form id="add-event-form" class="space-y-4">
+      <input type="hidden" name="EventID" id="event-id">
+      <div>
+        <label class="block text-sm font-medium mb-1">Event Template (Name) *</label>
+        <select name="EventName" id="event-template-select" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <option value="">-- Select Event Template --</option>
+        </select>
+        <p class="text-xs text-foreground/50 mt-1">Select from existing templates or <a href="/admin/event-templates" class="text-primary hover:underline">create a new template</a></p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">Start Date/Time *</label><input type="datetime-local" name="EventDateTimeStart" id="e-start" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">End Date/Time</label><input type="datetime-local" name="EventDateTimeEnd" id="e-end" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      </div>
+      <div><label class="block text-sm font-medium mb-1">Location</label><input type="text" name="EventLocation" id="e-location" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">Capacity</label><input type="number" name="EventCapacity" id="e-capacity" min="1" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Registration Deadline</label><input type="datetime-local" name="EventRegistrationDeadline" id="e-deadline" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeAddEventModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" id="event-submit-btn" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Add Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <h3 class="text-xl font-serif mb-4">Confirm Delete</h3>
+    <p class="text-foreground/70 mb-6" id="delete-message">Are you sure you want to delete this event?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-medium transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
 <script>
-  fetch('/api/events')
-    .then(r => r.json())
-    .then(events => {
-      const container = document.getElementById('events-container');
-      container.innerHTML = events.map(e => `
-        <div class="border-b border-border py-4">
-          <h3 class="text-xl font-serif">${e.EventName}</h3>
-          <p class="text-foreground/60">${new Date(e.EventDateTimeStart).toLocaleDateString()}</p>
-          <a href="/admin/events/${e.EventID}/registrations" class="text-primary hover:underline">View Registrations</a>
-        </div>
-      `).join('');
+  let eventsData = [];
+  let templatesData = [];
+  let editingEventId = null;
+  let deleteId = null;
+  let selectedTemplate = '';
+
+  // Load events and templates
+  Promise.all([
+    fetch('/api/events').then(r => r.json()),
+    fetch('/api/event-templates').then(r => r.json())
+  ]).then(([events, templates]) => {
+    eventsData = events;
+    templatesData = templates;
+    populateTemplateDropdown(templates);
+    renderEvents(events);
+    updateResultsCount(events.length, events.length);
+  });
+
+  function populateTemplateDropdown(templates) {
+    const select = document.getElementById('template-filter');
+    select.innerHTML = '<option value="">All Event Templates</option>';
+    templates.forEach(t => {
+      select.innerHTML += `<option value="${t.EventName}">${t.EventName}</option>`;
     });
+  }
+
+  function selectTemplate(templateName) {
+    selectedTemplate = templateName;
+    filterEvents();
+  }
+
+  function filterEvents() {
+    const searchName = document.getElementById('search-name').value.toLowerCase().trim();
+    const dateFrom = document.getElementById('search-date-from').value;
+    const dateTo = document.getElementById('search-date-to').value;
+    
+    let filtered = eventsData;
+    
+    // Filter by template
+    if (selectedTemplate) {
+      filtered = filtered.filter(e => e.EventName === selectedTemplate);
+    }
+    
+    // Filter by search name
+    if (searchName) {
+      filtered = filtered.filter(e => 
+        (e.EventName || '').toLowerCase().includes(searchName) ||
+        (e.EventLocation || '').toLowerCase().includes(searchName)
+      );
+    }
+    
+    // Filter by date range
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      filtered = filtered.filter(e => {
+        const eventDate = new Date(e.EventDateTimeStart);
+        return eventDate >= fromDate;
+      });
+    }
+    
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999); // End of day
+      filtered = filtered.filter(e => {
+        const eventDate = new Date(e.EventDateTimeStart);
+        return eventDate <= toDate;
+      });
+    }
+    
+    renderEvents(filtered);
+    
+    // Calculate base count based on template filter
+    const baseFiltered = selectedTemplate 
+      ? eventsData.filter(e => e.EventName === selectedTemplate)
+      : eventsData;
+    updateResultsCount(filtered.length, baseFiltered.length);
+  }
+
+  function clearFilters() {
+    selectedTemplate = '';
+    document.getElementById('template-filter').value = '';
+    document.getElementById('search-name').value = '';
+    document.getElementById('search-date-from').value = '';
+    document.getElementById('search-date-to').value = '';
+    renderEvents(eventsData);
+    updateResultsCount(eventsData.length, eventsData.length);
+  }
+
+  function updateResultsCount(shown, total) {
+    const countEl = document.getElementById('search-results-count');
+    const templateText = selectedTemplate ? ` for "${selectedTemplate}"` : '';
+    if (shown === total) {
+      countEl.textContent = `Showing all ${total} events${templateText}`;
+    } else {
+      countEl.textContent = `Showing ${shown} of ${total} events${templateText}`;
+    }
+  }
+
+  function renderEvents(events) {
+    const container = document.getElementById('events-container');
+    if (events.length === 0) {
+      container.innerHTML = '<p class="text-foreground/60 p-6">No events found.</p>';
+      return;
+    }
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Event Name</th>
+            <th class="text-left p-4 font-medium">Date</th>
+            <th class="text-left p-4 font-medium">Location</th>
+            <th class="text-left p-4 font-medium">Capacity</th>
+            <th class="text-right p-4 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${events.map(e => `
+            <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4 font-medium">${e.EventName}</td>
+              <td class="p-4 text-foreground/70">${new Date(e.EventDateTimeStart).toLocaleString()}</td>
+              <td class="p-4 text-foreground/70">${e.EventLocation || '-'}</td>
+              <td class="p-4 text-foreground/70">${e.EventCapacity || 'Unlimited'}</td>
+              <td class="p-4 text-right">
+                <a href="/admin/events/${e.EventID}/registrations" class="text-primary hover:underline mr-3" title="Registrations">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </a>
+                <button onclick='openEditEventModal(${JSON.stringify(e).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="openDeleteModal(${e.EventID}, '${e.EventName}')" class="text-red-600 hover:text-red-800" title="Delete">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function loadEventTemplates(selectedValue = '') {
+    fetch('/api/event-templates')
+      .then(r => r.json())
+      .then(templates => {
+        const select = document.getElementById('event-template-select');
+        select.innerHTML = '<option value="">-- Select Event Template --</option>';
+        templates.forEach(t => {
+          const selected = t.EventName === selectedValue ? 'selected' : '';
+          select.innerHTML += `<option value="${t.EventName}" ${selected}>${t.EventName}</option>`;
+        });
+      });
+  }
+
+  function openAddEventModal() {
+    editingEventId = null;
+    document.getElementById('event-modal-title').textContent = 'Add New Event';
+    document.getElementById('event-submit-btn').textContent = 'Add Event';
+    document.getElementById('add-event-form').reset();
+    document.getElementById('add-event-modal').classList.remove('hidden');
+    document.getElementById('add-event-modal').classList.add('flex');
+    loadEventTemplates();
+  }
+
+  function openEditEventModal(e) {
+    editingEventId = e.EventID;
+    document.getElementById('event-modal-title').textContent = 'Edit Event';
+    document.getElementById('event-submit-btn').textContent = 'Save Changes';
+    document.getElementById('event-id').value = e.EventID;
+    loadEventTemplates(e.EventName);
+    document.getElementById('e-start').value = e.EventDateTimeStart ? e.EventDateTimeStart.slice(0, 16) : '';
+    document.getElementById('e-end').value = e.EventDateTimeEnd ? e.EventDateTimeEnd.slice(0, 16) : '';
+    document.getElementById('e-location').value = e.EventLocation || '';
+    document.getElementById('e-capacity').value = e.EventCapacity || '';
+    document.getElementById('e-deadline').value = e.EventRegistrationDeadline ? e.EventRegistrationDeadline.slice(0, 16) : '';
+    document.getElementById('add-event-modal').classList.remove('hidden');
+    document.getElementById('add-event-modal').classList.add('flex');
+  }
+
+  function closeAddEventModal() {
+    document.getElementById('add-event-modal').classList.add('hidden');
+    document.getElementById('add-event-modal').classList.remove('flex');
+  }
+
+  function openDeleteModal(id, name) {
+    deleteId = id;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This action cannot be undone.`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+    document.getElementById('delete-modal').classList.remove('flex');
+  }
+
+  async function confirmDelete() {
+    try {
+      const response = await fetch(`/api/events/${deleteId}`, { method: 'DELETE' });
+      if (response.ok) {
+        alert('Event deleted successfully!');
+        closeDeleteModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to delete'));
+      }
+    } catch (err) {
+      alert('Error deleting event');
+    }
+  }
+
+  document.getElementById('add-event-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    Object.keys(data).forEach(key => { if (data[key] === '') delete data[key]; });
+    
+    const isEditing = !!editingEventId;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `/api/events/${editingEventId}` : '/api/events';
+    
+    try {
+      const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      if (response.ok) {
+        alert(isEditing ? 'Event updated!' : 'Event added!');
+        closeAddEventModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to save'));
+      }
+    } catch (err) { alert('Error saving event'); }
+  });
+
+  document.getElementById('add-event-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddEventModal(); });
+  document.getElementById('delete-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDeleteModal(); });
 </script>
 

@@ -1,8 +1,33 @@
 import express from 'express';
 import { db } from '../db/connection.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Get survey statistics (admin only)
+router.get('/stats', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const stats = await db('Surveys')
+      .avg('SurveySatisfactionScore as avgSatisfaction')
+      .avg('SurveyUsefulnessScore as avgUsefulness')
+      .avg('SurveyInstructorScore as avgInstructor')
+      .avg('SurveyRecommendationScore as avgRecommendation')
+      .avg('SurveyOverallScore as avgOverall')
+      .count('* as totalSurveys')
+      .first();
+    
+    res.json({
+      avgSatisfaction: parseFloat(stats.avgSatisfaction) || 0,
+      avgUsefulness: parseFloat(stats.avgUsefulness) || 0,
+      avgInstructor: parseFloat(stats.avgInstructor) || 0,
+      avgRecommendation: parseFloat(stats.avgRecommendation) || 0,
+      avgOverall: parseFloat(stats.avgOverall) || 0,
+      totalSurveys: parseInt(stats.totalSurveys) || 0
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Submit survey
 router.post('/', requireAuth, async (req, res, next) => {
