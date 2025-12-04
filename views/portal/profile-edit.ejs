@@ -1,0 +1,167 @@
+<%- include('../partials/head', { title: 'Edit Profile - Ella Rises Portal' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/profile/edit' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6 max-w-4xl">
+    <div class="mb-8">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-2">Edit Profile</h1>
+      <p class="text-foreground/60">Update your personal information</p>
+    </div>
+
+    <div class="bg-card border border-border rounded-xl p-8 shadow-sm">
+      <form action="/portal/profile/edit" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- Profile Photo -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Profile Photo</label>
+          <% if (participant.ParticipantPhotoPath) { %>
+            <div class="mb-4">
+              <img 
+                src="<%= participant.ParticipantPhotoPath %>" 
+                alt="Current profile photo" 
+                class="w-32 h-32 object-cover rounded-full border-2 border-border"
+              />
+            </div>
+          <% } %>
+          <input 
+            type="file" 
+            name="photo" 
+            accept="image/*" 
+            class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+          />
+          <p class="text-xs text-foreground/60 mt-1">Accepted formats: JPG, PNG, WebP (max 5MB)</p>
+        </div>
+
+        <!-- Name Fields -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">First Name *</label>
+            <input 
+              type="text" 
+              name="ParticipantFirstName" 
+              value="<%= participant.ParticipantFirstName || '' %>" 
+              required 
+              class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Last Name *</label>
+            <input 
+              type="text" 
+              name="ParticipantLastName" 
+              value="<%= participant.ParticipantLastName || '' %>" 
+              required 
+              class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+
+        <!-- Email (read-only) -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Email</label>
+          <input 
+            type="email" 
+            value="<%= participant.ParticipantEmail || '' %>" 
+            disabled 
+            class="w-full bg-muted border border-border text-foreground/60 h-12 px-4 rounded-lg cursor-not-allowed"
+          />
+          <p class="text-xs text-foreground/60 mt-1">Email cannot be changed</p>
+        </div>
+
+        <!-- Phone -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Phone Number</label>
+          <input 
+            type="tel" 
+            name="ParticipantPhone" 
+            value="<%= participant.ParticipantPhone || '' %>" 
+            class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <!-- Date of Birth -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Date of Birth</label>
+          <input 
+            type="date" 
+            name="ParticipantDOB" 
+            value="<%= participant.ParticipantDOB ? new Date(participant.ParticipantDOB).toISOString().split('T')[0] : '' %>" 
+            class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <!-- Field of Interest -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Field of Interest</label>
+          <select 
+            name="ParticipantFieldOfInterest" 
+            class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="Arts" <%= participant.ParticipantFieldOfInterest === 'Arts' ? 'selected' : '' %>>Arts</option>
+            <option value="STEM" <%= participant.ParticipantFieldOfInterest === 'STEM' ? 'selected' : '' %>>STEM</option>
+            <option value="Both" <%= participant.ParticipantFieldOfInterest === 'Both' || !participant.ParticipantFieldOfInterest ? 'selected' : '' %>>Both</option>
+          </select>
+        </div>
+
+        <!-- Location Fields -->
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">City</label>
+            <input 
+              type="text" 
+              name="ParticipantCity" 
+              value="<%= participant.ParticipantCity || '' %>" 
+              class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">State</label>
+            <input 
+              type="text" 
+              name="ParticipantState" 
+              value="<%= participant.ParticipantState || '' %>" 
+              class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Zip Code</label>
+            <input 
+              type="text" 
+              name="ParticipantZip" 
+              value="<%= participant.ParticipantZip || '' %>" 
+              class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+
+        <!-- School or Employer -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">School or Employer</label>
+          <input 
+            type="text" 
+            name="ParticipantSchoolOrEmployer" 
+            value="<%= participant.ParticipantSchoolOrEmployer || '' %>" 
+            class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex gap-4 pt-4">
+          <button 
+            type="submit" 
+            class="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 rounded-lg font-medium transition-colors"
+          >
+            Save Changes
+          </button>
+          <a 
+            href="/portal/dashboard" 
+            class="bg-muted hover:bg-muted/80 text-foreground h-12 px-8 rounded-lg font-medium flex items-center justify-center transition-colors"
+          >
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<%- include('../partials/footer-scripts') %>
+

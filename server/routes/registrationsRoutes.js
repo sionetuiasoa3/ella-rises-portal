@@ -138,7 +138,7 @@ router.put('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-// Delete registration
+// Delete registration (unregister)
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const registrationId = parseInt(req.params.id);
@@ -163,6 +163,36 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       .del();
 
     res.json({ message: 'Registration deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Unregister from event (convenience route for participants)
+router.post('/unregister', requireAuth, async (req, res, next) => {
+  try {
+    const { EventID } = req.body;
+    const participantId = req.session.user.participantId;
+
+    if (!EventID) {
+      return res.status(400).json({ message: 'EventID is required' });
+    }
+
+    // Find the registration
+    const registration = await db('Registrations')
+      .where({ EventID, ParticipantID: participantId })
+      .first();
+
+    if (!registration) {
+      return res.status(404).json({ message: 'Registration not found' });
+    }
+
+    // Delete the registration
+    await db('Registrations')
+      .where({ RegistrationID: registration.RegistrationID })
+      .del();
+
+    res.json({ message: 'Successfully unregistered from event' });
   } catch (error) {
     next(error);
   }

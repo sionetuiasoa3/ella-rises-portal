@@ -8,6 +8,8 @@ import milestonesRoutes from './milestonesRoutes.js';
 import donationsRoutes from './donationsRoutes.js';
 import surveysRoutes from './surveysRoutes.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
+import { db } from '../db/connection.js';
+import { uploadParticipantPhoto, getUploadPath, deleteUploadedFile, handleUploadError } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -60,12 +62,193 @@ router.get('/portal/auth', (req, res) => {
   res.render('portal/auth', { title: 'Login - Ella Rises Portal' });
 });
 
-router.get('/portal/dashboard', requireAuth, (req, res) => {
-  res.render('portal/dashboard', { title: 'Dashboard - Ella Rises Portal' });
+router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+    
+    // Fetch participant data
+    const participant = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+    
+    if (!participant) {
+      return res.status(404).render('not-found', { title: 'Participant Not Found' });
+    }
+    
+    // Fetch donations summary
+    const donationsSummary = await db('DonationSummary')
+      .where({ ParticipantID: participantId })
+      .first();
+    
+    // Fetch milestones (achieved and planned)
+    const allMilestones = await db('Milestones')
+      .join('MilestonesTypes', 'Milestones.MilestoneID', 'MilestonesTypes.MilestoneID')
+      .where({ 'Milestones.ParticipantID': participantId })
+      .select(
+        'Milestones.*',
+        'MilestonesTypes.MilestoneTitle'
+      )
+      .orderBy('Milestones.MilestoneDate', 'desc');
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const achievedMilestones = allMilestones.filter(m => {
+      const milestoneDate = new Date(m.MilestoneDate);
+      milestoneDate.setHours(0, 0, 0, 0);
+      return milestoneDate <= today;
+    });
+    
+    const plannedMilestones = allMilestones.filter(m => {
+      const milestoneDate = new Date(m.MilestoneDate);
+      milestoneDate.setHours(0, 0, 0, 0);
+      return milestoneDate > today;
+    });
+    
+    // Fetch registrations with event details
+    const registrations = await db('Registrations')
+      .join('Events', 'Registrations.EventID', 'Events.EventID')
+      .join('EventsTemplates', 'Events.EventName', 'EventsTemplates.EventName')
+      .where({ 'Registrations.ParticipantID': participantId })
+      .select(
+        'Registrations.*',
+        'Events.EventID',
+        'Events.EventName',
+        'Events.EventDateTimeStart',
+        'Events.EventDateTimeEnd',
+        'Events.EventLocation',
+        'EventsTemplates.EventTemplatePhotoPath'
+      )
+      .orderBy('Events.EventDateTimeStart', 'desc');
+    
+    const now = new Date();
+    const upcomingEvents = registrations.filter(reg => {
+      const eventDate = new Date(reg.EventDateTimeStart);
+      return eventDate > now;
+    });
+    
+    const pastEvents = registrations
+      .filter(reg => {
+        const eventDate = new Date(reg.EventDateTimeStart);
+        return eventDate <= now && reg.RegistrationAttendedFlag === true;
+      })
+      .slice(0, 5); // Most recent 5
+    
+    // Check which past events have surveys
+    const pastEventIds = pastEvents.map(e => e.RegistrationID);
+    const surveys = pastEventIds.length > 0 
+      ? await db('Surveys')
+          .whereIn('RegistrationID', pastEventIds)
+          .select('RegistrationID')
+      : [];
+    
+    const surveyRegistrationIds = new Set(surveys.map(s => s.RegistrationID));
+    
+    // Mark which events have surveys
+    pastEvents.forEach(event => {
+      event.hasSurvey = surveyRegistrationIds.has(event.RegistrationID);
+    });
+    
+    res.render('portal/dashboard', { 
+      title: 'Dashboard - Ella Rises Portal',
+      participant,
+      donationsSummary: donationsSummary || { TotalDonations: 0 },
+      achievedMilestones,
+      plannedMilestones,
+      upcomingEvents,
+      pastEvents,
+      updated: req.query.updated === '1'
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/portal/profile', requireAuth, (req, res) => {
   res.render('portal/profile', { title: 'Profile - Ella Rises Portal' });
+});
+
+router.get('/portal/profile/edit', requireAuth, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+    const participant = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+    
+    if (!participant) {
+      return res.status(404).render('not-found', { title: 'Participant Not Found' });
+    }
+    
+    res.render('portal/profile-edit', { 
+      title: 'Edit Profile - Ella Rises Portal',
+      participant 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/portal/profile/edit', requireAuth, uploadParticipantPhoto, handleUploadError, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+    
+    // Get existing participant
+    const existing = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+    
+    if (!existing) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+    
+    // Build update data from form fields (excluding PasswordHash)
+    const updateData = {};
+    const allowedFields = [
+      'ParticipantFirstName',
+      'ParticipantLastName',
+      'ParticipantDOB',
+      'ParticipantPhone',
+      'ParticipantCity',
+      'ParticipantState',
+      'ParticipantZip',
+      'ParticipantSchoolOrEmployer',
+      'ParticipantFieldOfInterest'
+    ];
+    
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined && req.body[field] !== '') {
+        updateData[field] = req.body[field] || null;
+      }
+    });
+    
+    // Handle photo upload if provided
+    if (req.file) {
+      // Delete old photo if it exists
+      if (existing.ParticipantPhotoPath) {
+        deleteUploadedFile(existing.ParticipantPhotoPath);
+      }
+      updateData.ParticipantPhotoPath = getUploadPath('participants', req.file.filename);
+    }
+    // If no photo uploaded, keep existing ParticipantPhotoPath
+    
+    // Update participant
+    const [updated] = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .update(updateData)
+      .returning('*');
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+    
+    // Update session with new name
+    req.session.user.firstName = updated.ParticipantFirstName;
+    req.session.user.lastName = updated.ParticipantLastName;
+    
+    res.redirect('/portal/dashboard?updated=1');
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/portal/events', requireAuth, (req, res) => {

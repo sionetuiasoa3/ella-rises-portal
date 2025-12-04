@@ -2,64 +2,234 @@
 <%- include('../partials/navbar', { currentPath: '/portal/dashboard' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Dashboard</h1>
-    <div class="grid md:grid-cols-4 gap-6">
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h2 class="text-xl font-serif mb-4">My Events</h2>
-        <p class="text-foreground/60">View your registered events</p>
-        <a href="/portal/events" class="text-primary hover:underline mt-4 inline-block">View Events →</a>
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">My Portal</h1>
+    
+    <% if (updated) { %>
+      <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+        Profile updated successfully!
       </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h2 class="text-xl font-serif mb-4">Milestones</h2>
-        <p class="text-foreground/60">Track your achievements</p>
-        <a href="/portal/milestones" class="text-primary hover:underline mt-4 inline-block">View Milestones →</a>
+    <% } %>
+
+    <!-- Top Row: Profile Card and Donations Summary -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- Top Left: Profile Card -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <div class="flex items-center gap-6">
+          <div class="flex-shrink-0">
+            <% if (participant.ParticipantPhotoPath) { %>
+              <img 
+                src="<%= participant.ParticipantPhotoPath %>" 
+                alt="Profile Photo" 
+                class="w-24 h-24 object-cover rounded-full border-2 border-border"
+              />
+            <% } else { %>
+              <div class="w-24 h-24 rounded-full bg-muted border-2 border-border flex items-center justify-center">
+                <span class="text-2xl text-foreground/40">
+                  <%= (participant.ParticipantFirstName || '').charAt(0).toUpperCase() %><%= (participant.ParticipantLastName || '').charAt(0).toUpperCase() %>
+                </span>
+              </div>
+            <% } %>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-serif text-foreground mb-1">
+              <%= participant.ParticipantFirstName %> <%= participant.ParticipantLastName %>
+            </h2>
+            <p class="text-foreground/60 mb-4"><%= participant.ParticipantEmail %></p>
+            <a 
+              href="/portal/profile/edit" 
+              class="inline-block bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors"
+            >
+              Edit Profile
+            </a>
+          </div>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h2 class="text-xl font-serif mb-4">Profile</h2>
-        <p class="text-foreground/60">Manage your account</p>
-        <a href="/portal/profile" class="text-primary hover:underline mt-4 inline-block">Edit Profile →</a>
-      </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h2 class="text-xl font-serif mb-4">My Donations</h2>
+
+      <!-- Top Right: Donations Summary -->
+      <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <h2 class="text-xl font-serif text-foreground mb-4">My Donations</h2>
         <p class="text-foreground/60 mb-2">Total contributed</p>
-        <p class="text-3xl font-semibold text-primary mb-1" id="donations-total">$0</p>
-        <p class="text-foreground/60 text-sm" id="donations-count">0 donations</p>
-        <a href="/donate" class="text-primary hover:underline mt-4 inline-block">Make a Donation →</a>
+        <p class="text-3xl font-semibold text-primary mb-1">
+          $<%= (donationsSummary.TotalDonations || 0).toLocaleString() %>
+        </p>
+        <a 
+          href="/donate" 
+          class="inline-block text-primary hover:underline mt-4 font-medium"
+        >
+          Make a Donation →
+        </a>
       </div>
+    </div>
+
+    <!-- Achieved Milestones Section -->
+    <div class="mb-8">
+      <h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6">Achieved Milestones</h2>
+      <% if (achievedMilestones && achievedMilestones.length > 0) { %>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% achievedMilestones.forEach(milestone => { %>
+            <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div class="flex items-start justify-between mb-2">
+                <h3 class="text-lg font-serif text-foreground"><%= milestone.MilestoneTitle %></h3>
+                <span class="text-sm text-primary">✓</span>
+              </div>
+              <p class="text-sm text-foreground/60">
+                <%= new Date(milestone.MilestoneDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+              </p>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-foreground/60">No milestones achieved yet. Keep participating to earn milestones!</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Planned Milestones Section -->
+    <div class="mb-8">
+      <h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6">Planned Milestones</h2>
+      <% if (plannedMilestones && plannedMilestones.length > 0) { %>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% plannedMilestones.forEach(milestone => { %>
+            <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div class="flex items-start justify-between mb-2">
+                <h3 class="text-lg font-serif text-foreground"><%= milestone.MilestoneTitle %></h3>
+                <span class="text-sm text-foreground/40">○</span>
+              </div>
+              <p class="text-sm text-foreground/60">
+                <%= new Date(milestone.MilestoneDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+              </p>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-foreground/60">No planned milestones at this time.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <div class="mb-8">
+      <h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6">Upcoming Events</h2>
+      <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+        <div class="space-y-4">
+          <% upcomingEvents.forEach(event => { %>
+            <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-serif text-foreground mb-2"><%= event.EventName %></h3>
+                  <div class="space-y-1 text-sm text-foreground/60">
+                    <p>
+                      <strong>Date:</strong> 
+                      <%= new Date(event.EventDateTimeStart).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      }) %>
+                    </p>
+                    <% if (event.EventLocation) { %>
+                      <p><strong>Location:</strong> <%= event.EventLocation %></p>
+                    <% } %>
+                  </div>
+                </div>
+                <button 
+                  onclick="unregisterFromEvent(<%= event.EventID %>)" 
+                  class="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+                >
+                  Unregister
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-foreground/60 mb-4">No upcoming events. Check out available events to register!</p>
+          <a href="/portal/events" class="text-primary hover:underline font-medium">Browse Events →</a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Past Events Section -->
+    <div class="mb-8">
+      <h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6">Past Events</h2>
+      <% if (pastEvents && pastEvents.length > 0) { %>
+        <div class="space-y-4">
+          <% pastEvents.forEach(event => { %>
+            <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-serif text-foreground mb-2"><%= event.EventName %></h3>
+                  <div class="space-y-1 text-sm text-foreground/60">
+                    <p>
+                      <strong>Date:</strong> 
+                      <%= new Date(event.EventDateTimeStart).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric'
+                      }) %>
+                    </p>
+                    <% if (event.EventLocation) { %>
+                      <p><strong>Location:</strong> <%= event.EventLocation %></p>
+                    <% } %>
+                  </div>
+                </div>
+                <% if (!event.hasSurvey) { %>
+                  <a 
+                    href="/portal/survey/<%= event.EventID %>" 
+                    class="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-center"
+                  >
+                    Take Survey
+                  </a>
+                <% } else { %>
+                  <span class="text-sm text-foreground/60 px-6 py-2">Survey completed</span>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-foreground/60">No past events to display.</p>
+        </div>
+      <% } %>
     </div>
   </div>
 </div>
 <%- include('../partials/footer') %>
 <%- include('../partials/footer-scripts') %>
 <script>
-  // Load donation summary for the logged-in participant
-  (async function loadDonationSummary() {
-    try {
-      const meRes = await fetch('/api/auth/me');
-      if (!meRes.ok) return;
-      const me = await meRes.json();
-      if (!me.ParticipantID) return;
-
-      const donationsRes = await fetch(`/api/participants/${me.ParticipantID}/donations`);
-      if (!donationsRes.ok) return;
-      const data = await donationsRes.json();
-
-      const totalEl = document.getElementById('donations-total');
-      const countEl = document.getElementById('donations-count');
-
-      const donations = data.donations || [];
-      const summary = data.summary || {};
-      const total = summary.TotalDonations ? parseFloat(summary.TotalDonations) : 0;
-
-      if (totalEl) {
-        totalEl.textContent = '$' + total.toLocaleString();
-      }
-      if (countEl) {
-        countEl.textContent = `${donations.length} donation${donations.length === 1 ? '' : 's'}`;
-      }
-    } catch (err) {
-      console.error('Error loading donation summary', err);
+  async function unregisterFromEvent(eventId) {
+    if (!confirm('Are you sure you want to unregister from this event?')) {
+      return;
     }
-  })();
-</script>
 
+    try {
+      // Use the unregister endpoint
+      const deleteRes = await fetch('/api/registrations/unregister', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ EventID: eventId })
+      });
+
+      if (!deleteRes.ok) {
+        const error = await deleteRes.json();
+        throw new Error(error.message || 'Failed to unregister');
+      }
+
+      // Reload the page to show updated events
+      window.location.reload();
+    } catch (error) {
+      alert('Error: ' + error.message);
+      console.error('Unregister error:', error);
+    }
+  }
+</script>
