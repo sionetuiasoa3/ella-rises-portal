@@ -20,8 +20,17 @@
             Login
           </button>
         </form>
-        <div class="mt-6 text-center">
-          <p class="text-foreground/60 text-sm">Don't have an account? <a href="/portal/auth?signup=true" class="text-primary hover:underline">Sign up</a></p>
+        <div class="mt-6 space-y-3 text-center">
+          <p class="text-foreground/60 text-sm">
+            Don't have an account?
+            <a href="/portal/auth?signup=true" class="text-primary hover:underline">Sign up</a>
+          </p>
+          <p class="text-foreground/60 text-sm">
+            Not sure if you already have a participant record?
+            <a href="/account/start" class="text-primary hover:underline">
+              Access or create your account
+            </a>
+          </p>
         </div>
       </div>
     </div>
@@ -32,6 +41,7 @@
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const isSignup = urlParams.get('signup') === 'true';
+  const prefillEmail = urlParams.get('email');
   
   if (isSignup) {
     document.querySelector('h1').innerHTML = 'Portal <span class="italic text-primary">Sign Up</span>';
@@ -49,7 +59,7 @@
       </div>
       <div>
         <label class="block text-sm font-medium text-foreground mb-2">Email *</label>
-        <input type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        <input id="signup-email" type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
       </div>
       <div>
         <label class="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
@@ -97,6 +107,12 @@
         Create Account
       </button>
     `;
+  }
+
+  // Prefill email if provided in query string
+  if (prefillEmail) {
+    const emailInput = document.querySelector('input[name="email"]');
+    if (emailInput) emailInput.value = prefillEmail;
   }
 
   document.getElementById('login-form').addEventListener('submit', async (e) => {

@@ -1,5 +1,5 @@
 import express from 'express';
-import authRoutes from './authRoutes.js';
+import authRoutes, { accountRouter } from './authRoutes.js';
 import participantsRoutes from './participantsRoutes.js';
 import eventsRoutes from './eventsRoutes.js';
 import templatesRoutes from './templatesRoutes.js';
@@ -112,6 +112,9 @@ router.get('/admin/milestones', requireAuth, requireRole('admin'), (req, res) =>
 router.get('/admin/donations', requireAuth, requireRole('admin'), (req, res) => {
   res.render('admin/donations', { title: 'Donations - Admin' });
 });
+
+// Account / password creation routes (non-API, EJS views)
+router.use('/', accountRouter);
 
 // API routes
 router.use('/api/auth', authRoutes);

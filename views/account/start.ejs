@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head') %>
+    <title><%= title %></title>
+  </head>
+  <body class="min-h-screen flex flex-col bg-gradient-to-b from-amber-50 to-white">
+    <%- include('../partials/navbar') %>
+
+    <main class="flex-1 pt-28 md:pt-32">
+      <section class="py-16 px-4">
+        <div class="max-w-3xl mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-lg p-8">
+          <h1 class="text-3xl md:text-4xl font-serif text-center text-ella-deep mb-2">
+            Access or Create Your Account
+          </h1>
+          <p class="text-center text-gray-600 mb-8">
+            Tell us if you are already a participant with Ella Rises, and we'll guide you to the right place.
+          </p>
+
+          <form id="account-start-form" method="POST" action="/account/existing" class="space-y-6">
+            <fieldset class="space-y-3">
+              <legend class="font-semibold text-gray-800 mb-2">
+                Are you already a participant with Ella Rises?
+              </legend>
+              <div class="flex flex-col md:flex-row gap-3">
+                <label class="flex-1 flex items-center gap-3 border rounded-2xl px-4 py-3 cursor-pointer hover:border-ella-accent transition">
+                  <input type="radio" name="participantStatus" value="existing" class="text-ella-accent" checked />
+                  <span class="flex flex-col">
+                    <span class="font-medium text-gray-900">Yes, I'm already a participant</span>
+                    <span class="text-sm text-gray-500">
+                      I have joined an Ella Rises program or event before.
+                    </span>
+                  </span>
+                </label>
+                <label class="flex-1 flex items-center gap-3 border rounded-2xl px-4 py-3 cursor-pointer hover:border-ella-accent transition">
+                  <input type="radio" name="participantStatus" value="new" class="text-ella-accent" />
+                  <span class="flex flex-col">
+                    <span class="font-medium text-gray-900">No, I'm new</span>
+                    <span class="text-sm text-gray-500">
+                      I'm just getting started with Ella Rises.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div id="existing-email-section" class="space-y-2">
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-2 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-ella-accent"
+                placeholder="you@example.com"
+              />
+              <p class="text-xs text-gray-500">
+                We'll check if you already have a participant record with Ella Rises.
+              </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6">
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold shadow-md hover:bg-primary/90 hover:shadow-lg transition"
+              >
+                Continue
+              </button>
+
+              <a href="/portal/auth" class="text-sm text-gray-600 hover:text-ella-accent underline-offset-2 hover:underline">
+                Already know your password? Log in instead
+              </a>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+    <%- include('../partials/footer-scripts') %>
+
+    <script>
+      (function () {
+        const form = document.getElementById('account-start-form');
+        const radios = form.querySelectorAll('input[name="participantStatus"]');
+        const emailSection = document.getElementById('existing-email-section');
+
+        function updateView() {
+          const value = Array.from(radios).find((r) => r.checked)?.value;
+          if (value === 'existing') {
+            emailSection.classList.remove('hidden');
+          } else {
+            emailSection.classList.add('hidden');
+          }
+        }
+
+        radios.forEach((radio) => {
+          radio.addEventListener('change', updateView);
+        });
+
+        form.addEventListener('submit', function (e) {
+          const value = Array.from(radios).find((r) => r.checked)?.value;
+          if (value === 'new') {
+            e.preventDefault();
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value;
+            const url = email ? `/portal/auth?signup=1&email=${encodeURIComponent(email)}` : '/portal/auth?signup=1';
+            window.location.href = url;
+          }
+        });
+
+        updateView();
+      })();
+    </script>
+  </body>
+</html>
+
+
