@@ -1,0 +1,65 @@
+<%- include('../partials/head', { title: 'Ella Rises Portal - Dashboard' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/dashboard' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Dashboard</h1>
+    <div class="grid md:grid-cols-4 gap-6">
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h2 class="text-xl font-serif mb-4">My Events</h2>
+        <p class="text-foreground/60">View your registered events</p>
+        <a href="/portal/events" class="text-primary hover:underline mt-4 inline-block">View Events →</a>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h2 class="text-xl font-serif mb-4">Milestones</h2>
+        <p class="text-foreground/60">Track your achievements</p>
+        <a href="/portal/milestones" class="text-primary hover:underline mt-4 inline-block">View Milestones →</a>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h2 class="text-xl font-serif mb-4">Profile</h2>
+        <p class="text-foreground/60">Manage your account</p>
+        <a href="/portal/profile" class="text-primary hover:underline mt-4 inline-block">Edit Profile →</a>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h2 class="text-xl font-serif mb-4">My Donations</h2>
+        <p class="text-foreground/60 mb-2">Total contributed</p>
+        <p class="text-3xl font-semibold text-primary mb-1" id="donations-total">$0</p>
+        <p class="text-foreground/60 text-sm" id="donations-count">0 donations</p>
+        <a href="/donate" class="text-primary hover:underline mt-4 inline-block">Make a Donation →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<%- include('../partials/footer-scripts') %>
+<script>
+  // Load donation summary for the logged-in participant
+  (async function loadDonationSummary() {
+    try {
+      const meRes = await fetch('/api/auth/me');
+      if (!meRes.ok) return;
+      const me = await meRes.json();
+      if (!me.ParticipantID) return;
+
+      const donationsRes = await fetch(`/api/participants/${me.ParticipantID}/donations`);
+      if (!donationsRes.ok) return;
+      const data = await donationsRes.json();
+
+      const totalEl = document.getElementById('donations-total');
+      const countEl = document.getElementById('donations-count');
+
+      const donations = data.donations || [];
+      const summary = data.summary || {};
+      const total = summary.TotalDonations ? parseFloat(summary.TotalDonations) : 0;
+
+      if (totalEl) {
+        totalEl.textContent = '$' + total.toLocaleString();
+      }
+      if (countEl) {
+        countEl.textContent = `${donations.length} donation${donations.length === 1 ? '' : 's'}`;
+      }
+    } catch (err) {
+      console.error('Error loading donation summary', err);
+    }
+  })();
+</script>
+

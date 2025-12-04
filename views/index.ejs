@@ -1,0 +1,113 @@
+<%- include('partials/head', { title: 'Ella Rises - Empowering Women in STEAM' }) %>
+<%- include('partials/navbar', { currentPath: '/' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Hero Section -->
+  <section class="relative pt-28 pb-8 md:pt-36 md:pb-12 overflow-hidden bg-cover bg-center">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
+    <div class="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-5 py-2.5 rounded-full mb-10 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          Empowering Women in STEAM
+        </div>
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif text-foreground mb-8 leading-[1.1]">
+          Where Women <span class="italic text-primary">Rise</span><br>Together
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+          Empowering the rising generation of women to pursue higher education and embrace their heritage through mentoring, creative workshops, and leadership opportunities.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/events" class="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base rounded-lg inline-flex items-center justify-center">
+            Explore Events
+            <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </a>
+          <a href="/donate" class="border-foreground/20 text-foreground hover:bg-foreground/5 px-8 py-6 text-base rounded-lg inline-flex items-center justify-center border">
+            Support Our Mission
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section (placeholder) -->
+  <section class="py-20">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl md:text-5xl font-serif text-foreground text-center mb-12">Our Events</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Placeholder for event images -->
+        <div class="aspect-video bg-muted rounded-2xl"></div>
+        <div class="aspect-video bg-muted rounded-2xl"></div>
+        <div class="aspect-video bg-muted rounded-2xl"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview -->
+  <section class="py-20 md:py-28">
+    <div class="container mx-auto px-6">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-6 text-sm font-medium">
+            <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+            Our Mission
+          </div>
+          <h2 class="text-3xl md:text-5xl font-serif text-foreground mb-6 leading-tight">
+            Every Girl Deserves to <span class="italic text-primary">Shine</span>
+          </h2>
+          <p class="text-foreground/70 mb-6 leading-relaxed text-lg">
+            Ella Rises is dedicated to empowering young women through transformative programs that build confidence, develop leadership skills, and create lasting connections.
+          </p>
+          <p class="text-foreground/70 mb-8 leading-relaxed">
+            Through workshops, mentorship programs, and community events, we create safe spaces where teen girls can explore their potential and develop the skills they need to thrive.
+          </p>
+          <a href="/about" class="border-foreground/20 text-foreground hover:bg-foreground/5 rounded-lg px-6 py-3 inline-flex items-center border">
+            Learn More About Us
+            <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </a>
+        </div>
+        <div class="relative">
+          <img src="/images/group-photo.jpeg" alt="Ella Rises participants" class="aspect-[4/3] w-full object-cover object-[center_100%] rounded-3xl shadow-xl" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workshop Highlight -->
+  <section class="py-12 md:py-16">
+    <div class="container mx-auto px-6">
+      <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+        <img src="/images/workshop-large.jpg" alt="Girls participating in an Ella Rises workshop" class="w-full h-[300px] md:h-[450px] object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/60 via-transparent to-transparent"></div>
+        <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
+          <p class="text-sm md:text-base font-medium text-ella-warm-cream/90 mb-2">Summer Summit 2024</p>
+          <h3 class="text-2xl md:text-3xl font-serif">100+ Girls. One Vision.</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 md:py-28 bg-gradient-to-br from-ella-charcoal via-ella-charcoal to-ella-charcoal/95">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-5xl font-serif text-white mb-6">
+        Help Us <span class="italic text-ella-pink">Rise</span> Together
+      </h2>
+      <p class="text-white/60 max-w-3xl mx-auto mb-10 text-lg">
+        Your support enables us to continue providing transformative STEAM programs, mentoring opportunities, and leadership development for the rising generation of women.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/donate" class="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-base rounded-lg inline-flex items-center justify-center">
+          Make a Donation
+          <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a href="/about" class="bg-ella-sage text-ella-charcoal hover:bg-ella-sage/90 px-10 py-6 text-base rounded-lg font-medium inline-flex items-center justify-center">
+          Volunteer With Us
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+

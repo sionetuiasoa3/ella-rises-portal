@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Ella Rises - Empowering Women in STEAM' %></title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN with custom config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: 'hsl(45 33% 95%)',
+            foreground: 'hsl(150 4% 23%)',
+            primary: {
+              DEFAULT: 'hsl(340 65% 50%)',
+              foreground: 'hsl(45 33% 95%)',
+            },
+            secondary: {
+              DEFAULT: 'hsl(120 18% 66%)',
+              foreground: 'hsl(150 4% 23%)',
+            },
+            muted: {
+              DEFAULT: 'hsl(40 20% 94%)',
+              foreground: 'hsl(150 4% 45%)',
+            },
+            card: {
+              DEFAULT: 'hsl(0 0% 100%)',
+              foreground: 'hsl(150 4% 23%)',
+            },
+            border: 'hsl(15 50% 85%)',
+            ella: {
+              pink: 'hsl(5 76% 83%)',
+              peach: 'hsl(22 82% 76%)',
+              purple: 'hsl(250 33% 66%)',
+              sage: 'hsl(140 25% 55%)',
+              coral: 'hsl(12 76% 61%)',
+              cream: 'hsl(45 33% 95%)',
+              blush: 'hsl(15 70% 91%)',
+              charcoal: 'hsl(150 4% 23%)',
+              'warm-cream': 'hsl(30 40% 92%)',
+            },
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            serif: ['DM Serif Display', 'serif'],
+          },
+          borderRadius: {
+            lg: '0.75rem',
+            md: 'calc(0.75rem - 2px)',
+            sm: 'calc(0.75rem - 4px)',
+          },
+        },
+      },
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-background text-foreground font-sans">
+

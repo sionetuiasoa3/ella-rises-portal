@@ -1,0 +1,162 @@
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/auth' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <div class="max-w-md mx-auto">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 text-center">
+        Portal <span class="italic text-primary">Login</span>
+      </h1>
+      <div class="bg-card border border-border rounded-xl p-8 shadow-sm">
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Email</label>
+            <input type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Password</label>
+            <input type="password" name="password" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          </div>
+          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
+            Login
+          </button>
+        </form>
+        <div class="mt-6 text-center">
+          <p class="text-foreground/60 text-sm">Don't have an account? <a href="/portal/auth?signup=true" class="text-primary hover:underline">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+></div>
+<%- include('../partials/footer') %>
+<%- include('../partials/footer-scripts') %>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const isSignup = urlParams.get('signup') === 'true';
+  
+  if (isSignup) {
+    document.querySelector('h1').innerHTML = 'Portal <span class="italic text-primary">Sign Up</span>';
+    const form = document.getElementById('login-form');
+    form.innerHTML = `
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">First Name *</label>
+          <input type="text" name="firstName" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Last Name *</label>
+          <input type="text" name="lastName" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Email *</label>
+        <input type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
+        <input type="tel" name="phoneNumber" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Date of Birth *</label>
+        <input type="date" name="dateOfBirth" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Field of Interest *</label>
+        <select name="fieldOfInterest" required class="w-full bg-background border border-border text-foreground h-11 px-4 rounded-lg">
+          <option value="Arts">Arts</option>
+          <option value="STEM">STEM</option>
+          <option value="Both" selected>Both</option>
+        </select>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">City *</label>
+          <input type="text" name="city" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">State *</label>
+          <input type="text" name="state" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Zip *</label>
+          <input type="text" name="zip" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">School or Employer</label>
+        <input type="text" name="schoolOrEmployer" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Password * (min 8 characters)</label>
+        <input type="password" name="password" required minlength="8" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-2">Confirm Password *</label>
+        <input type="password" name="confirmPassword" required minlength="8" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+      </div>
+      <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
+        Create Account
+      </button>
+    `;
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    // Map form fields to API payload
+    let payload;
+    if (isSignup) {
+      const password = data.password || '';
+      const confirmPassword = data.confirmPassword || '';
+      if (password.length < 8) {
+        alert('Password must be at least 8 characters long.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        alert('Passwords do not match. Please confirm your password.');
+        return;
+      }
+
+      // Backend expects PascalCase keys for signup
+      payload = {
+        Email: data.email,
+        Password: password,
+        FirstName: data.firstName,
+        LastName: data.lastName,
+        DateOfBirth: data.dateOfBirth || null,
+        PhoneNumber: data.phoneNumber || null,
+        City: data.city || null,
+        State: data.state || null,
+        Zip: data.zip || null,
+        SchoolOrEmployer: data.schoolOrEmployer || null,
+        FieldOfInterest: data.fieldOfInterest || 'Both'
+      };
+    } else {
+      // Login expects lowercase email/password
+      payload = {
+        email: data.email,
+        password: data.password
+      };
+    }
+    
+    try {
+      const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        window.location.href = '/portal/dashboard';
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Login failed');
+      }
+    } catch (err) {
+      alert('An error occurred. Please try again.');
+    }
+  });
+</script>
+

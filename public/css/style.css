@@ -1,0 +1,94 @@
+/* Ella Rises Design System - Complete CSS with all utilities */
+
+:root {
+  /* Brand Colors - Ella Rises Palette */
+  --background: 45 33% 95%; /* #F9F5EA cream */
+  --foreground: 150 4% 23%; /* #3A3F3B dark green */
+  --card: 0 0% 100%;
+  --card-foreground: 150 4% 23%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 150 4% 23%;
+  --primary: 340 65% 50%; /* #CE325B magenta/raspberry */
+  --primary-foreground: 45 33% 95%;
+  --secondary: 120 18% 66%; /* #9AB59D sage green */
+  --secondary-foreground: 150 4% 23%;
+  --muted: 40 20% 94%; /* neutral warm gray */
+  --muted-foreground: 150 4% 45%;
+  --accent: 200 30% 69%; /* #99B7C6 soft blue */
+  --accent-foreground: 150 4% 23%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 45 33% 95%;
+  --border: 15 50% 85%;
+  --input: 15 50% 85%;
+  --ring: 340 65% 50%;
+  --radius: 0.75rem;
+  --ella-pink: 5 76% 83%; /* #F9AFB1 coral pink */
+  --ella-peach: 22 82% 76%; /* #F4B092 peach */
+  --ella-purple: 250 33% 66%; /* #978EC4 soft purple */
+  --ella-sage: 140 25% 55%; /* refined sage green */
+  --ella-coral: 12 76% 61%; /* warm coral */
+  --ella-cream: 45 33% 95%; /* #F9F5EA cream */
+  --ella-blush: 15 70% 91%; /* #FFD8D1 soft peach/blush */
+  --ella-charcoal: 150 4% 23%; /* #3A3F3B dark charcoal */
+  --ella-warm-cream: 30 40% 92%; /* warm cream from logo ring */
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Montserrat', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'DM Serif Display', serif;
+}
+
+/* Utility classes for custom colors */
+.bg-background { background-color: hsl(var(--background)); }
+.text-foreground { color: hsl(var(--foreground)); }
+.bg-primary { background-color: hsl(var(--primary)); }
+.text-primary { color: hsl(var(--primary)); }
+.bg-primary-foreground { background-color: hsl(var(--primary-foreground)); }
+.text-primary-foreground { color: hsl(var(--primary-foreground)); }
+.bg-secondary { background-color: hsl(var(--secondary)); }
+.text-secondary { color: hsl(var(--secondary)); }
+.bg-muted { background-color: hsl(var(--muted)); }
+.text-muted-foreground { color: hsl(var(--muted-foreground)); }
+.bg-card { background-color: hsl(var(--card)); }
+.text-card-foreground { color: hsl(var(--card-foreground)); }
+.border-border { border-color: hsl(var(--border)); }
+
+/* Ella brand colors */
+.bg-ella-pink { background-color: hsl(var(--ella-pink)); }
+.bg-ella-sage { background-color: hsl(var(--ella-sage)); }
+.bg-ella-cream { background-color: hsl(var(--ella-cream)); }
+.bg-ella-blush { background-color: hsl(var(--ella-blush)); }
+.bg-ella-charcoal { background-color: hsl(var(--ella-charcoal)); }
+.text-ella-pink { color: hsl(var(--ella-pink)); }
+.text-ella-warm-cream { color: hsl(var(--ella-warm-cream)); }
+.bg-ella-warm-cream { background-color: hsl(var(--ella-warm-cream)); }
+
+/* Opacity utilities */
+.bg-secondary\/50 { background-color: hsl(var(--secondary) / 0.5); }
+.text-foreground\/70 { color: hsl(var(--foreground) / 0.7); }
+.text-foreground\/80 { color: hsl(var(--foreground) / 0.8); }
+.text-foreground\/60 { color: hsl(var(--foreground) / 0.6); }
+.bg-ella-warm-cream\/90 { background-color: hsl(var(--ella-warm-cream) / 0.9); }
+.border-ella-charcoal\/5 { border-color: hsl(var(--ella-charcoal) / 0.05); }
+
+/* Hover states */
+.hover\:bg-primary\/90:hover { background-color: hsl(var(--primary) / 0.9); }
+.hover\:text-primary:hover { color: hsl(var(--primary)); }
+.hover\:bg-foreground\/5:hover { background-color: hsl(var(--foreground) / 0.05); }
+.hover\:underline:hover { text-decoration: underline; }
+.hover\:text-white:hover { color: white; }
+
+/* Backdrop blur */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

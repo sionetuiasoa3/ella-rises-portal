@@ -1,0 +1,304 @@
+<%- include('partials/head', { title: 'About Us - Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/about' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Hero Section -->
+  <section class="relative pt-28 pb-8 md:pt-36 md:pb-12 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-ella-cream/50 to-ella-sage/40"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-5 py-2.5 rounded-full mb-8 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+          Our Mission
+        </div>
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 leading-tight">
+          Every Girl Deserves to <span class="italic text-primary">Shine</span>
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 leading-relaxed">
+          Ella Rises is dedicated to empowering young women through transformative programs that build confidence, develop leadership skills, and create lasting connections.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Mission Video Section -->
+  <section class="relative pt-8 pb-16 md:pt-12 md:pb-24 overflow-hidden bg-ella-sage/40">
+    <div class="container mx-auto px-6 relative">
+      <h2 class="text-3xl md:text-5xl font-serif text-foreground text-center mb-12 md:mb-16 tracking-wide">
+        OUR MISSION
+      </h2>
+      <div class="max-w-4xl mx-auto mb-10">
+        <div class="aspect-video rounded-lg overflow-hidden shadow-xl">
+          <video class="w-full h-full object-cover" controls playsinline>
+            <source 
+              src="https://video.wixstatic.com/video/e5f869_f075e19ca2744354bb20a65881dce28f/1080p/mp4/file.mp4" 
+              type="video/mp4" 
+            />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+      <p class="text-xl md:text-2xl text-foreground/70 text-center max-w-3xl mx-auto leading-relaxed font-light italic">
+        Empowering young women to pursue higher education through high-impact multicultural activities focused on mariachi and STEAM.
+      </p>
+    </div>
+  </section>
+
+  <!-- Our Story Section -->
+  <section class="py-20 md:py-28">
+    <div class="container mx-auto px-6">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-serif text-foreground mb-6 leading-tight">
+            Our Story
+          </h2>
+          <p class="text-foreground/70 mb-6 leading-relaxed text-lg">
+            Ella Rises was founded with a simple but powerful vision: to create a world where every young woman has the confidence, skills, and support to achieve her dreams.
+          </p>
+          <p class="text-foreground/70 mb-8 leading-relaxed">
+            Through workshops, mentorship programs, and community events, we create safe spaces where teen girls can explore their potential and develop the skills they need to thrive in STEAM fields and beyond.
+          </p>
+        </div>
+        <div class="relative">
+          <img 
+            src="/images/stem-workshop.jpg" 
+            alt="Young women participating in a STEM workshop" 
+            class="aspect-[4/3] w-full object-cover rounded-3xl shadow-xl"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Heritage Section -->
+  <section class="py-20 bg-muted/30">
+    <div class="container mx-auto px-6">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div class="order-2 md:order-1">
+          <img 
+            src="/images/mariachi-performance.jpeg" 
+            alt="Young women performing traditional mariachi music" 
+            class="aspect-[4/3] w-full object-cover rounded-3xl shadow-xl"
+          />
+        </div>
+        <div class="order-1 md:order-2">
+          <h2 class="text-3xl md:text-4xl font-serif text-foreground mb-6 leading-tight">
+            Embracing Heritage
+          </h2>
+          <p class="text-foreground/70 mb-6 leading-relaxed text-lg">
+            We believe in celebrating cultural heritage as a source of strength and identity. Our programs include traditional arts, music, and cultural education.
+          </p>
+          <p class="text-foreground/70 mb-8 leading-relaxed">
+            Through mariachi, folklorico, and traditional arts workshops, young women connect with their roots while building confidence and performance skills.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Meet the Team Section -->
+  <section class="relative overflow-hidden">
+    <div class="bg-ella-sage/50 py-8 md:py-12">
+      <h2 class="text-3xl md:text-5xl font-serif text-foreground text-center tracking-wide">
+        MEET THE TEAM
+      </h2>
+    </div>
+    <div class="container mx-auto px-6 py-6 md:py-8">
+      <!-- Nadia Cates -->
+      <div class="bg-ella-blush/30 border-l-4 border-primary rounded-r-2xl mb-8 overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <div class="flex-1 p-8 md:p-12 order-2 md:order-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-3xl md:text-4xl font-serif text-foreground">Nadia Cates</h3>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-foreground hover:text-primary transition-colors">
+                <svg class="h-7 w-7 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.22 8.44H4.78V24H.22V8.44zM8.34 8.44h4.34v2.12h.06c.6-1.14 2.06-2.34 4.23-2.34 4.52 0 5.36 2.98 5.36 6.86V24h-4.56v-7.14c0-1.7-.03-3.88-2.36-3.88-2.36 0-2.72 1.84-2.72 3.74V24H8.34V8.44z"/></svg>
+              </a>
+            </div>
+            <div class="w-16 h-0.5 bg-primary mb-4"></div>
+            <h4 class="text-xl md:text-2xl font-serif text-foreground mb-6">Founder and Executive Director</h4>
+            <div class="text-foreground/70 space-y-4 leading-relaxed">
+              <p>
+                Nadia is from the borderlands of Mexico and Southern California. She is the oldest of 3 daughters and inspired by her parents love and devotion for each other, their family, and God. She is a mother of 6 and married to an incredible man. She studied Human Development at Brigham Young University and graduated in 2007. In 2013, she and her young family moved to Mexico City, where she studied for a year in a Mexican Culinary Institute under the great Maestros Yuri de Gortari and Edmundo Escamilla.
+              </p>
+              <p>
+                It was while living in Mexico City that the idea of Ella Rises was conceived. Nadia connected deeply with her heritage and saw it in a different light from when she was growing up in the U.S. She believes that as we embrace our spiritual <em>and</em> cultural heritage we can attain more clarity and confidence towards an empowering cycle of progress.
+              </p>
+              <p>
+                Nadia is grateful to lead Ella Rises as the Creative and Executive Director.
+              </p>
+            </div>
+          </div>
+          <div class="md:w-[350px] lg:w-[400px] order-1 md:order-2">
+            <img 
+              src="/images/team/nadia-cates.jpeg" 
+              alt="Nadia Cates"
+              class="w-full h-full object-cover min-h-[300px] md:min-h-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Claudia Barillas -->
+      <div class="bg-ella-blush/30 border-l-4 border-primary rounded-r-2xl overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <div class="md:w-[350px] lg:w-[400px]">
+            <img 
+              src="/images/team/claudia-barillas.jpg" 
+              alt="Claudia Barillas"
+              class="w-full h-full object-cover min-h-[300px] md:min-h-full"
+            />
+          </div>
+          <div class="flex-1 p-8 md:p-12">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-3xl md:text-4xl font-serif text-foreground">Claudia Barillas</h3>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-foreground hover:text-primary transition-colors">
+                <svg class="h-7 w-7 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.22 8.44H4.78V24H.22V8.44zM8.34 8.44h4.34v2.12h.06c.6-1.14 2.06-2.34 4.23-2.34 4.52 0 5.36 2.98 5.36 6.86V24h-4.56v-7.14c0-1.7-.03-3.88-2.36-3.88-2.36 0-2.72 1.84-2.72 3.74V24H8.34V8.44z"/></svg>
+              </a>
+            </div>
+            <div class="w-16 h-0.5 bg-primary mb-4"></div>
+            <h4 class="text-xl md:text-2xl font-serif text-foreground mb-6">Program Director</h4>
+            <div class="text-foreground/70 space-y-4 leading-relaxed">
+              <p>
+                Claudia was raised in Los Angeles, California, after her family emigrated from Michoacán, Mexico. She is a dedicated community leader and advocate, holding a Bachelor's degree in Social Work from Cal State L.A. and a Master's in Public Administration from Brigham Young University.
+              </p>
+              <p>
+                Over the past 20 years, Claudia has worked tirelessly to promote social justice and address social issues, focusing on substance recovery, mental health, community advocacy, and education. She currently serves as the Human Services Director in Utah County, where she continues her mission to strengthen families, improve community and create meaningful social impact.
+              </p>
+              <p>
+                Outside of her professional work, Claudia devotes her time to her husband, two children, exploring the outdoors, and serving the community. She is passionate about her cultural roots, building genuine connections and empowering youth through her involvement with Ella Rises, where she helps young people embrace their identity and pursue their dreams.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Board of Directors Section -->
+  <section class="py-16 md:py-24">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl md:text-5xl font-serif text-foreground text-center mb-12 tracking-wide">
+        BOARD OF DIRECTORS
+      </h2>
+      <div class="bg-ella-sage/40 rounded-3xl p-8 md:p-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <!-- Each board member -->
+          <div class="flex flex-col">
+            <img src="/images/team/emma-guapo.jpg" alt="Emma Guapo" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Emma Guapo</h3>
+                <p class="text-foreground/60 text-xs">Chair of the Board</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/dennia-gayle.jpeg" alt="Dennia Gayle" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Dennia Gayle</h3>
+                <p class="text-foreground/60 text-xs">Vice Chair</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/bert-barillas.jpg" alt="Bert Barillas" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Bert Barillas</h3>
+                <p class="text-foreground/60 text-xs">Secretary</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/rogelio-osuna.jpg" alt="Rogelio Osuna" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Rogelio Osuna</h3>
+                <p class="text-foreground/60 text-xs">Treasurer</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/zach.jpg" alt="Zachariah Parry" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Zachariah Parry</h3>
+                <p class="text-foreground/60 text-xs">Board Member</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/shawn.jpg" alt="Shawn Cates" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Shawn Cates</h3>
+                <p class="text-foreground/60 text-xs">Board Member</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/kathy-larrabee.jpg" alt="Kathy Larrabee" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Kathy Larrabee</h3>
+                <p class="text-foreground/60 text-xs">Board Member</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <img src="/images/team/rick-heizer.jpg" alt="Rick Heizer" class="w-full aspect-square object-cover rounded-lg mb-3" />
+            <div class="bg-background p-3 rounded-lg shadow-md">
+              <div class="border-l-2 border-primary pl-3">
+                <h3 class="text-sm md:text-base font-medium text-foreground">Rick Heizer</h3>
+                <p class="text-foreground/60 text-xs">Board Member</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs Section -->
+  <section class="py-20">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-6 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          What We Offer
+        </div>
+        <h2 class="text-3xl md:text-5xl font-serif text-foreground mb-4">Our Programs</h2>
+        <p class="text-foreground/70 max-w-2xl mx-auto text-lg">
+          Discover the ways we support and empower young women in our community.
+        </p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          </div>
+          <h3 class="text-xl font-serif text-foreground mb-3">Mentorship</h3>
+          <p class="text-foreground/60 leading-relaxed">Connect with inspiring women mentors who guide, support, and encourage personal growth.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          </div>
+          <h3 class="text-xl font-serif text-foreground mb-3">Workshops</h3>
+          <p class="text-foreground/60 leading-relaxed">Interactive sessions on leadership, creativity, wellness, and essential life skills.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <h3 class="text-xl font-serif text-foreground mb-3">Community Events</h3>
+          <p class="text-foreground/60 leading-relaxed">Fun gatherings that build friendships and celebrate the achievements of our girls.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+

@@ -1,0 +1,28 @@
+<%- include('../partials/head', { title: 'Donate - Ella Rises Portal' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/donate' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <div class="max-w-3xl mx-auto text-center mb-10">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6">
+        Support <span class="italic text-primary">Ella</span>
+      </h1>
+      <p class="text-lg md:text-xl text-foreground/70 leading-relaxed">
+        As a member of the Ella Rises community, your donation helps provide life-changing STEAM, arts, and leadership opportunities.
+      </p>
+    </div>
+    <div class="max-w-xl mx-auto bg-card border border-border rounded-xl p-6 md:p-8 text-left">
+      <p class="text-foreground/70 mb-4">
+        To make a donation, please use our secure donation form on the main site.
+      </p>
+      <p class="text-foreground/70 mb-6">
+        Your contribution will be linked to your portal account when you donate while logged in.
+      </p>
+      <a href="/donate" class="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg inline-flex items-center justify-center">
+        Go to Donation Form
+        <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+

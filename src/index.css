@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ella Rises Design System */
+
+@layer base {
+  :root {
+    /* Brand Colors - Ella Rises Palette */
+    --background: 45 33% 95%; /* #F9F5EA cream */
+    --foreground: 150 4% 23%; /* #3A3F3B dark green */
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 4% 23%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 4% 23%;
+
+    --primary: 340 65% 50%; /* #CE325B magenta/raspberry */
+    --primary-foreground: 45 33% 95%;
+
+    --secondary: 120 18% 66%; /* #9AB59D sage green */
+    --secondary-foreground: 150 4% 23%;
+
+    --muted: 40 20% 94%; /* neutral warm gray */
+    --muted-foreground: 150 4% 45%;
+
+    --accent: 200 30% 69%; /* #99B7C6 soft blue */
+    --accent-foreground: 150 4% 23%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 45 33% 95%;
+
+    --border: 15 50% 85%;
+    --input: 15 50% 85%;
+    --ring: 340 65% 50%;
+
+    --radius: 0.75rem;
+
+    /* Extended Brand Colors */
+    --ella-pink: 5 76% 83%; /* #F9AFB1 coral pink */
+    --ella-peach: 22 82% 76%; /* #F4B092 peach */
+    --ella-purple: 250 33% 66%; /* #978EC4 soft purple */
+    --ella-sage: 140 25% 55%; /* refined sage green */
+    --ella-coral: 12 76% 61%; /* warm coral */
+    --ella-cream: 45 33% 95%; /* #F9F5EA cream */
+    --ella-blush: 15 70% 91%; /* #FFD8D1 soft peach/blush */
+    --ella-charcoal: 150 4% 23%; /* #3A3F3B dark charcoal */
+    --ella-warm-cream: 30 40% 92%; /* warm cream from logo ring */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 150 4% 23%;
+    --sidebar-primary: 340 65% 50%;
+    --sidebar-primary-foreground: 45 33% 95%;
+    --sidebar-accent: 15 70% 91%;
+    --sidebar-accent-foreground: 150 4% 23%;
+    --sidebar-border: 15 50% 85%;
+    --sidebar-ring: 340 65% 50%;
+  }
+
+  .dark {
+    --background: 150 4% 15%;
+    --foreground: 45 33% 95%;
+
+    --card: 150 4% 18%;
+    --card-foreground: 45 33% 95%;
+
+    --popover: 150 4% 18%;
+    --popover-foreground: 45 33% 95%;
+
+    --primary: 340 65% 55%;
+    --primary-foreground: 45 33% 95%;
+
+    --secondary: 120 18% 30%;
+    --secondary-foreground: 45 33% 95%;
+
+    --muted: 150 4% 25%;
+    --muted-foreground: 45 20% 70%;
+
+    --accent: 200 30% 35%;
+    --accent-foreground: 45 33% 95%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 45 33% 95%;
+
+    --border: 150 4% 25%;
+    --input: 150 4% 25%;
+    --ring: 340 65% 55%;
+
+    --sidebar-background: 150 4% 12%;
+    --sidebar-foreground: 45 33% 95%;
+    --sidebar-primary: 340 65% 55%;
+    --sidebar-primary-foreground: 45 33% 95%;
+    --sidebar-accent: 150 4% 20%;
+    --sidebar-accent-foreground: 45 33% 95%;
+    --sidebar-border: 150 4% 20%;
+    --sidebar-ring: 340 65% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}

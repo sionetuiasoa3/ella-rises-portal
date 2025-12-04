@@ -1,0 +1,38 @@
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/survey' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Event Survey</h1>
+    <div class="bg-card border border-border rounded-xl p-6">
+      <form id="survey-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Satisfaction Score (1-5)</label>
+          <input type="number" name="SurveySatisfactionScore" min="1" max="5" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Usefulness Score (1-5)</label>
+          <input type="number" name="SurveyUsefulnessScore" min="1" max="5" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">Comments</label>
+          <textarea name="SurveyComments" class="w-full bg-background border border-border text-foreground min-h-[120px] px-4 py-3 rounded-lg"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
+          Submit Survey
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  const eventId = window.location.pathname.split('/').pop();
+  document.getElementById('survey-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    // TODO: Get RegistrationID from eventId and participant
+    alert('Survey submission functionality coming soon');
+  });
+</script>
+

@@ -1,0 +1,52 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/admin/login' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <div class="max-w-md mx-auto">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 text-center">
+        Admin <span class="italic text-primary">Login</span>
+      </h1>
+      <div class="bg-card border border-border rounded-xl p-8 shadow-sm">
+        <form id="admin-login-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Email</label>
+            <input type="email" name="email" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">Password</label>
+            <input type="password" name="password" required class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          </div>
+          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
+            Login
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    try {
+      const response = await fetch('/api/auth/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        window.location.href = '/admin';
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Login failed');
+      }
+    } catch (err) {
+      alert('An error occurred. Please try again.');
+    }
+  });
+</script>
+

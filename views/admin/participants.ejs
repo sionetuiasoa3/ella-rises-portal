@@ -1,0 +1,26 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/admin/participants' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Participants</h1>
+    <div id="participants-container" class="bg-card border border-border rounded-xl p-6">
+      <p class="text-foreground/60">Loading participants...</p>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  fetch('/api/participants')
+    .then(r => r.json())
+    .then(participants => {
+      const container = document.getElementById('participants-container');
+      container.innerHTML = participants.map(p => `
+        <div class="border-b border-border py-4">
+          <a href="/admin/participants/${p.ParticipantID}" class="text-primary hover:underline">
+            ${p.ParticipantFirstName} ${p.ParticipantLastName} (${p.ParticipantEmail})
+          </a>
+        </div>
+      `).join('');
+    });
+</script>
+

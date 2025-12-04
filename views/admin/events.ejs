@@ -1,0 +1,26 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/admin/events' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Events</h1>
+    <div id="events-container" class="bg-card border border-border rounded-xl p-6">
+      <p class="text-foreground/60">Loading events...</p>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  fetch('/api/events')
+    .then(r => r.json())
+    .then(events => {
+      const container = document.getElementById('events-container');
+      container.innerHTML = events.map(e => `
+        <div class="border-b border-border py-4">
+          <h3 class="text-xl font-serif">${e.EventName}</h3>
+          <p class="text-foreground/60">${new Date(e.EventDateTimeStart).toLocaleDateString()}</p>
+          <a href="/admin/events/${e.EventID}/registrations" class="text-primary hover:underline">View Registrations</a>
+        </div>
+      `).join('');
+    });
+</script>
+

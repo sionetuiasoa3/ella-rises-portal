@@ -1,0 +1,92 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/events' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Hero Section -->
+  <section class="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-5 py-2.5 rounded-full mb-8 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Join Us
+        </div>
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 leading-tight">
+          Upcoming <span class="italic text-primary">Events</span>
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 leading-relaxed">
+          Join us at our next gathering and be part of something special. Each event is designed to inspire, connect, and empower.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters + Events Grid -->
+  <section class="py-20 md:py-28">
+    <div class="container mx-auto px-6">
+      <form method="GET" action="/events" class="flex flex-col md:flex-row gap-4 mb-8">
+        <select name="type" class="w-full md:w-auto bg-card border border-border rounded-lg px-4 py-2 text-sm">
+          <option value="all">All Types</option>
+          <option value="workshop">Workshop</option>
+          <option value="mentorship">Mentorship</option>
+          <option value="conference">Conference</option>
+        </select>
+        <select name="time" class="w-full md:w-auto bg-card border border-border rounded-lg px-4 py-2 text-sm">
+          <option value="upcoming">Upcoming</option>
+          <option value="past">Past</option>
+        </select>
+        <input 
+          type="text" 
+          name="location" 
+          placeholder="Location" 
+          class="w-full md:flex-1 bg-card border border-border rounded-lg px-4 py-2 text-sm"
+        />
+        <button type="submit" class="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6 py-2 text-sm font-medium">
+          Filter
+        </button>
+      </form>
+      <div id="events-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <!-- Events will be loaded via JavaScript -->
+        <p class="text-foreground/60">Loading events...</p>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+<script>
+  // Load events from API with filters from query string
+  const search = window.location.search || '';
+  fetch('/api/events' + search)
+    .then(res => res.json())
+    .then(events => {
+      const container = document.getElementById('events-container');
+      if (events.length === 0) {
+        container.innerHTML = '<p class="text-foreground/60">No upcoming events at this time.</p>';
+        return;
+      }
+      container.innerHTML = events.map(event => `
+        <div class="bg-card border-0 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 rounded-2xl">
+          <div class="aspect-video overflow-hidden">
+            <div class="w-full h-full bg-muted flex items-center justify-center">
+              <span class="text-foreground/40">Event Image</span>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="text-sm text-primary font-semibold mb-2">${new Date(event.EventDateTimeStart).toLocaleDateString()}</div>
+            <h3 class="text-xl font-serif text-foreground mb-2">${event.EventName}</h3>
+            <p class="text-foreground/60 text-sm mb-2">${event.EventLocation || 'Location TBD'}</p>
+            <p class="text-foreground/60 text-sm mb-4">${event.EventDescription || ''}</p>
+            <a href="/portal/events" class="block w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-center py-2">
+              Register Now
+            </a>
+          </div>
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      console.error('Error loading events:', err);
+      document.getElementById('events-container').innerHTML = '<p class="text-foreground/60">Error loading events. Please try again later.</p>';
+    });
+</script>
+

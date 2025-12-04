@@ -1,0 +1,34 @@
+{
+  "name": "ella-rises-portal",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "knex": "^3.1.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.17.10",
+    "@types/node": "^22.16.5",
+    "@types/pg": "^8.11.10",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.32.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

@@ -1,0 +1,51 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/contact' }) %>
+<div class="min-h-screen bg-background">
+  <main class="pt-28 pb-20">
+    <div class="container mx-auto px-6">
+      <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 text-center">
+          Contact <span class="italic text-primary">Us</span>
+        </h1>
+        <p class="text-foreground/70 text-lg max-w-2xl mx-auto text-center mb-12">
+          We'd love to hear from you. Reach out to learn more about our programs or how you can support our mission.
+        </p>
+        <form id="contact-form" class="space-y-4">
+          <select name="option" class="w-full bg-ella-sage/30 border-ella-sage text-foreground/70 h-14 px-4 rounded-lg" required>
+            <option value="">Select an option</option>
+            <option value="general">General Inquiry</option>
+            <option value="volunteer">Volunteer Opportunities</option>
+            <option value="programs">Programs Information</option>
+            <option value="donation">Donation Questions</option>
+            <option value="partnership">Partnership Opportunities</option>
+          </select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" name="firstName" placeholder="First Name" class="bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
+            <input type="text" name="lastName" placeholder="Last Name" class="bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
+          </div>
+          <input type="email" name="email" placeholder="Email" class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
+          <textarea name="message" placeholder="Type your message here..." class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 min-h-[120px] resize-none px-4 py-3 rounded-lg" required></textarea>
+          <div class="pt-4">
+            <p class="text-foreground mb-3">Enter your phone number if you would like to receive reminder messages.</p>
+            <input type="tel" name="phone" placeholder="Phone" class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" />
+          </div>
+          <div class="flex justify-end pt-4">
+            <button type="submit" class="bg-ella-sage hover:bg-ella-sage/90 text-foreground px-10 py-6 rounded-full text-base font-medium">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+<script>
+  document.getElementById('contact-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Thank you for your message! We\'ll get back to you soon.');
+    e.target.reset();
+  });
+</script>
+

@@ -1,0 +1,24 @@
+<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/navbar', { currentPath: '/portal/profile' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">My Profile</h1>
+    <div id="profile-container" class="bg-card border border-border rounded-xl p-6">
+      <p class="text-foreground/60">Loading profile...</p>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  fetch('/api/auth/me')
+    .then(r => r.json())
+    .then(profile => {
+      document.getElementById('profile-container').innerHTML = `
+        <h2 class="text-2xl font-serif mb-4">${profile.ParticipantFirstName} ${profile.ParticipantLastName}</h2>
+        <p><strong>Email:</strong> ${profile.ParticipantEmail}</p>
+        <p><strong>City:</strong> ${profile.ParticipantCity || 'N/A'}</p>
+        <p><strong>State:</strong> ${profile.ParticipantState || 'N/A'}</p>
+      `;
+    });
+</script>
+

@@ -1,0 +1,296 @@
+<%- include('partials/head', { title: 'Donate - Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/donate' }) %>
+<div class="min-h-screen bg-background">
+  <!-- Hero Section -->
+  <section class="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="container mx-auto px-6 relative">
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-5 py-2.5 rounded-full mb-8 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+          Make a Difference
+        </div>
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 leading-tight">
+          Rise With <span class="italic text-primary">Ella</span>
+        </h1>
+        <p class="text-lg md:text-xl text-foreground/70 leading-relaxed">
+          Your generosity helps us continue empowering young women through transformative programs and opportunities.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Donation Section (Lovable-style) -->
+  <section class="py-12 md:py-20">
+    <div class="container mx-auto px-6">
+      <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-start">
+        <!-- Left side - Campaign card + progress -->
+        <div class="space-y-6">
+          <div class="bg-ella-blush rounded-2xl p-8 flex items-center justify-center">
+            <img src="/images/ella-rises-logo.png" alt="Ella Rises" class="w-64 h-auto" />
+          </div>
+          <div class="bg-card border border-border rounded-xl p-6 space-y-4">
+            <div class="flex items-center justify-between text-sm">
+              <span class="font-semibold text-foreground">$981</span>
+              <span class="text-muted-foreground text-xs">1% of $100,000 goal</span>
+            </div>
+            <div class="h-2 rounded-full bg-muted overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width: 1%;"></div>
+            </div>
+            <div class="space-y-2">
+              <h2 class="text-xl font-serif text-foreground">Empowering Futures Together</h2>
+              <p class="text-foreground/70 text-sm leading-relaxed">
+                We believe in the power of community and the brilliance of our youth. Your donation helps provide
+                STEAM education, arts programs, and mentorship opportunities to young women across our community.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right side - Amount selector + form -->
+        <div class="bg-card border border-border rounded-xl p-6 md:p-8 shadow-sm">
+          <form id="donation-form" class="space-y-6">
+            <!-- Frequency -->
+            <div class="space-y-3">
+              <p class="text-sm font-semibold text-foreground">Choose amount</p>
+              <div class="flex rounded-lg border border-border p-1 text-sm">
+                <button type="button" data-frequency="one-time" class="flex-1 py-2 px-3 rounded-md bg-foreground text-background font-medium">
+                  One-time
+                </button>
+                <button type="button" data-frequency="monthly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
+                  Monthly
+                </button>
+                <button type="button" data-frequency="quarterly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
+                  Quarterly
+                </button>
+                <button type="button" data-frequency="yearly" class="flex-1 py-2 px-3 rounded-md text-muted-foreground hover:text-foreground">
+                  Yearly
+                </button>
+              </div>
+            </div>
+
+            <!-- Preset amounts -->
+            <div class="grid grid-cols-3 gap-3">
+              <button type="button" data-amount="1000" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
+                $1,000
+              </button>
+              <button type="button" data-amount="500" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
+                $500
+              </button>
+              <button type="button" data-amount="250" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
+                $250
+              </button>
+              <button type="button" data-amount="100" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-foreground bg-foreground/5 text-foreground">
+                $100
+              </button>
+              <button type="button" data-amount="55" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
+                $55
+              </button>
+              <button type="button" data-amount="25" class="preset-amount py-3 px-4 rounded-lg border text-center text-sm font-medium border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground">
+                $25
+              </button>
+            </div>
+
+            <!-- Custom amount -->
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+              <input
+                type="text"
+                name="customAmount"
+                placeholder="Other"
+                class="w-full bg-background border border-border rounded-lg pl-8 pr-16 py-2 h-11 text-sm"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">USD</span>
+            </div>
+
+            <!-- Optional comment -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-foreground">Add note/comment (optional)</label>
+              <textarea
+                name="message"
+                rows="3"
+                class="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm"
+                placeholder="Share why you're donating or leave a message of support..."
+              ></textarea>
+            </div>
+
+            <!-- Continue button + status -->
+            <button
+              type="submit"
+              class="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium"
+              id="donate-continue"
+            >
+              Continue →
+            </button>
+            <p id="donation-status" class="text-sm mt-2 text-foreground/70"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Other Ways to Help -->
+  <section class="py-20 bg-muted/30">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-serif text-foreground mb-6">
+        Other Ways to Help
+      </h2>
+      <p class="text-foreground/70 max-w-2xl mx-auto mb-10 text-lg">
+        Beyond financial contributions, there are many ways to support our mission.
+      </p>
+      <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-left">
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Become a Mentor</h3>
+          <p class="text-foreground/60">Share your experience and guide young women on their journey.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Volunteer</h3>
+          <p class="text-foreground/60">Help us organize events and workshops in your community.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Spread the Word</h3>
+          <p class="text-foreground/60">Share our mission with friends, family, and on social media.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Other Ways to Help -->
+  <section class="py-20 bg-muted/30">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-serif text-foreground mb-6">
+        Other Ways to Help
+      </h2>
+      <p class="text-foreground/70 max-w-2xl mx-auto mb-10 text-lg">
+        Beyond financial contributions, there are many ways to support our mission.
+      </p>
+      <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-left">
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Become a Mentor</h3>
+          <p class="text-foreground/60">Share your experience and guide young women on their journey.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Volunteer</h3>
+          <p class="text-foreground/60">Help us organize events and workshops in your community.</p>
+        </div>
+        <div class="bg-card border-0 shadow-lg rounded-2xl p-6">
+          <h3 class="text-xl font-serif text-foreground mb-3">Spread the Word</h3>
+          <p class="text-foreground/60">Share our mission with friends, family, and on social media.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/footer-scripts') %>
+<script>
+  (function () {
+    const PRESET_BUTTONS = Array.from(document.querySelectorAll('.preset-amount'));
+    const customAmountInput = document.querySelector('input[name="customAmount"]');
+    const frequencyButtons = Array.from(document.querySelectorAll('[data-frequency]'));
+    const form = document.getElementById('donation-form');
+    const status = document.getElementById('donation-status');
+
+    let selectedAmount = 100; // default
+    let frequency = 'one-time';
+
+    function setActivePreset(button) {
+      PRESET_BUTTONS.forEach((btn) => {
+        btn.classList.remove('border-foreground', 'bg-foreground/5', 'text-foreground');
+        btn.classList.add('border-border', 'text-muted-foreground');
+      });
+      if (button) {
+        button.classList.remove('border-border', 'text-muted-foreground');
+        button.classList.add('border-foreground', 'bg-foreground/5', 'text-foreground');
+      }
+    }
+
+    PRESET_BUTTONS.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const amt = parseFloat(btn.getAttribute('data-amount') || '0');
+        if (!amt) return;
+        selectedAmount = amt;
+        if (customAmountInput) customAmountInput.value = '';
+        setActivePreset(btn);
+      });
+    });
+
+    if (customAmountInput) {
+      customAmountInput.addEventListener('input', () => {
+        const sanitized = customAmountInput.value.replace(/[^0-9.]/g, '');
+        customAmountInput.value = sanitized;
+        selectedAmount = NaN; // force using custom
+        setActivePreset(null);
+      });
+    }
+
+    frequencyButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        frequencyButtons.forEach((b) => {
+          b.classList.remove('bg-foreground', 'text-background');
+          b.classList.add('text-muted-foreground');
+        });
+        btn.classList.add('bg-foreground', 'text-background');
+        btn.classList.remove('text-muted-foreground');
+        frequency = btn.getAttribute('data-frequency') || 'one-time';
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!status) return;
+      status.textContent = 'Submitting donation...';
+
+      let actualAmount = selectedAmount;
+      if (customAmountInput && customAmountInput.value) {
+        actualAmount = parseFloat(customAmountInput.value);
+      }
+
+      if (!actualAmount || actualAmount <= 0 || isNaN(actualAmount)) {
+        status.textContent = 'Please select or enter a valid donation amount.';
+        return;
+      }
+
+      const formData = new FormData(form);
+      const payload = {
+        ParticipantID: null,
+        DonationAmountRaw: actualAmount,
+        DonationDateRaw: new Date().toISOString(),
+        Message: formData.get('message') || '',
+        Anonymous: false,
+        Frequency: frequency,
+      };
+
+      try {
+        const res = await fetch('/api/donations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.status === 401) {
+          status.textContent = 'Please log in to complete your donation. Redirecting to portal login...';
+          setTimeout(() => {
+            window.location.href = '/portal/auth';
+          }, 1500);
+          return;
+        }
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          status.textContent = error.message || 'There was a problem submitting your donation.';
+          return;
+        }
+
+        status.textContent = 'Thank you for your donation!';
+        form.reset();
+        // reset defaults
+        selectedAmount = 100;
+        setActivePreset(PRESET_BUTTONS.find((b) => b.getAttribute('data-amount') === '100') || null);
+      } catch (err) {
+        console.error(err);
+        status.textContent = 'An unexpected error occurred. Please try again.';
+      }
+    });
+  })();
+</script>

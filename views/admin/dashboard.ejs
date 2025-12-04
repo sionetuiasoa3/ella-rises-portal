@@ -1,0 +1,60 @@
+<%- include('partials/head', { title: 'Ella Rises' }) %>
+<%- include('partials/navbar', { currentPath: '/admin' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Admin Dashboard</h1>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h3 class="text-lg font-medium mb-2">Participants</h3>
+        <p class="text-3xl font-bold text-primary" id="participants-count">-</p>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h3 class="text-lg font-medium mb-2">Events</h3>
+        <p class="text-3xl font-bold text-primary" id="events-count">-</p>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h3 class="text-lg font-medium mb-2">Registrations</h3>
+        <p class="text-3xl font-bold text-primary" id="registrations-count">-</p>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h3 class="text-lg font-medium mb-2">Total Donations</h3>
+        <p class="text-3xl font-bold text-primary" id="donations-total">-</p>
+      </div>
+    </div>
+    <div class="bg-card border border-border rounded-xl p-6">
+      <h2 class="text-2xl font-serif mb-4">Survey Results</h2>
+      <canvas id="survey-chart"></canvas>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>
+  // Load dashboard stats
+  Promise.all([
+    fetch('/api/participants').then(r => r.json()),
+    fetch('/api/events').then(r => r.json()),
+    fetch('/api/donations/summary').then(r => r.json())
+  ]).then(([participants, events, donations]) => {
+    document.getElementById('participants-count').textContent = participants.length;
+    document.getElementById('events-count').textContent = events.length;
+    const total = donations.reduce((sum, d) => sum + parseFloat(d.TotalDonations || 0), 0);
+    document.getElementById('donations-total').textContent = '$' + total.toLocaleString();
+  });
+
+  // Chart.js for survey results
+  const ctx = document.getElementById('survey-chart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Satisfaction', 'Usefulness', 'Instructor', 'Recommendation'],
+        datasets: [{
+          label: 'Average Score',
+          data: [4.5, 4.3, 4.7, 4.6],
+          backgroundColor: 'rgba(206, 50, 91, 0.5)'
+        }]
+      }
+    });
+  }
+</script>
+
