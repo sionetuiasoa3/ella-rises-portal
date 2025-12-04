@@ -30,15 +30,41 @@
     </div>
   </section>
 
-  <!-- Gallery Section (placeholder) -->
+  <!-- Gallery Section -->
   <section class="py-20">
     <div class="container mx-auto px-6">
-      <h2 class="text-3xl md:text-5xl font-serif text-foreground text-center mb-12">Our Events</h2>
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-4 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Moments That Inspire
+        </div>
+        <h2 class="text-3xl md:text-5xl font-serif text-foreground">Our <span class="italic text-primary">Events</span></h2>
+      </div>
       <div class="grid md:grid-cols-3 gap-6">
-        <!-- Placeholder for event images -->
-        <div class="aspect-video bg-muted rounded-2xl"></div>
-        <div class="aspect-video bg-muted rounded-2xl"></div>
-        <div class="aspect-video bg-muted rounded-2xl"></div>
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <img src="/images/folklorico-dancer-1.png" alt="Traditional Mexican folk dance performance" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm font-medium">Cultural Heritage</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <img src="/images/animation-workshop.jpg" alt="Animation workshop with participants" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm font-medium">Creative Workshops</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <img src="/images/byu-group-photo.jpg" alt="Ella Rises group at BYU" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm font-medium">Campus Tours</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -67,21 +93,31 @@
           </a>
         </div>
         <div class="relative">
-          <img src="/images/group-photo.jpeg" alt="Ella Rises participants" class="aspect-[4/3] w-full object-cover object-[center_100%] rounded-3xl shadow-xl" />
+          <img src="/images/summer-summit-group.jpg" alt="Ella Rises participants at Summer Summit" class="aspect-[4/3] w-full object-cover object-center rounded-3xl shadow-xl" />
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Workshop Highlight -->
+  <!-- Cultural Heritage & Community Section -->
   <section class="py-12 md:py-16">
     <div class="container mx-auto px-6">
-      <div class="relative rounded-3xl overflow-hidden shadow-2xl">
-        <img src="/images/workshop-large.jpg" alt="Girls participating in an Ella Rises workshop" class="w-full h-[300px] md:h-[450px] object-cover" />
-        <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/60 via-transparent to-transparent"></div>
-        <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
-          <p class="text-sm md:text-base font-medium text-ella-warm-cream/90 mb-2">Summer Summit 2024</p>
-          <h3 class="text-2xl md:text-3xl font-serif">100+ Girls. One Vision.</h3>
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+          <img src="/images/folklorico-dancer-2.png" alt="Traditional Mexican folk dance" class="w-full h-[300px] md:h-[400px] object-cover object-center" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent"></div>
+          <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
+            <p class="text-sm md:text-base font-medium text-ella-warm-cream/90 mb-2">Celebrating Heritage</p>
+            <h3 class="text-2xl md:text-3xl font-serif">Cultural <span class="italic">Pride</span></h3>
+          </div>
+        </div>
+        <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+          <img src="/images/group-walking.jpg" alt="Ella Rises participants walking together" class="w-full h-[300px] md:h-[400px] object-cover object-center" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent"></div>
+          <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
+            <p class="text-sm md:text-base font-medium text-ella-warm-cream/90 mb-2">Building Community</p>
+            <h3 class="text-2xl md:text-3xl font-serif">Together We <span class="italic">Rise</span></h3>
+          </div>
         </div>
       </div>
     </div>

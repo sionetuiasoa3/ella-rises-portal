@@ -73,7 +73,7 @@
   <!-- Heritage Section -->
   <section class="py-20 bg-muted/30">
     <div class="container mx-auto px-6">
-      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center mb-12">
         <div class="order-2 md:order-1">
           <img 
             src="/images/mariachi-performance.jpeg" 
@@ -91,6 +91,23 @@
           <p class="text-foreground/70 mb-8 leading-relaxed">
             Through mariachi, folklorico, and traditional arts workshops, young women connect with their roots while building confidence and performance skills.
           </p>
+        </div>
+      </div>
+      <!-- Folklorico Dance Gallery -->
+      <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg">
+          <img 
+            src="/images/folklorico-dancer-1.png" 
+            alt="Traditional Mexican folk dance performance" 
+            class="aspect-[4/3] w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg">
+          <img 
+            src="/images/folklorico-dancer-2.png" 
+            alt="Traditional Mexican folk dance in motion" 
+            class="aspect-[4/3] w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
       </div>
     </div>
@@ -260,6 +277,50 @@
     </div>
   </section>
 
+  <!-- Community Section -->
+  <section class="py-20 bg-gradient-to-br from-ella-cream/30 to-ella-blush/20">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-6 text-sm font-medium">
+          <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Our Community
+        </div>
+        <h2 class="text-3xl md:text-5xl font-serif text-foreground mb-4">Building <span class="italic text-primary">Connections</span></h2>
+        <p class="text-foreground/70 max-w-2xl mx-auto text-lg">
+          Together we create a supportive community where young women can grow, learn, and thrive.
+        </p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl">
+          <img 
+            src="/images/byu-group-photo.jpg" 
+            alt="Ella Rises participants at BYU" 
+            class="aspect-[4/3] w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/60 via-transparent to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-sm font-medium mb-1">Campus Tours</p>
+              <p class="text-lg font-serif">Exploring Higher Education</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl">
+          <img 
+            src="/images/group-walking.jpg" 
+            alt="Ella Rises community walking together" 
+            class="aspect-[4/3] w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/60 via-transparent to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-sm font-medium mb-1">Community Events</p>
+              <p class="text-lg font-serif">Walking Together</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Programs Section -->
   <section class="py-20">
     <div class="container mx-auto px-6">
@@ -274,26 +335,41 @@
         </p>
       </div>
       <div class="grid md:grid-cols-3 gap-8">
-        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
-          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group">
+          <div class="aspect-video overflow-hidden">
+            <img src="/images/animation-workshop.jpg" alt="Creative animation workshop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
-          <h3 class="text-xl font-serif text-foreground mb-3">Mentorship</h3>
-          <p class="text-foreground/60 leading-relaxed">Connect with inspiring women mentors who guide, support, and encourage personal growth.</p>
+          <div class="p-8">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground mb-3">Creative Workshops</h3>
+            <p class="text-foreground/60 leading-relaxed">Hands-on learning experiences in animation, art, and digital media that spark creativity and innovation.</p>
+          </div>
         </div>
-        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
-          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group">
+          <div class="aspect-video overflow-hidden">
+            <img src="/images/mentorship-talk.jpg" alt="Mentorship session" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
-          <h3 class="text-xl font-serif text-foreground mb-3">Workshops</h3>
-          <p class="text-foreground/60 leading-relaxed">Interactive sessions on leadership, creativity, wellness, and essential life skills.</p>
+          <div class="p-8">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground mb-3">Mentorship</h3>
+            <p class="text-foreground/60 leading-relaxed">Connect with inspiring women mentors who guide, support, and encourage personal growth.</p>
+          </div>
         </div>
-        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group p-8">
-          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <div class="bg-card border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group">
+          <div class="aspect-video overflow-hidden">
+            <img src="/images/community-event.jpg" alt="Community event gathering" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
-          <h3 class="text-xl font-serif text-foreground mb-3">Community Events</h3>
-          <p class="text-foreground/60 leading-relaxed">Fun gatherings that build friendships and celebrate the achievements of our girls.</p>
+          <div class="p-8">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground mb-3">Community Events</h3>
+            <p class="text-foreground/60 leading-relaxed">Fun gatherings that build friendships and celebrate the achievements of our girls.</p>
+          </div>
         </div>
       </div>
     </div>

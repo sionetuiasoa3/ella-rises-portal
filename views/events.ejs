@@ -65,12 +65,41 @@
         container.innerHTML = '<p class="text-foreground/60">No upcoming events at this time.</p>';
         return;
       }
-      container.innerHTML = events.map(event => `
+      // Fallback event images to use when events don't have photos
+      const fallbackImages = [
+        '/images/workshop-classroom.jpg',
+        '/images/event-workshop-1.jpeg',
+        '/images/event-workshop-2.jpeg',
+        '/images/event-participants-1.jpeg',
+        '/images/event-participants-2.jpeg',
+        '/images/event-participants-3.jpeg',
+        '/images/summer-summit-event.jpg',
+        '/images/event-audience.jpg',
+        '/images/art-workshop.jpg',
+        '/images/stem-workshop.jpg',
+        '/images/community-event.jpg'
+      ];
+      
+      container.innerHTML = events.map((event, index) => {
+        // Use EventTemplatePhotoPath if available, otherwise use fallback image
+        let imagePath = null;
+        if (event.EventTemplatePhotoPath) {
+          imagePath = event.EventTemplatePhotoPath.startsWith('/') 
+            ? event.EventTemplatePhotoPath 
+            : `/images/${event.EventTemplatePhotoPath}`;
+        } else {
+          // Use a fallback image based on event index
+          imagePath = fallbackImages[index % fallbackImages.length];
+        }
+        
+        const imageHtml = imagePath 
+          ? `<img src="${imagePath}" alt="${event.EventName}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />`
+          : `<div class="w-full h-full bg-muted flex items-center justify-center"><span class="text-foreground/40">Event Image</span></div>`;
+        
+        return `
         <div class="bg-card border-0 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 rounded-2xl">
           <div class="aspect-video overflow-hidden">
-            <div class="w-full h-full bg-muted flex items-center justify-center">
-              <span class="text-foreground/40">Event Image</span>
-            </div>
+            ${imageHtml}
           </div>
           <div class="p-6">
             <div class="text-sm text-primary font-semibold mb-2">${new Date(event.EventDateTimeStart).toLocaleDateString()}</div>
@@ -82,7 +111,8 @@
             </a>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     })
     .catch(err => {
       console.error('Error loading events:', err);
