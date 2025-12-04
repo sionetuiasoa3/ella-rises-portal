@@ -10,6 +10,11 @@
     <main class="flex-1 pt-28 md:pt-32">
       <section class="py-16 px-4">
         <div class="max-w-xl mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-lg p-8 space-y-6">
+          <!-- Back Button -->
+          <a href="/account/start" class="inline-flex items-center gap-2 text-foreground/70 hover:text-primary mb-4 text-sm transition-colors">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back
+          </a>
           <% if (status === 'missing_email') { %>
             <h1 class="text-2xl md:text-3xl font-serif text-ella-deep mb-2">
               We need your email
@@ -22,21 +27,29 @@
             </a>
           <% } else if (status === 'not_found') { %>
             <h1 class="text-2xl md:text-3xl font-serif text-ella-deep mb-2">
-              We didn’t find an account with that email
+              We didn't find an account with that email
             </h1>
             <p class="text-gray-600 mb-4">
-              We don’t see an existing participant with
+              We don't see an existing participant with
               <span class="font-semibold"><%= email %></span>.
             </p>
             <p class="text-gray-600 mb-6">
-              You can create a new participant account and get started with Ella Rises.
+              If you're new to Ella Rises, you can create a new participant account.
             </p>
-            <a
-              href="/portal/auth?signup=1&email=<%= encodeURIComponent(email) %>"
-              class="inline-flex items-center px-5 py-2.5 rounded-full bg-ella-accent text-white font-semibold hover:bg-ella-accent/90"
-            >
-              Create a new account
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <a
+                href="/portal/auth?signup=true&email=<%= encodeURIComponent(email) %>"
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+              >
+                Create a new account
+              </a>
+              <a
+                href="/account/start"
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
+              >
+                Try a different email
+              </a>
+            </div>
           <% } else if (status === 'has_password') { %>
             <h1 class="text-2xl md:text-3xl font-serif text-ella-deep mb-2">
               You already have an account
@@ -61,15 +74,21 @@
             </h1>
             <p class="text-gray-600 mb-4">
               We found your participant record for
-              <span class="font-semibold"><%= email %></span>, but you don’t have a password set yet.
+              <span class="font-semibold"><%= email %></span>, but you don't have a password set yet.
             </p>
             <p class="text-gray-600 mb-6">
-              We’ve sent an email with a secure link to create your password. The link will expire after about an hour.
+              We've sent an email with a secure link to create your password. The link will expire after about an hour.
             </p>
-            <p class="text-sm text-gray-500">
-              If you don’t see the email after a few minutes, please check your spam or junk folder, or try again with
+            <p class="text-sm text-gray-500 mb-6">
+              If you don't see the email after a few minutes, please check your spam or junk folder, or try again with
               a different email address.
             </p>
+            <a
+              href="/account/start"
+              class="inline-flex items-center px-5 py-2.5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
+            >
+              Try a different email
+            </a>
           <% } else { %>
             <h1 class="text-2xl md:text-3xl font-serif text-ella-deep mb-2">
               Something went wrong
