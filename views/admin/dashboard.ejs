@@ -1,86 +1,134 @@
 <%- include('../partials/head', { title: 'Ella Rises' }) %>
 <%- include('../partials/navbar', { currentPath: '/admin' }) %>
-<div class="min-h-screen bg-background pt-28 pb-20">
-  <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Admin Dashboard</h1>
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h3 class="text-lg font-medium mb-2">Participants</h3>
-        <p class="text-3xl font-bold text-primary" id="participants-count">-</p>
+<div class="min-h-screen pt-28 pb-20 relative overflow-hidden">
+  <!-- Enhanced warm gradient background with green accents -->
+  <div class="absolute inset-0 bg-gradient-to-br from-ella-cream via-ella-blush/40 to-ella-warm-cream"></div>
+  
+  <!-- Background decorative elements with green incorporated -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <!-- Top right - stronger sage green accent -->
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-ella-sage/20 rounded-full blur-3xl"></div>
+    <!-- Bottom left - pink accent -->
+    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-ella-pink/15 rounded-full blur-3xl"></div>
+    <!-- Center - sage green blend -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-ella-sage/12 rounded-full blur-3xl"></div>
+    <!-- Top left - subtle green-purple blend -->
+    <div class="absolute top-20 left-10 w-[300px] h-[300px] bg-gradient-to-br from-ella-sage/15 to-ella-purple/8 rounded-full blur-3xl"></div>
+    <!-- Bottom right - green-coral blend -->
+    <div class="absolute bottom-20 right-10 w-[400px] h-[400px] bg-gradient-to-br from-ella-sage/12 to-ella-coral/8 rounded-full blur-3xl"></div>
+    <!-- Additional green accent in middle right -->
+    <div class="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-ella-sage/10 rounded-full blur-3xl"></div>
+    
+    <!-- Subtle pattern overlay -->
+    <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle at 2px 2px, hsl(150 4% 23%) 1px, transparent 0); background-size: 40px 40px;"></div>
+  </div>
+
+  <div class="container mx-auto px-6 relative z-10">
+    <!-- Header Section with enhanced styling -->
+    <div class="mb-10">
+      <div class="inline-flex items-center gap-2 bg-ella-sage/40 border border-ella-sage/30 text-foreground/80 px-5 py-3 rounded-full mb-6 text-base md:text-lg font-medium">
+        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        Admin Dashboard
       </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h3 class="text-lg font-medium mb-2">Events</h3>
-        <p class="text-3xl font-bold text-primary" id="events-count">-</p>
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-2">Admin Dashboard</h1>
+      <p class="text-foreground/60 text-lg">Manage participants, events, and view analytics.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-ella-sage/10 rounded-full -mr-10 -mt-10 group-hover:bg-ella-sage/15 transition-colors"></div>
+        <div class="relative">
+          <h3 class="text-lg font-medium mb-2 text-foreground/70">Participants</h3>
+          <p class="text-3xl font-bold text-primary" id="participants-count">-</p>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h3 class="text-lg font-medium mb-2">Registrations</h3>
-        <p class="text-3xl font-bold text-primary" id="registrations-count">-</p>
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-ella-pink/10 rounded-full -mr-10 -mt-10 group-hover:bg-ella-pink/15 transition-colors"></div>
+        <div class="relative">
+          <h3 class="text-lg font-medium mb-2 text-foreground/70">Events</h3>
+          <p class="text-3xl font-bold text-primary" id="events-count">-</p>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-xl p-6">
-        <h3 class="text-lg font-medium mb-2">Total Donations</h3>
-        <p class="text-3xl font-bold text-primary" id="donations-total">-</p>
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-ella-peach/10 rounded-full -mr-10 -mt-10 group-hover:bg-ella-peach/15 transition-colors"></div>
+        <div class="relative">
+          <h3 class="text-lg font-medium mb-2 text-foreground/70">Registrations</h3>
+          <p class="text-3xl font-bold text-primary" id="registrations-count">-</p>
+        </div>
+      </div>
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-ella-sage/10 rounded-full -mr-10 -mt-10 group-hover:bg-ella-sage/15 transition-colors"></div>
+        <div class="relative">
+          <h3 class="text-lg font-medium mb-2 text-foreground/70">Total Donations</h3>
+          <p class="text-3xl font-bold text-primary" id="donations-total">-</p>
+        </div>
       </div>
     </div>
     
     <!-- Quick Actions -->
-    <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
       <!-- Manage Participants -->
-      <div class="bg-card border border-border rounded-xl p-6">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="bg-primary/10 p-3 rounded-lg">
-            <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-ella-sage/5 rounded-full -mr-16 -mt-16 group-hover:bg-ella-sage/10 transition-colors"></div>
+        <div class="relative">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="bg-ella-sage/20 p-3 rounded-lg">
+              <svg class="h-6 w-6 text-ella-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground">Manage Participants</h3>
           </div>
-          <h3 class="text-xl font-serif">Manage Participants</h3>
-        </div>
-        <p class="text-foreground/60 mb-4">View, edit, or delete participant accounts. Manage roles and permissions.</p>
-        <div class="flex flex-wrap gap-3">
-          <a href="/admin/participants" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-            </svg>
-            View All
-          </a>
-          <button onclick="openAddParticipantModal()" class="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add New
-          </button>
+          <p class="text-foreground/60 mb-4">View, edit, or delete participant accounts. Manage roles and permissions.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/admin/participants" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-all shadow-md hover:shadow-lg">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              View All
+            </a>
+            <button onclick="openAddParticipantModal()" class="inline-flex items-center gap-2 bg-ella-sage hover:bg-ella-sage/90 text-ella-charcoal rounded-lg px-4 py-2 font-medium transition-all shadow-md hover:shadow-lg">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add New
+            </button>
+          </div>
         </div>
       </div>
       
       <!-- Manage Events -->
-      <div class="bg-card border border-border rounded-xl p-6">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="bg-primary/10 p-3 rounded-lg">
-            <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-ella-pink/5 rounded-full -mr-16 -mt-16 group-hover:bg-ella-pink/10 transition-colors"></div>
+        <div class="relative">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="bg-ella-pink/20 p-3 rounded-lg">
+              <svg class="h-6 w-6 text-ella-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground">Manage Events</h3>
           </div>
-          <h3 class="text-xl font-serif">Manage Events</h3>
-        </div>
-        <p class="text-foreground/60 mb-4">Create, edit, or delete events. View registrations and manage capacity.</p>
-        <div class="flex flex-wrap gap-3">
-          <a href="/admin/events" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-            </svg>
-            View All
-          </a>
-          <button onclick="openAddEventModal()" class="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-4 py-2 font-medium transition-colors">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add New
-          </button>
-          <a href="/admin/event-templates" class="inline-flex items-center gap-2 border border-border hover:bg-muted rounded-lg px-4 py-2 font-medium transition-colors">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
-            </svg>
-            Templates
-          </a>
+          <p class="text-foreground/60 mb-4">Create, edit, or delete events. View registrations and manage capacity.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/admin/events" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-all shadow-md hover:shadow-lg">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              View All
+            </a>
+            <button onclick="openAddEventModal()" class="inline-flex items-center gap-2 bg-ella-sage hover:bg-ella-sage/90 text-ella-charcoal rounded-lg px-4 py-2 font-medium transition-all shadow-md hover:shadow-lg">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add New
+            </button>
+            <a href="/admin/event-templates" class="inline-flex items-center gap-2 bg-white/80 border border-ella-charcoal/10 hover:bg-white rounded-lg px-4 py-2 font-medium transition-all shadow-sm hover:shadow-md">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+              </svg>
+              Templates
+            </a>
+          </div>
         </div>
       </div>
     </div>
