@@ -97,6 +97,8 @@ router.post('/', requireAuth, async (req, res, next) => {
       // If not provided, use logged-in user's ID
       if (req.session.user.role === 'user' || req.session.user.role === 'participant') {
         participantId = req.session.user.participantId;
+      } else if (req.session.user.role === 'admin') {
+        return res.status(400).json({ message: 'Admins cannot register for events' });
       } else {
         return res.status(400).json({ message: 'ParticipantID is required' });
       }

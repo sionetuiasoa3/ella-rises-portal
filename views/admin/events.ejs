@@ -42,11 +42,39 @@
           class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
           onchange="filterEvents()">
       </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Sort by date</label>
+        <select id="sort-order" onchange="filterEvents()" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </div>
       <button onclick="clearFilters()" class="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-foreground/70">
         Clear All
       </button>
     </div>
-    <p class="text-sm text-foreground/50 mb-4" id="search-results-count"></p>
+    
+    <!-- Status Toggle Buttons -->
+    <div class="mb-4">
+      <p class="text-sm text-foreground/50 mb-3" id="search-results-count"></p>
+      <div class="flex gap-2">
+        <button 
+          id="btn-upcoming" 
+          onclick="setStatusFilter('upcoming')" 
+          class="px-4 py-2 rounded-full font-medium text-sm transition-colors bg-primary text-white"
+        >
+          Upcoming
+        </button>
+        <button 
+          id="btn-completed" 
+          onclick="setStatusFilter('completed')" 
+          class="px-4 py-2 rounded-full font-medium text-sm transition-colors bg-muted text-foreground/70 hover:bg-muted/80"
+        >
+          Completed
+        </button>
+      </div>
+    </div>
     <div id="events-container" class="bg-card border border-border rounded-xl overflow-hidden">
       <p class="text-foreground/60 p-6">Loading events...</p>
     </div>
@@ -75,9 +103,9 @@
         <div><label class="block text-sm font-medium mb-1">Start Date/Time *</label><input type="datetime-local" name="EventDateTimeStart" id="e-start" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
         <div><label class="block text-sm font-medium mb-1">End Date/Time</label><input type="datetime-local" name="EventDateTimeEnd" id="e-end" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       </div>
-      <div><label class="block text-sm font-medium mb-1">Location</label><input type="text" name="EventLocation" id="e-location" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      <div><label class="block text-sm font-medium mb-1">Location *</label><input type="text" name="EventLocation" id="e-location" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium mb-1">Capacity</label><input type="number" name="EventCapacity" id="e-capacity" min="1" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Capacity *</label><input type="number" name="EventCapacity" id="e-capacity" min="1" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
         <div><label class="block text-sm font-medium mb-1">Registration Deadline</label><input type="datetime-local" name="EventRegistrationDeadline" id="e-deadline" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       </div>
       <div class="flex gap-3 pt-2">
@@ -107,6 +135,24 @@
   let editingEventId = null;
   let deleteId = null;
   let selectedTemplate = '';
+  let statusFilter = 'upcoming'; // Default to upcoming
+
+  function setStatusFilter(status) {
+    statusFilter = status;
+    // Update button styles
+    const btnUpcoming = document.getElementById('btn-upcoming');
+    const btnCompleted = document.getElementById('btn-completed');
+    
+    if (status === 'upcoming') {
+      btnUpcoming.className = 'px-4 py-2 rounded-full font-medium text-sm transition-colors bg-primary text-white';
+      btnCompleted.className = 'px-4 py-2 rounded-full font-medium text-sm transition-colors bg-muted text-foreground/70 hover:bg-muted/80';
+    } else {
+      btnUpcoming.className = 'px-4 py-2 rounded-full font-medium text-sm transition-colors bg-muted text-foreground/70 hover:bg-muted/80';
+      btnCompleted.className = 'px-4 py-2 rounded-full font-medium text-sm transition-colors bg-primary text-white';
+    }
+    
+    filterEvents();
+  }
 
   function getQueryParam(name) {
     const params = new URLSearchParams(window.location.search);
@@ -132,8 +178,8 @@
       }
       filterEvents();
     } else {
-      renderEvents(events);
-      updateResultsCount(events.length, events.length);
+      // Apply default filter (upcoming)
+      filterEvents();
     }
   });
 
@@ -154,12 +200,21 @@
     const searchName = document.getElementById('search-name').value.toLowerCase().trim();
     const dateFrom = document.getElementById('search-date-from').value;
     const dateTo = document.getElementById('search-date-to').value;
+    const sortOrder = document.getElementById('sort-order').value;
     
     let filtered = eventsData;
+    const now = new Date();
     
     // Filter by template
     if (selectedTemplate) {
       filtered = filtered.filter(e => e.EventName === selectedTemplate);
+    }
+    
+    // Filter by status (upcoming/completed) - uses button toggle
+    if (statusFilter === 'upcoming') {
+      filtered = filtered.filter(e => new Date(e.EventDateTimeStart) >= now);
+    } else if (statusFilter === 'completed') {
+      filtered = filtered.filter(e => new Date(e.EventDateTimeStart) < now);
     }
     
     // Filter by search name
@@ -188,6 +243,13 @@
       });
     }
     
+    // Sort by date
+    filtered = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.EventDateTimeStart);
+      const dateB = new Date(b.EventDateTimeStart);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
     renderEvents(filtered);
     
     // Calculate base count based on template filter
@@ -203,18 +265,27 @@
     document.getElementById('search-name').value = '';
     document.getElementById('search-date-from').value = '';
     document.getElementById('search-date-to').value = '';
-    renderEvents(eventsData);
+    document.getElementById('sort-order').value = 'newest';
+    // Reset to upcoming
+    setStatusFilter('upcoming');
+    // Sort by newest first (default)
+    const sorted = [...eventsData].sort((a, b) => {
+      const dateA = new Date(a.EventDateTimeStart);
+      const dateB = new Date(b.EventDateTimeStart);
+      return dateB - dateA;
+    });
+    renderEvents(sorted);
     updateResultsCount(eventsData.length, eventsData.length);
   }
 
   function updateResultsCount(shown, total) {
     const countEl = document.getElementById('search-results-count');
-    const templateText = selectedTemplate ? ` for "${selectedTemplate}"` : '';
-    if (shown === total) {
-      countEl.textContent = `Showing all ${total} events${templateText}`;
-    } else {
-      countEl.textContent = `Showing ${shown} of ${total} events${templateText}`;
-    }
+    const now = new Date();
+    const upcomingCount = eventsData.filter(e => new Date(e.EventDateTimeStart) >= now).length;
+    const completedCount = eventsData.filter(e => new Date(e.EventDateTimeStart) < now).length;
+    const statusText = statusFilter === 'upcoming' ? 'upcoming' : 'completed';
+    
+    countEl.textContent = `Showing ${shown} ${statusText} events (upcoming: ${upcomingCount} | completed: ${completedCount})`;
   }
 
   function renderEvents(events) {
