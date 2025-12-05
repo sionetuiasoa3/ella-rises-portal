@@ -106,6 +106,7 @@
   </div>
 </div>
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   let participantsData = [];
@@ -285,7 +286,7 @@ async function openEditParticipantModal(participantId) {
       // Fetch the full participant data from the API
       const response = await fetch(`/api/participants/${participantId}`);
       if (!response.ok) {
-        alert('Error loading participant data');
+        showNotification('Error loading participant data', 'error', 'Error');
         return;
       }
       const p = await response.json();
@@ -319,7 +320,7 @@ async function openEditParticipantModal(participantId) {
       document.getElementById('add-participant-modal').classList.add('flex');
     } catch (error) {
       console.error('Error loading participant:', error);
-      alert('Error loading participant data');
+      showNotification('Error loading participant data', 'error', 'Error');
     }
   }
 
@@ -365,15 +366,15 @@ async function openEditParticipantModal(participantId) {
     try {
       const response = await fetch(`/api/participants/${deleteId}`, { method: 'DELETE' });
       if (response.ok) {
-        alert('Participant deleted successfully!');
+        showNotification('Participant deleted successfully!', 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to delete'));
+        showNotification('Error: ' + (error.message || 'Failed to delete'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error deleting participant');
+      showNotification('Error deleting participant', 'error', 'Error');
     }
   }
 
@@ -392,7 +393,7 @@ async function openEditParticipantModal(participantId) {
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       if (!response.ok) {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to save'));
+        showNotification('Error: ' + (error.message || 'Failed to save'), 'error', 'Error');
         return;
       }
       
@@ -411,16 +412,16 @@ async function openEditParticipantModal(participantId) {
         });
         
         if (!photoResponse.ok) {
-          alert('Participant saved, but photo upload failed.');
+          showNotification('Participant saved, but photo upload failed.', 'warning', 'Partial Success');
         }
       }
       
-      alert(isEditing ? 'Participant updated!' : 'Participant added!');
+      showNotification(isEditing ? 'Participant updated!' : 'Participant added!', 'success', 'Success');
       closeAddParticipantModal();
       location.reload();
     } catch (err) { 
       console.error(err);
-      alert('Error saving participant'); 
+      showNotification('Error saving participant', 'error', 'Error'); 
     }
   });
 

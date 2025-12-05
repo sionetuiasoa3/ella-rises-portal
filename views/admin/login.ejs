@@ -24,6 +24,7 @@
     </div>
   </div>
 </div>
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
@@ -42,10 +43,10 @@
         window.location.href = '/admin';
       } else {
         const error = await response.json();
-        alert(error.message || 'Login failed');
+        showNotification(error.message || 'Login failed', 'error', 'Login Failed');
       }
     } catch (err) {
-      alert('An error occurred. Please try again.');
+      showNotification('An error occurred. Please try again.', 'error', 'Error');
     }
   });
 </script>

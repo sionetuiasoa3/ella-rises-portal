@@ -47,6 +47,7 @@
     </div>
   </div>
 </div>
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   const eventId = <%= eventId %>;
@@ -236,7 +237,7 @@
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to update attendance. Please try again.');
+      showNotification('Failed to update attendance. Please try again.', 'error', 'Error');
     }
   }
 
@@ -245,8 +246,12 @@
       ? 'Mark all participants as attended?' 
       : 'Mark all participants as did not attend?';
     
-    if (!confirm(confirmMsg)) return;
-    
+    showConfirmation(confirmMsg, async () => {
+      await performBulkAttendanceUpdate(attended);
+    }, 'Update Attendance');
+  }
+  
+  async function performBulkAttendanceUpdate(attended) {
     try {
       for (const registration of registrationsData) {
         await fetch(`/api/registrations/${registration.RegistrationID}/attendance`, {
@@ -259,10 +264,10 @@
       
       renderRegistrations();
       renderStats();
-      alert('All attendance records updated!');
+      showNotification('All attendance records updated!', 'success', 'Success');
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to update some records. Please refresh and try again.');
+        showNotification('Failed to update some records. Please refresh and try again.', 'error', 'Error');
     }
   }
 

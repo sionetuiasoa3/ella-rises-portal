@@ -140,6 +140,7 @@
     </div>
   </div>
 </div>
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   document.getElementById('survey-form').addEventListener('submit', async (e) => {
@@ -172,18 +173,18 @@
       });
       
       if (response.ok) {
-        alert('Thank you for your feedback!');
+        showNotification('Thank you for your feedback!', 'success', 'Survey Submitted');
         window.location.href = '/portal/dashboard';
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to submit survey'));
+        showNotification('Error: ' + (error.message || 'Failed to submit survey'), 'error', 'Error');
         submitBtn.disabled = false;
         btnText.textContent = 'Submit Survey';
         btnSpinner.classList.add('hidden');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      showNotification('An error occurred. Please try again.', 'error', 'Error');
       submitBtn.disabled = false;
       btnText.textContent = 'Submit Survey';
       btnSpinner.classList.add('hidden');

@@ -128,6 +128,7 @@
   </div>
 </div>
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   let eventsData = [];
@@ -394,15 +395,15 @@
     try {
       const response = await fetch(`/api/events/${deleteId}`, { method: 'DELETE' });
       if (response.ok) {
-        alert('Event deleted successfully!');
+        showNotification('Event deleted successfully!', 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to delete'));
+        showNotification('Error: ' + (error.message || 'Failed to delete'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error deleting event');
+      showNotification('Error deleting event', 'error', 'Error');
     }
   }
 
@@ -419,14 +420,16 @@
     try {
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       if (response.ok) {
-        alert(isEditing ? 'Event updated!' : 'Event added!');
+        showNotification(isEditing ? 'Event updated!' : 'Event added!', 'success', 'Success');
         closeAddEventModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to save'));
+        showNotification('Error: ' + (error.message || 'Failed to save'), 'error', 'Error');
       }
-    } catch (err) { alert('Error saving event'); }
+    } catch (err) { 
+      showNotification('Error saving event', 'error', 'Error'); 
+    }
   });
 
   document.getElementById('add-event-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddEventModal(); });

@@ -103,6 +103,7 @@
   </div>
 </div>
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   let surveysData = [];
@@ -274,15 +275,15 @@
     try {
       const response = await fetch(`/api/surveys/${deleteSurveyId}`, { method: 'DELETE' });
       if (response.ok) {
-        alert('Survey deleted successfully!');
+        showNotification('Survey deleted successfully!', 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to delete'));
+        showNotification('Error: ' + (error.message || 'Failed to delete'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error deleting survey');
+      showNotification('Error deleting survey', 'error', 'Error');
     }
   }
 
@@ -305,15 +306,15 @@
       });
       
       if (response.ok) {
-        alert('Survey updated successfully!');
+        showNotification('Survey updated successfully!', 'success', 'Success');
         closeEditModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to update'));
+        showNotification('Error: ' + (error.message || 'Failed to update'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error updating survey');
+      showNotification('Error updating survey', 'error', 'Error');
     }
   });
 

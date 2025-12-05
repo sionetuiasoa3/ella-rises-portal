@@ -161,6 +161,7 @@
   </div>
 </div>
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   let templatesData = [];
@@ -365,15 +366,15 @@
     try {
       const response = await fetch(`/api/event-templates/${encodeURIComponent(deleteTemplateName)}`, { method: 'DELETE' });
       if (response.ok) {
-        alert('Template deleted successfully!');
+        showNotification('Template deleted successfully!', 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to delete. Make sure no events are using this template.'));
+        showNotification('Error: ' + (error.message || 'Failed to delete. Make sure no events are using this template.'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error deleting template');
+      showNotification('Error deleting template', 'error', 'Error');
     }
   }
 
@@ -390,7 +391,7 @@
     
     // For new templates, require a photo
     if (!isEditing && !pendingPhotoFile && !currentTemplatePhoto) {
-      alert('Please upload a photo for the template');
+      showNotification('Please upload a photo for the template', 'warning', 'Photo Required');
       return;
     }
     
@@ -402,7 +403,7 @@
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       if (!response.ok) {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to save'));
+        showNotification('Error: ' + (error.message || 'Failed to save'), 'error', 'Error');
         return;
       }
       
@@ -420,7 +421,7 @@
         });
         
         if (!photoResponse.ok) {
-          alert('Template saved but photo upload failed');
+          showNotification('Template saved but photo upload failed', 'warning', 'Partial Success');
         }
       }
       // If editing and photo was removed (currentTemplatePhoto is null but was originally set)
@@ -431,12 +432,12 @@
         }
       }
       
-      alert(isEditing ? 'Template updated!' : 'Template added!');
+      showNotification(isEditing ? 'Template updated!' : 'Template added!', 'success', 'Success');
       closeAddTemplateModal();
       location.reload();
     } catch (err) { 
       console.error(err);
-      alert('Error saving template'); 
+      showNotification('Error saving template', 'error', 'Error'); 
     }
   });
 
@@ -446,7 +447,7 @@
   document.getElementById('create-event-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentCreateTemplate) {
-      alert('No template selected');
+      showNotification('No template selected', 'warning', 'Selection Required');
       return;
     }
 
@@ -458,7 +459,7 @@
     const EventRegistrationDeadline = document.getElementById('event-deadline').value;
 
     if (!EventDateTimeStart) {
-      alert('Start date/time is required');
+      showNotification('Start date/time is required', 'warning', 'Validation Error');
       return;
     }
 
@@ -483,12 +484,12 @@
         throw new Error(err.message || 'Failed to create event');
       }
 
-      alert('Event created!');
+      showNotification('Event created!', 'success', 'Success');
       closeCreateEventModal();
       location.reload();
     } catch (error) {
       console.error('Create event error:', error);
-      alert(error.message || 'Failed to create event');
+      showNotification(error.message || 'Failed to create event', 'error', 'Error');
     }
   });
 </script>
