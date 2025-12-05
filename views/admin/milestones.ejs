@@ -1,12 +1,215 @@
-<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/head', { title: 'Milestones - Admin' }) %>
 <%- include('../partials/navbar', { currentPath: '/admin/milestones' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Milestones</h1>
-    <div class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Milestone management interface coming soon.</p>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground">Milestone Types</h1>
+      <button onclick="openAddMilestoneModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Milestone Type
+      </button>
+    </div>
+    <p class="text-foreground/60 mb-4">Manage milestone types. Edit titles or delete types that aren't in use.</p>
+
+    <div id="milestones-container" class="bg-card border border-border rounded-xl overflow-hidden">
+      <p class="text-foreground/60 p-6">Loading milestone types...</p>
     </div>
   </div>
 </div>
-<%- include('../partials/footer') %>
 
+<!-- Add/Edit Milestone Type Modal -->
+<div id="milestone-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="milestone-modal-title">Add Milestone Type</h3>
+      <button onclick="closeMilestoneModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form id="milestone-form" class="space-y-4">
+      <input type="hidden" id="milestone-id">
+      <div>
+        <label class="block text-sm font-medium mb-1">Milestone Title *</label>
+        <input type="text" id="milestone-title" required class="w-full border border-border rounded-lg px-3 py-2 bg-background" placeholder="e.g., High School Diploma">
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeMilestoneModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <h3 class="text-xl font-serif mb-4">Confirm Delete</h3>
+    <p class="text-foreground/70 mb-6" id="delete-message">Are you sure you want to delete this milestone type?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-medium transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/notification-modal') %>
+<%- include('../partials/footer') %>
+<script>
+  let milestonesData = [];
+  let editingMilestoneId = null;
+  let deleteMilestoneId = null;
+
+  async function loadMilestones() {
+    const container = document.getElementById('milestones-container');
+    container.innerHTML = '<p class="text-foreground/60 p-6">Loading milestone types...</p>';
+    
+    try {
+      const res = await fetch('/api/milestones/types/with-counts');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.error || errorData.message || 'Failed to load milestone types');
+      }
+      milestonesData = await res.json();
+      renderMilestones();
+    } catch (error) {
+      console.error('Error loading milestones:', error);
+      container.innerHTML = `<p class="text-red-600 p-6">Failed to load milestone types: ${error.message}</p>`;
+    }
+  }
+
+  function renderMilestones() {
+    const container = document.getElementById('milestones-container');
+    
+    if (milestonesData.length === 0) {
+      container.innerHTML = '<p class="text-foreground/60 p-6">No milestone types found.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Milestone Title</th>
+            <th class="text-left p-4 font-medium">Achieved</th>
+            <th class="text-left p-4 font-medium">Goals</th>
+            <th class="text-right p-4 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${milestonesData.map(m => `
+            <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4 font-medium text-foreground">${m.MilestoneTitle || ''}</td>
+              <td class="p-4 text-foreground/70">${m.achieved_count || 0}</td>
+              <td class="p-4 text-foreground/70">${m.goals_count || 0}</td>
+              <td class="p-4 text-right space-x-2">
+                <button onclick='openEditMilestoneModal(${JSON.stringify(m).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800" title="Edit">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="openDeleteModal(${m.MilestoneID}, '${(m.MilestoneTitle || '').replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-800" title="Delete">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openAddMilestoneModal() {
+    editingMilestoneId = null;
+    document.getElementById('milestone-modal-title').textContent = 'Add Milestone Type';
+    document.getElementById('milestone-id').value = '';
+    document.getElementById('milestone-title').value = '';
+    document.getElementById('milestone-modal').classList.remove('hidden');
+    document.getElementById('milestone-modal').classList.add('flex');
+  }
+
+  function openEditMilestoneModal(milestone) {
+    editingMilestoneId = milestone.MilestoneID;
+    document.getElementById('milestone-modal-title').textContent = 'Edit Milestone Type';
+    document.getElementById('milestone-id').value = milestone.MilestoneID;
+    document.getElementById('milestone-title').value = milestone.MilestoneTitle || '';
+    document.getElementById('milestone-modal').classList.remove('hidden');
+    document.getElementById('milestone-modal').classList.add('flex');
+  }
+
+  function closeMilestoneModal() {
+    editingMilestoneId = null;
+    document.getElementById('milestone-form').reset();
+    document.getElementById('milestone-modal').classList.add('hidden');
+    document.getElementById('milestone-modal').classList.remove('flex');
+  }
+
+  function openDeleteModal(id, title) {
+    deleteMilestoneId = id;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${title}"? This action cannot be undone and will fail if any participants have this milestone.`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    deleteMilestoneId = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+    document.getElementById('delete-modal').classList.remove('flex');
+  }
+
+  async function confirmDelete() {
+    try {
+      const res = await fetch(`/api/milestones/types/${deleteMilestoneId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Delete failed');
+      }
+      showNotification('Milestone type deleted successfully.', 'success', 'Success');
+      closeDeleteModal();
+      await loadMilestones();
+    } catch (error) {
+      showNotification(error.message || 'Error deleting milestone type', 'error', 'Error');
+    }
+  }
+
+  document.getElementById('milestone-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('milestone-title').value.trim();
+    
+    if (!title) {
+      showNotification('Milestone title is required.', 'warning', 'Validation Error');
+      return;
+    }
+
+    const payload = { MilestoneTitle: title };
+    const method = editingMilestoneId ? 'PUT' : 'POST';
+    const url = editingMilestoneId ? `/api/milestones/types/${editingMilestoneId}` : '/api/milestones/types';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Request failed');
+      }
+      
+      showNotification(editingMilestoneId ? 'Milestone type updated successfully!' : 'Milestone type added successfully!', 'success', 'Success');
+      closeMilestoneModal();
+      await loadMilestones();
+    } catch (error) {
+      showNotification(error.message || 'Error saving milestone type', 'error', 'Error');
+    }
+  });
+
+  // Close modals on backdrop click
+  document.getElementById('milestone-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeMilestoneModal();
+  });
+  document.getElementById('delete-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDeleteModal();
+  });
+
+  // Load milestones on page load
+  loadMilestones();
+</script>
