@@ -66,13 +66,16 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
   try {
     const participantId = req.session.user.participantId;
     
-    // Fetch participant data
+    // Fetch participant data (exclude deleted)
     const participant = await db('Participants')
       .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
       .first();
     
     if (!participant) {
-      return res.status(404).render('not-found', { title: 'Participant Not Found' });
+      // If participant is deleted, destroy session and redirect to login
+      req.session.destroy(() => {});
+      return res.redirect('/portal/auth?deleted=1');
     }
     
     // Fetch donations summary
@@ -173,10 +176,13 @@ router.get('/portal/profile/edit', requireAuth, async (req, res, next) => {
     const participantId = req.session.user.participantId;
     const participant = await db('Participants')
       .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
       .first();
     
     if (!participant) {
-      return res.status(404).render('not-found', { title: 'Participant Not Found' });
+      // If participant is deleted, destroy session and redirect to login
+      req.session.destroy(() => {});
+      return res.redirect('/portal/auth?deleted=1');
     }
     
     res.render('portal/profile-edit', { 
@@ -192,13 +198,16 @@ router.post('/portal/profile/edit', requireAuth, uploadParticipantPhoto, handleU
   try {
     const participantId = req.session.user.participantId;
     
-    // Get existing participant
+    // Get existing participant (exclude deleted)
     const existing = await db('Participants')
       .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
       .first();
     
     if (!existing) {
-      return res.status(404).json({ message: 'Participant not found' });
+      // If participant is deleted, destroy session and return 401
+      req.session.destroy(() => {});
+      return res.status(401).json({ message: 'Participant not found' });
     }
     
     // Build update data from form fields (excluding PasswordHash)

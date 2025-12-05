@@ -6,10 +6,11 @@ import { uploadParticipantPhoto, getUploadPath, deleteUploadedFile, handleUpload
 
 const router = express.Router();
 
-// List all participants (admin only)
+// List all participants (admin only) - Exclude deleted participants
 router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const participants = await db('Participants')
+      .where({ IsDeleted: false })
       .select('*')
       .orderBy('ParticipantLastName', 'asc');
     res.json(participants);
@@ -39,7 +40,7 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
       return res.status(400).json({ message: 'First name, last name, and email are required' });
     }
 
-    // Validate phone number (10 digits only)
+// Validate phone number (10 digits only)
     if (ParticipantPhone && !/^\d{10}$/.test(ParticipantPhone)) {
       return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
     }
@@ -54,9 +55,10 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
       return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
     }
 
-    // Check if email already exists
+    // Check if email already exists (excluding deleted participants)
     const existing = await db('Participants')
       .where({ ParticipantEmail })
+      .where({ IsDeleted: false })
       .first();
 
     if (existing) {
@@ -97,6 +99,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
     const participant = await db('Participants')
       .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
@@ -164,6 +167,16 @@ router.put('/:id', requireAuth, async (req, res, next) => {
       }
     });
 
+    // Check if participant exists and is not deleted before updating
+    const existing = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
+      .first();
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
     const [updated] = await db('Participants')
       .where({ ParticipantID: participantId })
       .update(updateData)
@@ -179,20 +192,108 @@ router.put('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-// Delete participant (admin only)
+// Delete participant (admin only) - Soft delete with anonymization
 router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const participantId = parseInt(req.params.id);
     
-    const deleted = await db('Participants')
+    // Check if participant exists and is not already deleted
+    const participant = await db('Participants')
       .where({ ParticipantID: participantId })
-      .del();
+      .where({ IsDeleted: false })
+      .first();
 
-    if (!deleted) {
+    if (!participant) {
       return res.status(404).json({ message: 'Participant not found' });
     }
 
-    res.json({ message: 'Participant deleted successfully' });
+    // Soft delete + anonymization (keeping ParticipantSchoolOrEmployer and ParticipantFieldOfInterest)
+    // Log values before deletion for debugging
+    console.log('Before deletion - School:', participant.ParticipantSchoolOrEmployer, 'Field:', participant.ParticipantFieldOfInterest);
+    
+    const updated = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .update({
+        IsDeleted: true,
+        DeletedAt: db.fn.now(),
+        ParticipantFirstName: null,
+        ParticipantLastName: null,
+        ParticipantEmail: null,
+        ParticipantDOB: null,
+        ParticipantPhone: null,
+        ParticipantCity: null,
+        ParticipantState: null,
+        ParticipantZip: null,
+        PasswordHash: null
+        // Note: ParticipantSchoolOrEmployer and ParticipantFieldOfInterest are NOT updated - they are preserved
+      });
+
+    if (!updated) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
+    // Verify the values were preserved
+    const afterDelete = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+    console.log('After deletion - School:', afterDelete?.ParticipantSchoolOrEmployer, 'Field:', afterDelete?.ParticipantFieldOfInterest);
+
+    res.json({ message: 'Profile deleted and anonymized.' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete own profile (self-delete) - Soft delete with anonymization
+router.delete('/me', requireAuth, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+    
+    // Check if participant exists and is not already deleted
+    const participant = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
+      .first();
+
+    if (!participant) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
+    // Soft delete + anonymization (keeping ParticipantSchoolOrEmployer and ParticipantFieldOfInterest)
+    // Log values before deletion for debugging
+    console.log('Before self-deletion - School:', participant.ParticipantSchoolOrEmployer, 'Field:', participant.ParticipantFieldOfInterest);
+    
+    await db('Participants')
+      .where({ ParticipantID: participantId })
+      .update({
+        IsDeleted: true,
+        DeletedAt: db.fn.now(),
+        ParticipantFirstName: null,
+        ParticipantLastName: null,
+        ParticipantEmail: null,
+        ParticipantDOB: null,
+        ParticipantPhone: null,
+        ParticipantCity: null,
+        ParticipantState: null,
+        ParticipantZip: null,
+        PasswordHash: null
+        // Note: ParticipantSchoolOrEmployer and ParticipantFieldOfInterest are NOT updated - they are preserved
+      });
+
+    // Verify the values were preserved
+    const afterDelete = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+    console.log('After self-deletion - School:', afterDelete?.ParticipantSchoolOrEmployer, 'Field:', afterDelete?.ParticipantFieldOfInterest);
+
+    // Destroy session to log user out
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error destroying session:', err);
+      }
+    });
+
+    res.json({ message: 'Profile deleted and anonymized.' });
   } catch (error) {
     next(error);
   }
@@ -205,8 +306,9 @@ router.put('/:id/toggle-admin', requireAuth, requireRole('admin'), async (req, r
     
     const participant = await db('Participants')
       .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
       .first();
-
+    
     if (!participant) {
       return res.status(404).json({ message: 'Participant not found' });
     }

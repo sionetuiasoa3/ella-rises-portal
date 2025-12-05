@@ -98,6 +98,7 @@ router.post('/login', async (req, res, next) => {
 
     const participant = await db('Participants')
       .where({ ParticipantEmail: email })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
@@ -174,7 +175,7 @@ router.post('/signup', async (req, res, next) => {
       });
     }
 
-    // Validate phone number (10 digits only)
+// Validate phone number (10 digits only)
     if (PhoneNumber && !/^\d{10}$/.test(PhoneNumber)) {
       return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
     }
@@ -189,9 +190,10 @@ router.post('/signup', async (req, res, next) => {
       return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
     }
 
-    // Check if email already exists
+    // Check if email already exists (excluding deleted participants)
     const existing = await db('Participants')
       .where({ ParticipantEmail: Email })
+      .where({ IsDeleted: false })
       .first();
 
     if (existing) {
@@ -286,6 +288,7 @@ accountRouter.post('/account/existing', async (req, res, next) => {
 
     const participant = await db('Participants')
       .where({ ParticipantEmail: email })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
@@ -416,6 +419,7 @@ accountRouter.post('/account/create-password', async (req, res, next) => {
 
     const participant = await db('Participants')
       .where({ ParticipantID: tokenRow.ParticipantID })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
@@ -489,6 +493,7 @@ router.post('/admin/login', async (req, res, next) => {
     const participant = await db('Participants')
       .where({ ParticipantEmail: email })
       .where({ ParticipantRole: 'admin' })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
@@ -548,10 +553,13 @@ router.get('/me', async (req, res, next) => {
 
     const participant = await db('Participants')
       .where({ ParticipantID: req.session.user.participantId })
+      .where({ IsDeleted: false })
       .first();
 
     if (!participant) {
-      return res.status(404).json({ message: 'User not found' });
+      // If participant is deleted, destroy session and return 401
+      req.session.destroy(() => {});
+      return res.status(401).json({ message: 'User not found' });
     }
 
     res.json({

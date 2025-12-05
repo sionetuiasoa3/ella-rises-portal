@@ -250,10 +250,10 @@
               </td>
               <td class="p-4 text-foreground/70">${p.ParticipantCity || '-'}</td>
               <td class="p-4 text-right">
-                <button onclick='openEditParticipantModal(${JSON.stringify(p).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
+                <button onclick="openEditParticipantModal(${p.ParticipantID})" class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
                   <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 </button>
-                <button onclick="openDeleteModal(${p.ParticipantID}, '${p.ParticipantFirstName} ${p.ParticipantLastName}')" class="text-red-600 hover:text-red-800" title="Delete">
+                <button onclick="openDeleteModal(${p.ParticipantID}, '${(p.ParticipantFirstName || '').replace(/'/g, "\\'")} ${(p.ParticipantLastName || '').replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-800" title="Delete">
                   <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
               </td>
@@ -280,33 +280,47 @@
     document.getElementById('add-participant-modal').classList.add('flex');
   }
 
-  function openEditParticipantModal(p) {
-    editingParticipantId = p.ParticipantID;
-    currentParticipantPhoto = p.ParticipantPhotoPath;
-    document.getElementById('participant-modal-title').textContent = 'Edit Participant';
-    document.getElementById('participant-submit-btn').textContent = 'Save Changes';
-    document.getElementById('participant-id').value = p.ParticipantID;
-    document.getElementById('p-firstname').value = p.ParticipantFirstName || '';
-    document.getElementById('p-lastname').value = p.ParticipantLastName || '';
-    document.getElementById('p-email').value = p.ParticipantEmail || '';
-    document.getElementById('p-phone').value = p.ParticipantPhone || '';
-    document.getElementById('p-dob').value = p.ParticipantDOB ? p.ParticipantDOB.split('T')[0] : '';
-    document.getElementById('p-role').value = p.ParticipantRole || 'participant';
-    document.getElementById('p-city').value = p.ParticipantCity || '';
-    document.getElementById('p-state').value = p.ParticipantState || '';
-    // Find state name from abbreviation
-    const stateObj = states.find(s => s.abbr === p.ParticipantState);
-    document.getElementById('p-state-search').value = stateObj ? stateObj.name : (p.ParticipantState || '');
-    document.getElementById('p-zip').value = p.ParticipantZip || '';
-    document.getElementById('p-school').value = p.ParticipantSchoolOrEmployer || '';
-    document.getElementById('p-interest').value = p.ParticipantFieldOfInterest || 'Both';
-    document.getElementById('photo-input').value = '';
-    
-    const initials = (p.ParticipantFirstName || '').charAt(0) + (p.ParticipantLastName || '').charAt(0);
-    updatePhotoPreview(p.ParticipantPhotoPath, initials);
-    
-    document.getElementById('add-participant-modal').classList.remove('hidden');
-    document.getElementById('add-participant-modal').classList.add('flex');
+async function openEditParticipantModal(participantId) {
+    try {
+      // Fetch the full participant data from the API
+      const response = await fetch(`/api/participants/${participantId}`);
+      if (!response.ok) {
+        alert('Error loading participant data');
+        return;
+      }
+      const p = await response.json();
+      
+      editingParticipantId = p.ParticipantID;
+      currentParticipantPhoto = p.ParticipantPhotoPath;
+      document.getElementById('participant-modal-title').textContent = 'Edit Participant';
+      document.getElementById('participant-submit-btn').textContent = 'Save Changes';
+      document.getElementById('participant-id').value = p.ParticipantID;
+      document.getElementById('p-firstname').value = p.ParticipantFirstName || '';
+      document.getElementById('p-lastname').value = p.ParticipantLastName || '';
+      document.getElementById('p-email').value = p.ParticipantEmail || '';
+      // Strip dashes from phone for editing (stored as XXX-XXX-XXXX)
+      document.getElementById('p-phone').value = (p.ParticipantPhone || '').replace(/-/g, '');
+      document.getElementById('p-dob').value = p.ParticipantDOB ? (p.ParticipantDOB.split('T')[0] || '') : '';
+      document.getElementById('p-role').value = p.ParticipantRole || 'participant';
+      document.getElementById('p-city').value = p.ParticipantCity || '';
+      document.getElementById('p-state').value = p.ParticipantState || '';
+      // Find state name from abbreviation
+      const stateObj = states.find(s => s.abbr === p.ParticipantState);
+      document.getElementById('p-state-search').value = stateObj ? stateObj.name : (p.ParticipantState || '');
+      document.getElementById('p-zip').value = p.ParticipantZip || '';
+      document.getElementById('p-school').value = p.ParticipantSchoolOrEmployer || '';
+      document.getElementById('p-interest').value = p.ParticipantFieldOfInterest || 'Both';
+      document.getElementById('photo-input').value = '';
+      
+      const initials = (p.ParticipantFirstName || '').charAt(0) + (p.ParticipantLastName || '').charAt(0);
+      updatePhotoPreview(p.ParticipantPhotoPath, initials);
+      
+      document.getElementById('add-participant-modal').classList.remove('hidden');
+      document.getElementById('add-participant-modal').classList.add('flex');
+    } catch (error) {
+      console.error('Error loading participant:', error);
+      alert('Error loading participant data');
+    }
   }
 
   function updatePhotoPreview(photoPath, initials) {

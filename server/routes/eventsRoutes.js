@@ -172,6 +172,7 @@ router.get('/:id/registrations', requireAuth, requireRole('admin'), async (req, 
     const registrations = await db('Registrations')
       .join('Participants', 'Registrations.ParticipantID', 'Participants.ParticipantID')
       .where({ 'Registrations.EventID': eventId })
+      .where({ 'Participants.IsDeleted': false })
       .select(
         'Registrations.*',
         'Participants.ParticipantFirstName',

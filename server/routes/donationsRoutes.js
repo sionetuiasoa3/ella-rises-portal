@@ -9,6 +9,7 @@ router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const donations = await db('Donations')
       .join('Participants', 'Donations.ParticipantID', 'Participants.ParticipantID')
+      .where({ 'Participants.IsDeleted': false })
       .select(
         'Donations.*',
         'Participants.ParticipantFirstName',
@@ -65,6 +66,7 @@ router.get('/summary', requireAuth, requireRole('admin'), async (req, res, next)
   try {
     const summary = await db('DonationSummary')
       .join('Participants', 'DonationSummary.ParticipantID', 'Participants.ParticipantID')
+      .where({ 'Participants.IsDeleted': false })
       .select(
         'DonationSummary.*',
         'Participants.ParticipantFirstName',
