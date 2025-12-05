@@ -88,9 +88,9 @@ export const createUpload = (entity, fieldName = 'photo', maxSizeMB = 5) => {
   }).single(fieldName);
 };
 
-// Pre-configured uploaders
-export const uploadParticipantPhoto = createUpload('participants', 'photo');
-export const uploadTemplatePhoto = createUpload('templates', 'photo');
+// Pre-configured uploaders - increased limit to 10MB for photos
+export const uploadParticipantPhoto = createUpload('participants', 'photo', 10);
+export const uploadTemplatePhoto = createUpload('templates', 'photo', 10);
 
 // Helper to get the public URL for an uploaded file
 export const getUploadPath = (entity, filename) => {
