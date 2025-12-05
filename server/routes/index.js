@@ -321,11 +321,40 @@ router.get('/portal/milestones', requireAuth, (req, res) => {
   res.render('portal/milestones', { title: 'Milestones - Ella Rises Portal' });
 });
 
-router.get('/portal/survey/:eventId', requireAuth, (req, res) => {
-  res.render('portal/survey', { 
-    title: 'Survey - Ella Rises Portal',
-    eventId: req.params.eventId 
-  });
+router.get('/portal/survey/:eventId', requireAuth, async (req, res, next) => {
+  try {
+    const eventId = parseInt(req.params.eventId);
+    const participantId = req.session.user.participantId;
+    
+    // Get event and registration info
+    const registration = await db('Registrations')
+      .join('Events', 'Registrations.EventID', 'Events.EventID')
+      .where({ 'Registrations.EventID': eventId, 'Registrations.ParticipantID': participantId })
+      .select('Registrations.*', 'Events.EventName', 'Events.EventDateTimeStart')
+      .first();
+    
+    if (!registration) {
+      return res.redirect('/portal/dashboard');
+    }
+    
+    // Check if survey already exists
+    const existingSurvey = await db('Surveys')
+      .where({ RegistrationID: registration.RegistrationID })
+      .first();
+    
+    if (existingSurvey) {
+      return res.redirect('/portal/dashboard?survey=completed');
+    }
+    
+    res.render('portal/survey', { 
+      title: 'Survey - Ella Rises Portal',
+      eventId,
+      eventName: registration.EventName,
+      registrationId: registration.RegistrationID
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/portal/donate', requireAuth, (req, res) => {

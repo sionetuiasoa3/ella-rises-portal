@@ -1,38 +1,192 @@
-<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/head', { title: 'Event Survey - Ella Rises' }) %>
 <%- include('../partials/navbar', { currentPath: '/portal/survey' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
-  <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Event Survey</h1>
-    <div class="bg-card border border-border rounded-xl p-6">
-      <form id="survey-form" class="space-y-4">
+  <div class="container mx-auto px-6 max-w-2xl">
+    <!-- Header with gratitude message -->
+    <div class="text-center mb-10">
+      <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-serif text-foreground mb-4">Thank You for Attending!</h1>
+      <p class="text-lg text-foreground/70">
+        We're so grateful you joined us at <strong class="text-primary"><%= eventName %></strong>! 
+        We'd love to hear about your experience to help us make future events even better.
+      </p>
+    </div>
+
+    <!-- Survey Form -->
+    <div class="bg-card border border-border rounded-xl p-8 shadow-sm">
+      <form id="survey-form" class="space-y-8">
+        <input type="hidden" name="RegistrationID" value="<%= registrationId %>">
+        
+        <!-- Satisfaction Question -->
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2">Satisfaction Score (1-5)</label>
-          <input type="number" name="SurveySatisfactionScore" min="1" max="5" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          <label class="block text-lg font-medium text-foreground mb-4">
+            How satisfied were you with <span class="text-primary"><%= eventName %></span>?
+          </label>
+          <div class="flex justify-between items-center gap-2">
+            <span class="text-sm text-foreground/60">Not satisfied</span>
+            <div class="flex gap-3">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <label class="cursor-pointer">
+                  <input type="radio" name="SurveySatisfactionScore" value="<%= i %>" required class="sr-only peer">
+                  <div class="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center text-lg font-bold text-foreground/60 peer-checked:bg-primary peer-checked:border-primary peer-checked:text-white transition-all hover:border-primary/50">
+                    <%= i %>
+                  </div>
+                </label>
+              <% } %>
+            </div>
+            <span class="text-sm text-foreground/60">Very satisfied</span>
+          </div>
         </div>
+
+        <!-- Usefulness Question -->
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2">Usefulness Score (1-5)</label>
-          <input type="number" name="SurveyUsefulnessScore" min="1" max="5" class="w-full bg-background border border-border text-foreground h-12 px-4 rounded-lg" />
+          <label class="block text-lg font-medium text-foreground mb-4">
+            How useful was <span class="text-primary"><%= eventName %></span> for your life/goals?
+          </label>
+          <div class="flex justify-between items-center gap-2">
+            <span class="text-sm text-foreground/60">Not useful</span>
+            <div class="flex gap-3">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <label class="cursor-pointer">
+                  <input type="radio" name="SurveyUsefulnessScore" value="<%= i %>" required class="sr-only peer">
+                  <div class="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center text-lg font-bold text-foreground/60 peer-checked:bg-primary peer-checked:border-primary peer-checked:text-white transition-all hover:border-primary/50">
+                    <%= i %>
+                  </div>
+                </label>
+              <% } %>
+            </div>
+            <span class="text-sm text-foreground/60">Very useful</span>
+          </div>
         </div>
+
+        <!-- Instructor Rating Question -->
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2">Comments</label>
-          <textarea name="SurveyComments" class="w-full bg-background border border-border text-foreground min-h-[120px] px-4 py-3 rounded-lg"></textarea>
+          <label class="block text-lg font-medium text-foreground mb-4">
+            How would you rate the instructor(s) of <span class="text-primary"><%= eventName %></span>?
+          </label>
+          <div class="flex justify-between items-center gap-2">
+            <span class="text-sm text-foreground/60">Poor</span>
+            <div class="flex gap-3">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <label class="cursor-pointer">
+                  <input type="radio" name="SurveyInstructorScore" value="<%= i %>" required class="sr-only peer">
+                  <div class="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center text-lg font-bold text-foreground/60 peer-checked:bg-primary peer-checked:border-primary peer-checked:text-white transition-all hover:border-primary/50">
+                    <%= i %>
+                  </div>
+                </label>
+              <% } %>
+            </div>
+            <span class="text-sm text-foreground/60">Excellent</span>
+          </div>
         </div>
-        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
-          Submit Survey
+
+        <!-- Recommendation Question -->
+        <div>
+          <label class="block text-lg font-medium text-foreground mb-4">
+            How likely are you to recommend <span class="text-primary"><%= eventName %></span> to a friend?
+          </label>
+          <div class="flex justify-between items-center gap-2">
+            <span class="text-sm text-foreground/60">Not likely</span>
+            <div class="flex gap-3">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <label class="cursor-pointer">
+                  <input type="radio" name="SurveyRecommendationScore" value="<%= i %>" required class="sr-only peer">
+                  <div class="w-12 h-12 rounded-full border-2 border-border flex items-center justify-center text-lg font-bold text-foreground/60 peer-checked:bg-primary peer-checked:border-primary peer-checked:text-white transition-all hover:border-primary/50">
+                    <%= i %>
+                  </div>
+                </label>
+              <% } %>
+            </div>
+            <span class="text-sm text-foreground/60">Very likely</span>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div>
+          <label class="block text-lg font-medium text-foreground mb-3">Further Comments</label>
+          <p class="text-sm text-foreground/60 mb-3">Share any additional thoughts, suggestions, or feedback about your experience.</p>
+          <textarea 
+            name="SurveyComments" 
+            rows="4"
+            placeholder="Your feedback helps us improve..."
+            class="w-full bg-background border border-border text-foreground px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="submit-btn"
+          class="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-14 rounded-lg font-medium text-lg transition-colors flex items-center justify-center gap-2"
+        >
+          <span id="btn-text">Submit Survey</span>
+          <svg id="btn-spinner" class="hidden animate-spin h-5 w-5" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
         </button>
       </form>
+    </div>
+
+    <!-- Back Link -->
+    <div class="text-center mt-6">
+      <a href="/portal/dashboard" class="text-foreground/60 hover:text-primary transition-colors">
+        ← Back to Dashboard
+      </a>
     </div>
   </div>
 </div>
 <%- include('../partials/footer') %>
 <script>
-  const eventId = window.location.pathname.split('/').pop();
   document.getElementById('survey-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    
+    // Show loading
+    submitBtn.disabled = true;
+    btnText.textContent = 'Submitting...';
+    btnSpinner.classList.remove('hidden');
+    
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    // TODO: Get RegistrationID from eventId and participant
-    alert('Survey submission functionality coming soon');
+    const data = {
+      RegistrationID: parseInt(formData.get('RegistrationID')),
+      SurveySatisfactionScore: parseInt(formData.get('SurveySatisfactionScore')),
+      SurveyUsefulnessScore: parseInt(formData.get('SurveyUsefulnessScore')),
+      SurveyInstructorScore: parseInt(formData.get('SurveyInstructorScore')),
+      SurveyRecommendationScore: parseInt(formData.get('SurveyRecommendationScore')),
+      SurveyComments: formData.get('SurveyComments') || null
+    };
+    
+    try {
+      const response = await fetch('/api/surveys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        alert('Thank you for your feedback!');
+        window.location.href = '/portal/dashboard';
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to submit survey'));
+        submitBtn.disabled = false;
+        btnText.textContent = 'Submit Survey';
+        btnSpinner.classList.add('hidden');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+      submitBtn.disabled = false;
+      btnText.textContent = 'Submit Survey';
+      btnSpinner.classList.add('hidden');
+    }
   });
 </script>
-
