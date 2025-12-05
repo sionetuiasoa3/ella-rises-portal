@@ -34,12 +34,39 @@
           <!-- Featured Video -->
           <article class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-ella-charcoal/5">
             <div class="aspect-video bg-muted overflow-hidden relative">
-              <video class="w-full h-full object-cover" controls playsinline>
+              <video 
+                id="nadia-video"
+                class="w-full h-full object-cover" 
+                controls 
+                playsinline 
+                preload="metadata"
+                crossorigin="anonymous"
+                onerror="handleVideoError(this)"
+              >
                 <source src="https://video.wixstatic.com/video/e5f869_addaab11f4014d7793fb8752dc55f6db/480p/mp4/file.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div id="video-error" class="hidden w-full h-full absolute inset-0 flex items-center justify-center bg-gradient-to-br from-ella-pink/20 to-ella-sage/20">
+                <div class="text-center p-8">
+                  <svg class="w-16 h-16 mx-auto mb-4 text-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <p class="text-foreground/60 mb-2">Video unavailable</p>
+                  <a href="https://video.wixstatic.com/video/e5f869_addaab11f4014d7793fb8752dc55f6db/480p/mp4/file.mp4" target="_blank" class="text-primary hover:underline text-sm">Open video in new tab</a>
+                </div>
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             </div>
+            <script>
+              function handleVideoError(video) {
+                const errorDiv = document.getElementById('video-error');
+                if (errorDiv) {
+                  errorDiv.classList.remove('hidden');
+                  video.style.display = 'none';
+                }
+              }
+            </script>
             <div class="p-6 md:p-8">
               <div class="flex items-center gap-2 mb-3">
                 <div class="w-2 h-2 bg-primary rounded-full"></div>

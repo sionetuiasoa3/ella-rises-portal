@@ -3,8 +3,8 @@
 <div class="min-h-screen bg-background">
   <!-- Hero Section -->
   <section class="relative pt-28 pb-8 md:pt-36 md:pb-12 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-ella-cream/50 to-ella-sage/40"></div>
-    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-muted/30 via-ella-cream/20 to-ella-sage/15"></div>
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-ella-cream/30 via-muted/20 to-ella-blush/15"></div>
     <div class="container mx-auto px-6 relative">
       <div class="max-w-3xl mx-auto text-center">
         <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-5 py-2.5 rounded-full mb-8 text-sm font-medium">
@@ -29,15 +29,23 @@
       </h2>
           <div class="max-w-6xl mx-auto mb-10">
             <div class="aspect-video rounded-lg overflow-hidden shadow-xl">
-              <video class="w-full h-full object-cover" controls playsinline>
-            <source 
-              src="https://video.wixstatic.com/video/e5f869_f075e19ca2744354bb20a65881dce28f/1080p/mp4/file.mp4" 
-              type="video/mp4" 
-            />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      </div>
+              <video 
+                id="mission-video"
+                class="w-full h-full object-cover" 
+                controls 
+                playsinline 
+                autoplay 
+                muted 
+                loop
+              >
+                <source 
+                  src="https://video.wixstatic.com/video/e5f869_f075e19ca2744354bb20a65881dce28f/1080p/mp4/file.mp4" 
+                  type="video/mp4" 
+                />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
       <p class="text-xl md:text-2xl text-foreground/70 text-center max-w-3xl mx-auto leading-relaxed font-light italic">
         Empowering young women to pursue higher education through high-impact multicultural activities focused on mariachi and STEAM.
       </p>
@@ -333,4 +341,24 @@
 </div>
 <%- include('partials/footer') %>
 <%- include('partials/footer-scripts') %>
+<script>
+  // Auto-play mission video when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    const missionVideo = document.getElementById('mission-video');
+    if (missionVideo) {
+      // Try to play the video
+      missionVideo.play().catch(function(error) {
+        // Autoplay was prevented, video will play when user interacts
+        console.log('Video autoplay prevented:', error);
+      });
+      
+      // Allow user to unmute by clicking on the video
+      missionVideo.addEventListener('click', function() {
+        if (missionVideo.muted) {
+          missionVideo.muted = false;
+        }
+      });
+    }
+  });
+</script>
 
