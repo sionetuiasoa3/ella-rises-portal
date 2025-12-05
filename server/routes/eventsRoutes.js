@@ -33,7 +33,28 @@ router.get('/', async (req, res, next) => {
     }
 
     const events = await query.orderBy('Events.EventDateTimeStart', 'asc');
-    res.json(events);
+    
+    // Get registration counts for each event
+    const eventIds = events.map(e => e.EventID);
+    const registrationCounts = await db('Registrations')
+      .whereIn('EventID', eventIds)
+      .groupBy('EventID')
+      .select('EventID')
+      .count('* as registrationCount');
+    
+    // Create a map of event ID to registration count
+    const countMap = {};
+    registrationCounts.forEach(r => {
+      countMap[r.EventID] = parseInt(r.registrationCount) || 0;
+    });
+    
+    // Add registration count to each event
+    const eventsWithCounts = events.map(e => ({
+      ...e,
+      RegistrationCount: countMap[e.EventID] || 0
+    }));
+    
+    res.json(eventsWithCounts);
   } catch (error) {
     next(error);
   }
