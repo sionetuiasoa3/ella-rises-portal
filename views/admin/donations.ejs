@@ -2,24 +2,234 @@
 <%- include('../partials/navbar', { currentPath: '/admin/donations' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Donations</h1>
-    <div id="donations-container" class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Loading donations...</p>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-4xl md:text-6xl font-serif text-foreground">Donations</h1>
+        <p class="text-foreground/60 mt-2">Search, add, edit, and delete donations. Participant names included.</p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="openDonationModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium shadow-md hover:shadow-lg inline-flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Add Donation
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+      <div class="flex flex-wrap gap-3 mb-4">
+        <div class="flex-1 min-w-[240px]">
+          <label class="block text-sm font-medium text-foreground/70 mb-1">Search</label>
+          <input id="search-input" type="text" placeholder="Name, email, participant ID, donation ID" class="w-full px-3 py-2 border border-border rounded-lg bg-background" oninput="renderDonations()" />
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-muted">
+            <tr>
+              <th class="text-left p-3 font-medium">Donation ID</th>
+              <th class="text-left p-3 font-medium">Participant</th>
+              <th class="text-left p-3 font-medium">Participant ID</th>
+              <th class="text-left p-3 font-medium">Date</th>
+              <th class="text-left p-3 font-medium">Amount</th>
+              <th class="text-left p-3 font-medium">Message</th>
+              <th class="text-right p-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="donations-table-body">
+            <tr><td colspan="7" class="p-4 text-foreground/60">Loading donations...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Add/Edit Donation Modal -->
+<div id="donation-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif" id="donation-modal-title">Add Donation</h3>
+      <button onclick="closeDonationModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form id="donation-form" class="space-y-4">
+      <input type="hidden" id="donation-id">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Participant ID</label>
+          <input type="number" id="donation-participant" class="w-full border border-border rounded-lg px-3 py-2 bg-background" placeholder="Enter ParticipantID" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount</label>
+          <input type="number" step="0.01" id="donation-amount" class="w-full border border-border rounded-lg px-3 py-2 bg-background" placeholder="e.g. 50.00" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Date</label>
+          <input type="datetime-local" id="donation-date" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Anonymous</label>
+          <select id="donation-anon" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Message (optional)</label>
+        <textarea id="donation-message" rows="2" class="w-full border border-border rounded-lg px-3 py-2 bg-background" placeholder="Notes about this donation"></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeDonationModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <%- include('../partials/footer') %>
 <script>
-  fetch('/api/donations/summary')
-    .then(r => r.json())
-    .then(donations => {
-      const container = document.getElementById('donations-container');
-      container.innerHTML = donations.map(d => `
-        <div class="border-b border-border py-4">
-          <p>${d.ParticipantFirstName} ${d.ParticipantLastName}</p>
-          <p class="text-primary font-bold">$${parseFloat(d.TotalDonations).toLocaleString()}</p>
-        </div>
-      `).join('');
-    });
-</script>
+  let donationsData = [];
+  let editingDonationId = null;
 
+  const tableBody = document.getElementById('donations-table-body');
+  const searchInput = document.getElementById('search-input');
+
+  function formatDate(d) {
+    if (!d) return '-';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleString();
+  }
+
+  function formatCurrency(amount) {
+    const num = parseFloat(amount || 0);
+    if (isNaN(num)) return '$0.00';
+    return num.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+  }
+
+  function renderDonations() {
+    const term = (searchInput.value || '').toLowerCase().trim();
+    let filtered = donationsData;
+    if (term) {
+      filtered = donationsData.filter(d => {
+        return (d.ParticipantFirstName || '').toLowerCase().includes(term)
+          || (d.ParticipantLastName || '').toLowerCase().includes(term)
+          || (d.ParticipantEmail || '').toLowerCase().includes(term)
+          || String(d.ParticipantID || '').includes(term)
+          || String(d.DonationID || '').includes(term);
+      });
+    }
+
+    if (!filtered.length) {
+      tableBody.innerHTML = '<tr><td colspan="7" class="p-4 text-foreground/60">No donations found.</td></tr>';
+      return;
+    }
+
+    tableBody.innerHTML = filtered.map(d => `
+      <tr class="border-t border-border hover:bg-muted/50">
+        <td class="p-3 font-medium">${d.DonationID}</td>
+        <td class="p-3 text-foreground/80">${d.DisplayName || `${d.ParticipantFirstName || ''} ${d.ParticipantLastName || ''}`.trim() || 'Unknown'}</td>
+        <td class="p-3 text-foreground/70">${d.ParticipantID || '-'}</td>
+        <td class="p-3 text-foreground/70">${formatDate(d.DonationDateRaw)}</td>
+        <td class="p-3 text-foreground/80 font-semibold">${formatCurrency(d.DonationAmountRaw)}</td>
+        <td class="p-3 text-foreground/70 max-w-xs truncate" title="${d.Message || ''}">${d.Message || ''}</td>
+        <td class="p-3 text-right space-x-2">
+          <button onclick='openDonationModal(${JSON.stringify(d).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 text-sm font-medium">Edit</button>
+          <button onclick="deleteDonation(${d.DonationID})" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openDonationModal(donation = null) {
+    editingDonationId = donation ? donation.DonationID : null;
+    document.getElementById('donation-modal-title').textContent = editingDonationId ? 'Edit Donation' : 'Add Donation';
+    document.getElementById('donation-id').value = donation?.DonationID || '';
+    document.getElementById('donation-participant').value = donation?.ParticipantID || '';
+    document.getElementById('donation-amount').value = donation?.DonationAmountRaw || '';
+    document.getElementById('donation-date').value = donation?.DonationDateRaw ? new Date(donation.DonationDateRaw).toISOString().slice(0,16) : '';
+    document.getElementById('donation-anon').value = donation?.Anonymous ? 'true' : 'false';
+    document.getElementById('donation-message').value = donation?.Message || '';
+
+    document.getElementById('donation-modal').classList.remove('hidden');
+    document.getElementById('donation-modal').classList.add('flex');
+  }
+
+  function closeDonationModal() {
+    editingDonationId = null;
+    document.getElementById('donation-form').reset();
+    document.getElementById('donation-modal').classList.add('hidden');
+    document.getElementById('donation-modal').classList.remove('flex');
+  }
+
+  document.getElementById('donation-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      ParticipantID: parseInt(document.getElementById('donation-participant').value) || null,
+      DonationAmountRaw: parseFloat(document.getElementById('donation-amount').value),
+      DonationDateRaw: document.getElementById('donation-date').value || null,
+      Anonymous: document.getElementById('donation-anon').value === 'true',
+      Message: document.getElementById('donation-message').value || null
+    };
+
+    if (!payload.DonationAmountRaw || isNaN(payload.DonationAmountRaw)) {
+      alert('Please enter a valid amount.');
+      return;
+    }
+
+    const method = editingDonationId ? 'PUT' : 'POST';
+    const url = editingDonationId ? `/api/donations/${editingDonationId}` : '/api/donations';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Request failed');
+      }
+      closeDonationModal();
+      await loadDonations();
+    } catch (error) {
+      alert(error.message || 'Error saving donation');
+    }
+  });
+
+  async function deleteDonation(id) {
+    if (!confirm('Delete this donation?')) return;
+    try {
+      const res = await fetch(`/api/donations/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Delete failed');
+      }
+      await loadDonations();
+    } catch (error) {
+      alert(error.message || 'Error deleting donation');
+    }
+  }
+
+  async function loadDonations() {
+    tableBody.innerHTML = '<tr><td colspan="7" class="p-4 text-foreground/60">Loading donations...</td></tr>';
+    try {
+      const res = await fetch('/api/donations');
+      if (!res.ok) {
+        throw new Error('Failed to load donations');
+      }
+      const data = await res.json();
+      donationsData = data;
+      renderDonations();
+    } catch (error) {
+      tableBody.innerHTML = `<tr><td colspan="7" class="p-4 text-red-600">${error.message}</td></tr>`;
+    }
+  }
+
+  loadDonations();
+</script>
