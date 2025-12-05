@@ -165,6 +165,9 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
       event.hasSurvey = surveyRegistrationIds.has(event.RegistrationID);
     });
     
+    // Find events needing surveys (attended but no survey submitted)
+    const pendingSurveys = pastEvents.filter(event => !event.hasSurvey);
+    
     res.render('portal/dashboard', { 
       title: 'Dashboard - Ella Rises Portal',
       participant,
@@ -173,6 +176,7 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
       plannedMilestones,
       upcomingEvents,
       pastEvents,
+      pendingSurveys,
       updated: req.query.updated === '1' || false
     });
   } catch (error) {

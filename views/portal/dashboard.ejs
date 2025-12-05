@@ -22,6 +22,67 @@
   </div>
 
   <div class="container mx-auto px-6 relative z-10">
+    <!-- Pending Survey Notification -->
+    <% if (typeof pendingSurveys !== 'undefined' && pendingSurveys.length > 0) { %>
+      <div id="survey-notification" class="fixed top-24 left-6 z-50 max-w-sm animate-slide-in">
+        <div class="bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl shadow-2xl overflow-hidden">
+          <div class="p-4">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-lg mb-1">Survey Pending!</h4>
+                <p class="text-white/90 text-sm mb-3">
+                  We'd love to hear about your experience at the <strong><%= pendingSurveys[0].EventName %></strong> event!
+                </p>
+                <a href="/portal/survey/<%= pendingSurveys[0].EventID %>" 
+                   class="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-white/90 transition-colors">
+                  Take Survey
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+              <button onclick="dismissNotification()" class="text-white/70 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <% if (pendingSurveys.length > 1) { %>
+              <p class="text-white/70 text-xs mt-2 pl-13">
+                + <%= pendingSurveys.length - 1 %> more survey<%= pendingSurveys.length > 2 ? 's' : '' %> pending
+              </p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <style>
+        @keyframes slide-in {
+          from { transform: translateX(-100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slide-in { animation: slide-in 0.5s ease-out; }
+      </style>
+      <script>
+        function dismissNotification() {
+          const notification = document.getElementById('survey-notification');
+          notification.style.transform = 'translateX(-100%)';
+          notification.style.opacity = '0';
+          notification.style.transition = 'all 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        }
+        // Auto-dismiss after 15 seconds
+        setTimeout(() => {
+          const notification = document.getElementById('survey-notification');
+          if (notification) dismissNotification();
+        }, 15000);
+      </script>
+    <% } %>
+
     <!-- Header Section with enhanced styling -->
     <div class="mb-10">
       <div class="inline-flex items-center gap-2 bg-ella-sage/40 border border-ella-sage/30 text-foreground/80 px-5 py-3 rounded-full mb-6 text-base md:text-lg font-medium">
