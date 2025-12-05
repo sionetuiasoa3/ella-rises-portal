@@ -35,6 +35,7 @@
                 required
                 class="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="you@example.com"
+                value="<%= typeof query !== 'undefined' && query.email ? query.email : '' %>"
               />
               <p class="text-xs text-gray-500">
                 We'll check if you already have a participant record. If you do, we'll help you create a password to access your account.

@@ -101,6 +101,27 @@
   </div>
 </div>
 <%- include('../partials/notification-modal') %>
+
+<!-- Duplicate Email Modal -->
+<div id="duplicate-email-modal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0 mt-1">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 id="duplicate-email-title" class="text-xl font-serif text-foreground mb-2">Email Already Registered</h3>
+        <p id="duplicate-email-message" class="text-foreground/70 mb-4"></p>
+        <div id="duplicate-email-actions" class="flex flex-col gap-2">
+          <!-- Actions will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <%- include('../partials/footer-scripts') %>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -209,7 +230,15 @@
           window.location.href = '/portal/dashboard';
         } else {
           const error = await response.json();
-          showNotification(error.message || (isSignupForm ? 'Signup failed' : 'Login failed'), 'error', 'Error');
+          
+          // Handle duplicate email cases with special modal
+          if (isSignupForm && error.error && (error.error === 'EMAIL_EXISTS_WITH_PASSWORD' || error.error === 'EMAIL_EXISTS_NO_PASSWORD')) {
+            const email = payload.Email || data.email || '';
+            showDuplicateEmailModal(error.error, email);
+          } else {
+            showNotification(error.message || (isSignupForm ? 'Signup failed' : 'Login failed'), 'error', 'Error');
+          }
+          
           if (submitButton) {
             submitButton.disabled = false;
             submitButton.innerHTML = originalText;
@@ -224,6 +253,63 @@
         }
       }
     }
+
+    // Show duplicate email modal
+    function showDuplicateEmailModal(errorType, email) {
+      const modal = document.getElementById('duplicate-email-modal');
+      const titleEl = document.getElementById('duplicate-email-title');
+      const messageEl = document.getElementById('duplicate-email-message');
+      const actionsEl = document.getElementById('duplicate-email-actions');
+      
+      if (errorType === 'EMAIL_EXISTS_WITH_PASSWORD') {
+        // Email exists with password - show login link
+        titleEl.textContent = 'Email Already Registered';
+        messageEl.textContent = `This email (${email}) is already associated with a participant account. Please log in to access your account.`;
+        actionsEl.innerHTML = `
+          <a href="/portal/auth?email=${encodeURIComponent(email)}" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6 py-3 font-medium transition-colors text-center">
+            Log In
+          </a>
+        `;
+      } else if (errorType === 'EMAIL_EXISTS_NO_PASSWORD') {
+        // Email exists without password - show create password link
+        titleEl.textContent = 'Account Found';
+        messageEl.textContent = `This email (${email}) is already associated with a participant record, but no password has been set yet. You can create a password to access your account.`;
+        actionsEl.innerHTML = `
+          <a href="/account/start?email=${encodeURIComponent(email)}" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6 py-3 font-medium transition-colors text-center">
+            Create Password
+          </a>
+          <a href="/portal/auth?email=${encodeURIComponent(email)}" class="w-full border border-border rounded-lg px-6 py-3 font-medium hover:bg-muted transition-colors text-center">
+            Log In Instead
+          </a>
+        `;
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    
+    function closeDuplicateEmailModal() {
+      const modal = document.getElementById('duplicate-email-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    
+    // Close duplicate email modal on backdrop click
+    document.getElementById('duplicate-email-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeDuplicateEmailModal();
+      }
+    });
+    
+    // Close duplicate email modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('duplicate-email-modal');
+        if (!modal.classList.contains('hidden')) {
+          closeDuplicateEmailModal();
+        }
+      }
+    });
 
     // Get form element
     const form = document.getElementById('login-form');
