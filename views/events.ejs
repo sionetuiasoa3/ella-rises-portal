@@ -125,12 +125,17 @@
       console.log('Current time for filtering:', now);
       
       container.innerHTML = sortedTemplates.map((template, index) => {
-        // Use EventTemplatePhotoPath if available, otherwise use fallback image
+        // Use EventTemplatePhotoPath if available (S3 URL or /uploads/... path), otherwise fallback
         let imagePath = null;
         if (template.EventTemplatePhotoPath) {
-          imagePath = template.EventTemplatePhotoPath.startsWith('/') 
-            ? template.EventTemplatePhotoPath 
-            : `/images/${template.EventTemplatePhotoPath}`;
+          if (template.EventTemplatePhotoPath.startsWith('http')) {
+            imagePath = template.EventTemplatePhotoPath;
+          } else if (template.EventTemplatePhotoPath.startsWith('/')) {
+            imagePath = template.EventTemplatePhotoPath;
+          } else {
+            // Legacy case: stored key without leading slash
+            imagePath = `/uploads/templates/${template.EventTemplatePhotoPath}`;
+          }
         } else {
           imagePath = fallbackImages[index % fallbackImages.length];
         }

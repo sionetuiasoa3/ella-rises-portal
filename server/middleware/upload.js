@@ -90,6 +90,7 @@ export const createUpload = (entity, fieldName = 'photo', maxSizeMB = 5) => {
 
 // Pre-configured uploaders
 export const uploadParticipantPhoto = createUpload('participants', 'photo');
+export const uploadTemplatePhoto = createUpload('templates', 'photo');
 
 // Helper to get the public URL for an uploaded file
 export const getUploadPath = (entity, filename) => {
