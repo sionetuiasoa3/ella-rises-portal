@@ -223,97 +223,40 @@
       container.innerHTML = '<p class="text-foreground/60 p-6">No events found.</p>';
       return;
     }
-
-    const now = new Date();
-    const upcoming = events.filter(e => new Date(e.EventDateTimeStart) >= now);
-    const completed = events.filter(e => new Date(e.EventDateTimeStart) < now);
-
-    const formatDate = (d) => new Date(d).toLocaleString();
-    const capacityText = (cap) => cap ? cap : 'Unlimited';
-    const regText = (count, cap) => `${count ?? 0} / ${capacityText(cap)}`;
-
-    const renderRows = (rows, label) => rows.map(e => `
-      <tr class="border-t border-border hover:bg-muted/50">
-        <td class="p-4 font-medium">${e.EventName}</td>
-        <td class="p-4 text-foreground/70">${formatDate(e.EventDateTimeStart)}</td>
-        <td class="p-4 text-foreground/70">${e.EventLocation || '-'}</td>
-        <td class="p-4 text-foreground/70">${label === 'upcoming' ? regText(e.registrationCount, e.EventCapacity) : regText(e.attendedCount, e.EventCapacity)}</td>
-        <td class="p-4 text-right">
-          <a href="/admin/events/${e.EventID}/registrations" class="text-primary hover:underline mr-3" title="Registrations">
-            <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          </a>
-          <button onclick='openEditEventModal(${JSON.stringify(e).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
-            <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-          </button>
-          <button onclick="openDeleteModal(${e.EventID}, '${e.EventName}')" class="text-red-600 hover:text-red-800" title="Delete">
-            <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          </button>
-        </td>
-      </tr>
-    `).join('');
-
-    const renderUpcoming = `
-      <div class="mb-8">
-        <h2 class="text-2xl font-serif text-foreground mb-3">Upcoming Events</h2>
-        <table class="w-full">
-          <thead class="bg-muted">
-            <tr>
-              <th class="text-left p-4 font-medium">Event Name</th>
-              <th class="text-left p-4 font-medium">Date</th>
-              <th class="text-left p-4 font-medium">Location</th>
-              <th class="text-left p-4 font-medium">Registered / Capacity</th>
-              <th class="text-right p-4 font-medium">Actions</th>
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Event Name</th>
+            <th class="text-left p-4 font-medium">Date</th>
+            <th class="text-left p-4 font-medium">Location</th>
+            <th class="text-left p-4 font-medium">Capacity</th>
+            <th class="text-right p-4 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${events.map(e => `
+            <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4 font-medium">${e.EventName}</td>
+              <td class="p-4 text-foreground/70">${new Date(e.EventDateTimeStart).toLocaleString()}</td>
+              <td class="p-4 text-foreground/70">${e.EventLocation || '-'}</td>
+              <td class="p-4 text-foreground/70">${e.EventCapacity || 'Unlimited'}</td>
+              <td class="p-4 text-right">
+                <a href="/admin/events/${e.EventID}/registrations" class="text-primary hover:underline mr-3" title="Registrations">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </a>
+                <button onclick='openEditEventModal(${JSON.stringify(e).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="openDeleteModal(${e.EventID}, '${e.EventName}')" class="text-red-600 hover:text-red-800" title="Delete">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            ${upcoming.length ? renderRows(upcoming, 'upcoming') : `<tr><td colspan="5" class="p-4 text-foreground/60">No upcoming events.</td></tr>`}
-          </tbody>
-        </table>
-      </div>
+          `).join('')}
+        </tbody>
+      </table>
     `;
-
-    const completedByYear = completed.reduce((acc, e) => {
-      const year = new Date(e.EventDateTimeStart).getFullYear();
-      acc[year] = acc[year] || [];
-      acc[year].push(e);
-      return acc;
-    }, {});
-
-    const renderCompletedSections = Object.keys(completedByYear).sort((a,b)=>b-a).map(year => {
-      return `
-        <details class="border border-border rounded-lg mb-3 overflow-hidden" ${year === String(new Date().getFullYear()) ? 'open' : ''}>
-          <summary class="bg-muted px-4 py-3 cursor-pointer text-foreground font-medium flex items-center justify-between">
-            Completed ${year}
-            <span class="text-sm text-foreground/60">${completedByYear[year].length} events</span>
-          </summary>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-muted/70">
-                <tr>
-                  <th class="text-left p-4 font-medium">Event Name</th>
-                  <th class="text-left p-4 font-medium">Date</th>
-                  <th class="text-left p-4 font-medium">Location</th>
-                  <th class="text-left p-4 font-medium">Attended / Capacity</th>
-                  <th class="text-right p-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${renderRows(completedByYear[year], 'completed') || `<tr><td colspan="5" class="p-4 text-foreground/60">No events.</td></tr>`}
-              </tbody>
-            </table>
-          </div>
-        </details>
-      `;
-    }).join('');
-
-    const renderCompleted = `
-      <div>
-        <h2 class="text-2xl font-serif text-foreground mb-3">Completed Events</h2>
-        ${Object.keys(completedByYear).length ? renderCompletedSections : '<p class="text-foreground/60 p-4 border border-border rounded-lg">No completed events.</p>'}
-      </div>
-    `;
-
-    container.innerHTML = renderUpcoming + renderCompleted;
   }
 
   function loadEventTemplates(selectedValue = '') {
