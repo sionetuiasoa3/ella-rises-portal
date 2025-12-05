@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Light pink/blush circle background -->
+  <circle cx="50" cy="50" r="48" fill="hsl(15 70% 91%)" stroke="hsl(150 4% 23%)" stroke-width="2" />
+  <!-- Stylized "ER" text in black -->
+  <text x="50" y="65" font-family="serif" font-size="48" font-weight="bold" text-anchor="middle" fill="hsl(150 4% 23%)">ER</text>
+</svg>
