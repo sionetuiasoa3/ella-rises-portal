@@ -15,11 +15,28 @@
       </div>
     </div>
 
+    <!-- Total summary -->
+    <div class="bg-card border border-border rounded-xl p-6 shadow-sm mb-8">
+      <div class="flex items-center justify-between text-sm">
+        <span class="font-semibold text-foreground">Total Donations</span>
+        <span class="text-primary font-bold" id="admin-current-raised">$0</span>
+      </div>
+    </div>
+
     <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
       <div class="flex flex-wrap gap-3 mb-4">
         <div class="flex-1 min-w-[240px]">
           <label class="block text-sm font-medium text-foreground/70 mb-1">Search</label>
           <input id="search-input" type="text" placeholder="Name, email, participant ID, donation ID" class="w-full px-3 py-2 border border-border rounded-lg bg-background" oninput="renderDonations()" />
+        </div>
+        <div class="w-48">
+          <label class="block text-sm font-medium text-foreground/70 mb-1">Sort</label>
+          <select id="sort-by" class="w-full px-3 py-2 border border-border rounded-lg bg-background" onchange="renderDonations()">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="amount-desc">Most (high to low)</option>
+            <option value="amount-asc">Least (low to high)</option>
+          </select>
         </div>
       </div>
 
@@ -27,9 +44,9 @@
         <table class="w-full">
           <thead class="bg-muted">
             <tr>
-              <th class="text-left p-3 font-medium">Donation ID</th>
-              <th class="text-left p-3 font-medium">Participant</th>
               <th class="text-left p-3 font-medium">Participant ID</th>
+              <th class="text-left p-3 font-medium">Participant</th>
+              <th class="text-left p-3 font-medium">Donation #</th>
               <th class="text-left p-3 font-medium">Date</th>
               <th class="text-left p-3 font-medium">Amount</th>
               <th class="text-left p-3 font-medium">Message</th>
@@ -91,6 +108,7 @@
   </div>
 </div>
 
+
 <%- include('../partials/footer') %>
 <script>
   let donationsData = [];
@@ -98,6 +116,7 @@
 
   const tableBody = document.getElementById('donations-table-body');
   const searchInput = document.getElementById('search-input');
+  const sortBy = document.getElementById('sort-by');
 
   function formatDate(d) {
     if (!d) return '-';
@@ -110,6 +129,46 @@
     const num = parseFloat(amount || 0);
     if (isNaN(num)) return '$0.00';
     return num.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+  }
+
+  async function loadGoalAndTotal() {
+    try {
+      const [totalRes, goalRes] = await Promise.all([
+        fetch('/api/donations/total'),
+        fetch('/api/donations/goal')
+      ]);
+      const totalData = totalRes.ok ? await totalRes.json() : { total: 0 };
+      const goalData = goalRes.ok ? await goalRes.json() : { goal: donationGoal };
+
+      const total = typeof totalData.total === 'number' ? totalData.total : parseFloat(totalData.total) || 0;
+      donationGoal = typeof goalData.goal === 'number' ? goalData.goal : parseFloat(goalData.goal) || donationGoal;
+
+      const percent = donationGoal ? Math.min((total / donationGoal) * 100, 100) : 0;
+
+      const raisedEl = document.getElementById('admin-current-raised');
+      const goalPercentEl = document.getElementById('admin-goal-percent');
+      const barEl = document.getElementById('admin-progress-bar');
+      const labelEl = document.getElementById('admin-goal-label');
+
+      if (raisedEl) raisedEl.textContent = '$' + Math.round(total).toLocaleString();
+      if (goalPercentEl) goalPercentEl.textContent = percent.toFixed(1) + '% of $' + donationGoal.toLocaleString() + ' goal';
+      if (barEl) barEl.style.width = percent + '%';
+      if (labelEl) labelEl.textContent = `Total donations vs goal (${percent.toFixed(1)}%)`;
+    } catch (error) {
+      console.error('Error loading goal/total', error);
+    }
+  }
+
+  async function loadTotalOnly() {
+    try {
+      const totalRes = await fetch('/api/donations/total');
+      const totalData = totalRes.ok ? await totalRes.json() : { total: 0 };
+      const total = typeof totalData.total === 'number' ? totalData.total : parseFloat(totalData.total) || 0;
+      const raisedEl = document.getElementById('admin-current-raised');
+      if (raisedEl) raisedEl.textContent = '$' + Math.round(total).toLocaleString();
+    } catch (error) {
+      console.error('Error loading total', error);
+    }
   }
 
   function renderDonations() {
@@ -125,31 +184,56 @@
       });
     }
 
+    // Sort
+    filtered = filtered.slice().sort((a, b) => {
+      const dateA = new Date(a.DonationDateRaw);
+      const dateB = new Date(b.DonationDateRaw);
+      const amtA = parseFloat(a.DonationAmountRaw) || 0;
+      const amtB = parseFloat(b.DonationAmountRaw) || 0;
+
+      const sort = sortBy.value;
+      switch (sort) {
+        case 'amount-asc':
+          if (amtA !== amtB) return amtA - amtB;
+          return dateB - dateA; // tie-breaker: newer first
+        case 'amount-desc':
+          if (amtA !== amtB) return amtB - amtA;
+          return dateB - dateA; // tie-breaker: newer first
+        case 'date-asc':
+          if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+          return amtB - amtA; // tie-breaker: larger first
+        case 'date-desc':
+        default:
+          if (dateA.getTime() !== dateB.getTime()) return dateB - dateA;
+          return amtB - amtA; // tie-breaker: larger first
+      }
+    });
+
     if (!filtered.length) {
       tableBody.innerHTML = '<tr><td colspan="7" class="p-4 text-foreground/60">No donations found.</td></tr>';
       return;
     }
 
-    tableBody.innerHTML = filtered.map(d => `
+        tableBody.innerHTML = filtered.map(d => `
       <tr class="border-t border-border hover:bg-muted/50">
-        <td class="p-3 font-medium">${d.DonationID}</td>
-        <td class="p-3 text-foreground/80">${d.DisplayName || `${d.ParticipantFirstName || ''} ${d.ParticipantLastName || ''}`.trim() || 'Unknown'}</td>
         <td class="p-3 text-foreground/70">${d.ParticipantID || '-'}</td>
+        <td class="p-3 text-foreground/80">${d.DisplayName || `${d.ParticipantFirstName || ''} ${d.ParticipantLastName || ''}`.trim() || 'Unknown'}</td>
+        <td class="p-3 text-foreground/70">${d.DonationNumber != null ? d.DonationNumber : '-'}</td>
         <td class="p-3 text-foreground/70">${formatDate(d.DonationDateRaw)}</td>
         <td class="p-3 text-foreground/80 font-semibold">${formatCurrency(d.DonationAmountRaw)}</td>
         <td class="p-3 text-foreground/70 max-w-xs truncate" title="${d.Message || ''}">${d.Message || ''}</td>
         <td class="p-3 text-right space-x-2">
           <button onclick='openDonationModal(${JSON.stringify(d).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 text-sm font-medium">Edit</button>
-          <button onclick="deleteDonation(${d.DonationID})" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+          <button onclick="deleteDonation(${d.DonationID || d.donationid})" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
         </td>
       </tr>
     `).join('');
   }
 
   function openDonationModal(donation = null) {
-    editingDonationId = donation ? donation.DonationID : null;
+    editingDonationId = donation ? (donation.DonationID || donation.donationid) : null;
     document.getElementById('donation-modal-title').textContent = editingDonationId ? 'Edit Donation' : 'Add Donation';
-    document.getElementById('donation-id').value = donation?.DonationID || '';
+    document.getElementById('donation-id').value = donation?.DonationID || donation?.donationid || '';
     document.getElementById('donation-participant').value = donation?.ParticipantID || '';
     document.getElementById('donation-amount').value = donation?.DonationAmountRaw || '';
     document.getElementById('donation-date').value = donation?.DonationDateRaw ? new Date(donation.DonationDateRaw).toISOString().slice(0,16) : '';
@@ -232,4 +316,5 @@
   }
 
   loadDonations();
+  loadTotalOnly();
 </script>

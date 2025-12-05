@@ -34,22 +34,60 @@ async function recalcDonationSummary(participantId) {
   }
 }
 
+const DEFAULT_GOAL = 100000;
+let inMemoryGoal = DEFAULT_GOAL;
+
+async function getDonationGoalValue() {
+  try {
+    const row = await db('DonationGoal').first();
+    if (row && row.GoalAmount !== undefined && row.GoalAmount !== null) {
+      const goalVal = parseFloat(row.GoalAmount) || DEFAULT_GOAL;
+      inMemoryGoal = goalVal;
+      return goalVal;
+    }
+  } catch (err) {
+    // Table may not exist; fallback to in-memory/default without throwing
+    console.warn('DonationGoal table not found; using in-memory goal fallback.');
+  }
+  return inMemoryGoal || DEFAULT_GOAL;
+}
+
+async function setDonationGoalValue(goalAmount) {
+  const goal = parseFloat(goalAmount);
+  if (isNaN(goal) || goal <= 0) {
+    throw new Error('Goal must be a positive number');
+  }
+  // Upsert single-row table; if table missing, throw so caller can handle
+  try {
+    const existing = await db('DonationGoal').first();
+    if (existing) {
+      await db('DonationGoal').update({ GoalAmount: goal });
+    } else {
+      await db('DonationGoal').insert({ GoalAmount: goal });
+    }
+    inMemoryGoal = goal;
+  } catch (err) {
+    console.warn('DonationGoal table not found or write failed; storing goal in memory only.');
+    inMemoryGoal = goal;
+  }
+}
+
 // List all donations (admin only)
 router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
-    const donations = await db('Donations')
-      .leftJoin('Participants', 'Donations.ParticipantID', 'Participants.ParticipantID')
+    const donations = await db('Donations as d')
+      .leftJoin('Participants as p', 'd.ParticipantID', 'p.ParticipantID')
       .where(function () {
-        this.whereNull('Participants.IsDeleted').orWhere({ 'Participants.IsDeleted': false });
+        this.whereNull('p.IsDeleted').orWhere({ 'p.IsDeleted': false });
       })
       .select(
-        'Donations.*',
-        'Participants.ParticipantFirstName',
-        'Participants.ParticipantLastName',
-        'Participants.ParticipantEmail',
-        'Participants.ParticipantRole'
+        'd.*',
+        'p.ParticipantFirstName',
+        'p.ParticipantLastName',
+        'p.ParticipantEmail',
+        'p.ParticipantRole'
       )
-      .orderBy('Donations.DonationDateRaw', 'desc');
+      .orderBy('d.DonationDateRaw', 'desc');
     
     // Mark anonymous donations (from donor role participants)
     const formattedDonations = donations.map(d => ({
