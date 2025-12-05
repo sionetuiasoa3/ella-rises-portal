@@ -14,10 +14,21 @@ router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
         'Donations.*',
         'Participants.ParticipantFirstName',
         'Participants.ParticipantLastName',
-        'Participants.ParticipantEmail'
+        'Participants.ParticipantEmail',
+        'Participants.ParticipantRole'
       )
       .orderBy('Donations.DonationDateRaw', 'desc');
-    res.json(donations);
+    
+    // Mark anonymous donations (from donor role participants)
+    const formattedDonations = donations.map(d => ({
+      ...d,
+      isAnonymous: d.ParticipantRole === 'donor',
+      DisplayName: d.ParticipantRole === 'donor' 
+        ? 'Anonymous Donor' 
+        : `${d.ParticipantFirstName || ''} ${d.ParticipantLastName || ''}`.trim() || 'Unknown'
+    }));
+    
+    res.json(formattedDonations);
   } catch (error) {
     next(error);
   }
@@ -71,10 +82,21 @@ router.get('/summary', requireAuth, requireRole('admin'), async (req, res, next)
         'DonationSummary.*',
         'Participants.ParticipantFirstName',
         'Participants.ParticipantLastName',
-        'Participants.ParticipantEmail'
+        'Participants.ParticipantEmail',
+        'Participants.ParticipantRole'
       )
       .orderBy('DonationSummary.TotalDonations', 'desc');
-    res.json(summary);
+    
+    // Mark anonymous donations (from donor role participants)
+    const formattedSummary = summary.map(s => ({
+      ...s,
+      isAnonymous: s.ParticipantRole === 'donor',
+      DisplayName: s.ParticipantRole === 'donor' 
+        ? 'Anonymous Donor' 
+        : `${s.ParticipantFirstName || ''} ${s.ParticipantLastName || ''}`.trim() || 'Unknown'
+    }));
+    
+    res.json(formattedSummary);
   } catch (error) {
     next(error);
   }
@@ -142,14 +164,48 @@ router.post('/', async (req, res, next) => {
 
       res.status(201).json(donation);
     } else {
-      // Anonymous donation - return success
-      // Note: Anonymous donations don't create Donations records or update DonationSummary
-      // The total endpoint sums from DonationSummary, so anonymous donations won't be counted
-      // If you want to track anonymous donations, you'd need to create Donations records with null ParticipantID
+      // Anonymous donation - create a donor participant to track the donation
+      // Create a new participant with role="donor" and minimal info
+      const [donorParticipant] = await db('Participants')
+        .insert({
+          ParticipantRole: 'donor',
+          ParticipantEmail: DonorEmail || null,
+          ParticipantFirstName: null,
+          ParticipantLastName: null,
+          ParticipantDOB: null,
+          ParticipantPhone: null,
+          ParticipantCity: null,
+          ParticipantState: null,
+          ParticipantZip: null,
+          ParticipantSchoolOrEmployer: null,
+          ParticipantFieldOfInterest: null,
+          IsDeleted: false
+        })
+        .returning('*');
+
+      const donorId = donorParticipant.ParticipantID;
+
+      // Create the donation record
+      const [donation] = await db('Donations')
+        .insert({
+          ParticipantID: donorId,
+          DonationNumber: 1,
+          DonationDateRaw: DonationDateRaw || new Date(),
+          DonationAmountRaw
+        })
+        .returning('*');
+
+      // Create donation summary for this donor
+      await db('DonationSummary')
+        .insert({
+          ParticipantID: donorId,
+          TotalDonations: DonationAmountRaw
+        });
+
       res.status(201).json({ 
         message: 'Donation received',
         amount: DonationAmountRaw,
-        anonymous: true 
+        donationId: donation.DonationID
       });
     }
   } catch (error) {

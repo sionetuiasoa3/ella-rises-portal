@@ -6,11 +6,12 @@ import { uploadParticipantPhoto, getUploadPath, deleteUploadedFile, handleUpload
 
 const router = express.Router();
 
-// List all participants (admin only) - Exclude deleted participants
+// List all participants (admin only) - Exclude deleted participants and donors
 router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const participants = await db('Participants')
       .where({ IsDeleted: false })
+      .whereNot({ ParticipantRole: 'donor' })
       .select('*')
       .orderBy('ParticipantLastName', 'asc');
     res.json(participants);

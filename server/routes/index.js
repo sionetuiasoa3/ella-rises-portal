@@ -95,17 +95,21 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const futurePlaceholder = new Date('2099-12-31');
+    futurePlaceholder.setHours(0, 0, 0, 0);
     
     const achievedMilestones = allMilestones.filter(m => {
       const milestoneDate = new Date(m.MilestoneDate);
       milestoneDate.setHours(0, 0, 0, 0);
-      return milestoneDate <= today;
+      // Exclude placeholder date (future milestones)
+      return milestoneDate <= today && milestoneDate.getTime() !== futurePlaceholder.getTime();
     });
     
     const plannedMilestones = allMilestones.filter(m => {
       const milestoneDate = new Date(m.MilestoneDate);
       milestoneDate.setHours(0, 0, 0, 0);
-      return milestoneDate > today;
+      // Include placeholder date (future milestones without dates)
+      return milestoneDate.getTime() === futurePlaceholder.getTime() || milestoneDate > today;
     });
     
     // Fetch registrations with event details
