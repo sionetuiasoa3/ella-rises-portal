@@ -142,8 +142,12 @@
           ${participants.map(p => `
             <tr class="border-t border-border hover:bg-muted/50">
               <td class="p-4">
-                <a href="/admin/participants/${p.ParticipantID}" class="text-primary hover:underline font-medium">
-                  ${p.ParticipantFirstName} ${p.ParticipantLastName}
+                <a href="/admin/participants/${p.ParticipantID}" class="flex items-center gap-3 text-primary hover:underline font-medium">
+                  ${p.ParticipantPhotoPath 
+                    ? `<img src="${p.ParticipantPhotoPath}" alt="" class="w-10 h-10 rounded-full object-cover border border-border">`
+                    : `<div class="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-sm text-foreground/40">${(p.ParticipantFirstName || '').charAt(0)}${(p.ParticipantLastName || '').charAt(0)}</div>`
+                  }
+                  <span>${p.ParticipantFirstName} ${p.ParticipantLastName}</span>
                 </a>
               </td>
               <td class="p-4 text-foreground/70">${p.ParticipantEmail}</td>
