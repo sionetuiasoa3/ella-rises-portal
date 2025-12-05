@@ -30,9 +30,25 @@
     const upcomingEvents = registrations.filter(r => new Date(r.EventDateTimeStart) > now);
     const pastEvents = registrations.filter(r => new Date(r.EventDateTimeStart) <= now);
     
-    // Separate achieved and planned milestones
-    const achievedMilestones = milestones.filter(m => m.MilestoneStatus === 'achieved' || new Date(m.MilestoneDate) <= now);
-    const plannedMilestones = milestones.filter(m => m.MilestoneStatus === 'planned' || new Date(m.MilestoneDate) > now);
+    // Separate achieved and planned milestones (using same logic as user dashboard)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const futurePlaceholder = new Date('2099-12-31');
+    futurePlaceholder.setHours(0, 0, 0, 0);
+    
+    const achievedMilestones = milestones.filter(m => {
+      const milestoneDate = new Date(m.MilestoneDate);
+      milestoneDate.setHours(0, 0, 0, 0);
+      // Exclude placeholder date (future milestones)
+      return milestoneDate <= today && milestoneDate.getTime() !== futurePlaceholder.getTime();
+    });
+    
+    const plannedMilestones = milestones.filter(m => {
+      const milestoneDate = new Date(m.MilestoneDate);
+      milestoneDate.setHours(0, 0, 0, 0);
+      // Include placeholder date (future milestones without dates)
+      return milestoneDate.getTime() === futurePlaceholder.getTime() || milestoneDate > today;
+    });
     
     const totalDonations = donations.TotalDonations || donations.reduce?.((sum, d) => sum + parseFloat(d.DonationAmount || 0), 0) || 0;
     
@@ -99,48 +115,128 @@
         </div>
       </div>
       
-      <!-- Achieved Milestones -->
+      <!-- Combined Milestones Section -->
       <div class="mb-8">
-        <h2 class="text-2xl font-serif text-foreground mb-4">Achieved Milestones</h2>
-        ${achievedMilestones.length > 0 ? `
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${achievedMilestones.map(m => `
-              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
-                <div class="flex items-start justify-between mb-2">
-                  <h3 class="font-medium text-foreground">${m.MilestoneTitle || m.MilestoneTypeName || 'Milestone'}</h3>
-                  <span class="text-green-600">✓</span>
-                </div>
-                <p class="text-sm text-foreground/60">${new Date(m.MilestoneDate).toLocaleDateString()}</p>
+        <h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6">Milestones</h2>
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Left: Completed Milestones -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-serif text-foreground">Completed Milestones</h3>
+                <button 
+                  onclick="openAddMilestoneModal(true, ${participant.ParticipantID})"
+                  class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  + Add
+                </button>
               </div>
-            `).join('')}
-          </div>
-        ` : `
-          <div class="bg-card border border-border rounded-xl p-6 text-center">
-            <p class="text-foreground/60">No milestones achieved yet.</p>
-          </div>
-        `}
-      </div>
-      
-      <!-- Planned Milestones -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-serif text-foreground mb-4">Planned Milestones</h2>
-        ${plannedMilestones.length > 0 ? `
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${plannedMilestones.map(m => `
-              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
-                <div class="flex items-start justify-between mb-2">
-                  <h3 class="font-medium text-foreground">${m.MilestoneTitle || m.MilestoneTypeName || 'Milestone'}</h3>
-                  <span class="text-foreground/40">○</span>
-                </div>
-                <p class="text-sm text-foreground/60">${new Date(m.MilestoneDate).toLocaleDateString()}</p>
+              <div class="space-y-3 max-h-96 overflow-y-auto">
+                ${achievedMilestones.length > 0 ? achievedMilestones.map(m => {
+                  const milestoneDate = new Date(m.MilestoneDate);
+                  const futurePlaceholderDate = new Date('2099-12-31');
+                  const dateStr = milestoneDate.toISOString().split('T')[0];
+                  const isPlaceholder = milestoneDate.getTime() === futurePlaceholderDate.getTime();
+                  
+                  return `
+                    <div 
+                      class="bg-background border border-border rounded-lg p-4 flex items-start justify-between gap-3"
+                      data-milestone-id="${m.Id || m.MilestoneID}"
+                      data-milestone-type-id="${m.MilestoneID}"
+                      data-milestone-date="${dateStr}"
+                      data-participant-id="${participant.ParticipantID}"
+                      data-is-completed="true"
+                    >
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                          <h4 class="text-base font-serif text-foreground">${m.MilestoneTitle || 'Milestone'}</h4>
+                          <span class="text-sm text-primary">✓</span>
+                        </div>
+                        <p class="text-sm text-foreground/60">
+                          ${!isPlaceholder ? milestoneDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                        </p>
+                      </div>
+                      <div class="flex gap-2">
+                        <button 
+                          onclick="openEditMilestoneModalFromElement(this.closest('[data-milestone-id]'), ${participant.ParticipantID})"
+                          class="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1 rounded text-sm font-medium transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onclick="deleteMilestone(${m.Id || m.MilestoneID}, ${participant.ParticipantID})"
+                          class="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-3 py-1 rounded text-sm font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('') : `
+                  <p class="text-foreground/60 text-sm text-center py-4">No milestones achieved yet. Keep participating to earn milestones!</p>
+                `}
               </div>
-            `).join('')}
+            </div>
+
+            <!-- Right: Future Milestone Goals -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-serif text-foreground">Future Milestone Goals</h3>
+                <button 
+                  onclick="openAddMilestoneModal(false, ${participant.ParticipantID})"
+                  class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  + Add
+                </button>
+              </div>
+              <div class="space-y-3 max-h-96 overflow-y-auto">
+                ${plannedMilestones.length > 0 ? plannedMilestones.map(m => {
+                  const milestoneDate = new Date(m.MilestoneDate);
+                  const futurePlaceholderDate = new Date('2099-12-31');
+                  const dateStr = milestoneDate.toISOString().split('T')[0];
+                  const isPlaceholder = milestoneDate.getTime() === futurePlaceholderDate.getTime();
+                  
+                  return `
+                    <div 
+                      class="bg-background border border-border rounded-lg p-4 flex items-start justify-between gap-3"
+                      data-milestone-id="${m.Id || m.MilestoneID}"
+                      data-milestone-type-id="${m.MilestoneID}"
+                      data-milestone-date="${dateStr}"
+                      data-participant-id="${participant.ParticipantID}"
+                      data-is-completed="false"
+                    >
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                          <h4 class="text-base font-serif text-foreground">${m.MilestoneTitle || 'Milestone'}</h4>
+                          <span class="text-sm text-foreground/40">○</span>
+                        </div>
+                        <p class="text-sm text-foreground/60">
+                          ${!isPlaceholder ? `<strong>Goal Date:</strong> ${milestoneDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : ''}
+                        </p>
+                      </div>
+                      <div class="flex gap-2">
+                        <button 
+                          onclick="openEditMilestoneModalFromElement(this.closest('[data-milestone-id]'), ${participant.ParticipantID})"
+                          class="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1 rounded text-sm font-medium transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onclick="deleteMilestone(${m.Id || m.MilestoneID}, ${participant.ParticipantID})"
+                          class="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-3 py-1 rounded text-sm font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('') : `
+                  <p class="text-foreground/60 text-sm text-center py-4">No planned milestones at this time.</p>
+                `}
+              </div>
+            </div>
           </div>
-        ` : `
-          <div class="bg-card border border-border rounded-xl p-6 text-center">
-            <p class="text-foreground/60">No planned milestones.</p>
-          </div>
-        `}
+        </div>
       </div>
       
       <!-- Upcoming Events -->
@@ -219,5 +315,313 @@
       alert('Error uploading photo');
     }
   }
+
+  // Milestone management functions
+  let milestoneTypes = [];
+  let currentParticipantId = null;
+
+  // Load milestone types
+  async function loadMilestoneTypes() {
+    try {
+      const res = await fetch('/api/milestones/types', {
+        credentials: 'same-origin'
+      });
+      if (res.ok) {
+        milestoneTypes = await res.json();
+        const select = document.getElementById('milestoneType');
+        if (select) {
+          select.innerHTML = '<option value="">Select a milestone...</option>';
+          milestoneTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.MilestoneID;
+            option.textContent = type.MilestoneTitle;
+            select.appendChild(option);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading milestone types:', error);
+    }
+  }
+
+  // Open add milestone modal
+  async function openAddMilestoneModal(isCompleted, participantId) {
+    currentParticipantId = participantId;
+    await loadMilestoneTypes();
+    document.getElementById('milestoneModalTitle').textContent = isCompleted 
+      ? 'Add Completed Milestone' 
+      : 'Add Future Milestone Goal';
+    document.getElementById('milestoneId').value = '';
+    document.getElementById('isCompleted').value = isCompleted ? 'true' : 'false';
+    document.getElementById('milestoneType').value = '';
+    document.getElementById('milestoneDate').value = '';
+    
+    const dateField = document.getElementById('dateField');
+    const dateLabel = document.getElementById('dateFieldLabel');
+    const dateHelp = document.getElementById('dateFieldHelp');
+    const dateInput = document.getElementById('milestoneDate');
+    
+    if (isCompleted) {
+      dateLabel.textContent = 'Date Achieved';
+      dateInput.required = true;
+      dateHelp.textContent = '';
+    } else {
+      dateLabel.textContent = 'Goal Date to Achieve Milestone By';
+      dateInput.required = false;
+      dateHelp.textContent = 'Optional - leave blank if no specific goal date';
+    }
+    
+    document.getElementById('milestoneModal').classList.remove('hidden');
+  }
+
+  // Open edit milestone modal from element
+  async function openEditMilestoneModalFromElement(element, participantId) {
+    currentParticipantId = participantId;
+    await loadMilestoneTypes();
+    
+    const milestoneId = element.dataset.milestoneId;
+    const milestoneTypeId = element.dataset.milestoneTypeId;
+    const milestoneDate = element.dataset.milestoneDate;
+    const isCompleted = element.dataset.isCompleted === 'true';
+    
+    document.getElementById('milestoneModalTitle').textContent = isCompleted 
+      ? 'Edit Completed Milestone' 
+      : 'Edit Future Milestone Goal';
+    document.getElementById('milestoneId').value = milestoneId;
+    document.getElementById('isCompleted').value = isCompleted ? 'true' : 'false';
+    document.getElementById('milestoneType').value = milestoneTypeId;
+    
+    const form = document.getElementById('milestoneForm');
+    form.dataset.originalMilestoneId = milestoneTypeId;
+    form.dataset.originalMilestoneDate = milestoneDate;
+    form.dataset.originalParticipantId = participantId;
+    
+    const dateField = document.getElementById('dateField');
+    const dateLabel = document.getElementById('dateFieldLabel');
+    const dateHelp = document.getElementById('dateFieldHelp');
+    const dateInput = document.getElementById('milestoneDate');
+    
+    if (isCompleted) {
+      dateLabel.textContent = 'Date Achieved';
+      dateInput.required = true;
+      dateHelp.textContent = '';
+    } else {
+      dateLabel.textContent = 'Goal Date to Achieve Milestone By';
+      dateInput.required = false;
+      dateHelp.textContent = 'Optional - leave blank if no specific goal date';
+    }
+    
+    const date = new Date(milestoneDate);
+    const futurePlaceholder = new Date('2099-12-31');
+    if (date.getTime() !== futurePlaceholder.getTime()) {
+      dateInput.value = date.toISOString().split('T')[0];
+    } else {
+      dateInput.value = '';
+    }
+    
+    document.getElementById('milestoneModal').classList.remove('hidden');
+  }
+
+  // Close milestone modal
+  function closeMilestoneModal() {
+    document.getElementById('milestoneModal').classList.add('hidden');
+    document.getElementById('milestoneForm').reset();
+    currentParticipantId = null;
+  }
+
+  // Handle milestone form submission
+  async function handleMilestoneSubmit(event) {
+    event.preventDefault();
+    
+    const milestoneId = document.getElementById('milestoneId').value;
+    const isCompleted = document.getElementById('isCompleted').value === 'true';
+    const MilestoneID = document.getElementById('milestoneType').value;
+    const MilestoneDate = document.getElementById('milestoneDate').value;
+    const ParticipantID = currentParticipantId;
+    const form = document.getElementById('milestoneForm');
+
+    try {
+      let res;
+      if (milestoneId) {
+        const dateValue = isCompleted 
+          ? MilestoneDate 
+          : (MilestoneDate || null);
+        
+        const body = {
+          MilestoneID,
+          MilestoneDate: dateValue,
+          isFuture: !isCompleted
+        };
+        
+        if (form.dataset.originalMilestoneId) {
+          body.originalMilestoneID = form.dataset.originalMilestoneId;
+          body.originalMilestoneDate = form.dataset.originalMilestoneDate;
+          body.ParticipantID = form.dataset.originalParticipantId;
+        }
+        
+        res = await fetch(`/api/milestones/${milestoneId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify(body)
+        });
+      } else {
+        const dateValue = isCompleted 
+          ? MilestoneDate 
+          : (MilestoneDate || null);
+        
+        res = await fetch('/api/milestones', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            MilestoneID,
+            ParticipantID,
+            MilestoneDate: dateValue,
+            isFuture: !isCompleted
+          })
+        });
+      }
+
+      if (!res.ok) {
+        let errorMessage = 'Failed to save milestone';
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const error = await res.json();
+            errorMessage = error.message || errorMessage;
+          } catch (e) {
+            errorMessage = `Server error: ${res.status} ${res.statusText}`;
+          }
+        } else {
+          errorMessage = `Server error: ${res.status} ${res.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      closeMilestoneModal();
+      window.location.reload();
+    } catch (error) {
+      alert('Error: ' + error.message);
+      console.error('Milestone save error:', error);
+    }
+  }
+
+  // Delete milestone
+  async function deleteMilestone(milestoneId, participantId) {
+    if (!confirm('Are you sure you want to delete this milestone?')) {
+      return;
+    }
+
+    try {
+      const element = document.querySelector(`[data-milestone-id="${milestoneId}"]`);
+      let url = `/api/milestones/${milestoneId}`;
+      
+      if (element) {
+        const params = new URLSearchParams({
+          ParticipantID: element.dataset.participantId,
+          MilestoneID: element.dataset.milestoneTypeId,
+          MilestoneDate: element.dataset.milestoneDate
+        });
+        url += '?' + params.toString();
+      }
+      
+      const res = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        let errorMessage = 'Failed to delete milestone';
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const error = await res.json();
+            errorMessage = error.message || errorMessage;
+          } catch (e) {
+            errorMessage = `Server error: ${res.status} ${res.statusText}`;
+          }
+        } else {
+          errorMessage = `Server error: ${res.status} ${res.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      window.location.reload();
+    } catch (error) {
+      alert('Error: ' + error.message);
+      console.error('Delete milestone error:', error);
+    }
+  }
+</script>
+
+<!-- Add/Edit Milestone Modal -->
+<div id="milestoneModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4">
+    <h3 id="milestoneModalTitle" class="text-2xl font-serif text-foreground mb-4">Add Milestone</h3>
+    <form id="milestoneForm" onsubmit="handleMilestoneSubmit(event)">
+      <input type="hidden" id="milestoneId" />
+      <input type="hidden" id="isCompleted" />
+      
+      <div class="mb-4">
+        <label for="milestoneType" class="block text-sm font-medium text-foreground mb-2">
+          Milestone Type
+        </label>
+        <select 
+          id="milestoneType" 
+          required
+          class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+        >
+          <option value="">Select a milestone...</option>
+        </select>
+      </div>
+
+      <div id="dateField" class="mb-4">
+        <label id="dateFieldLabel" for="milestoneDate" class="block text-sm font-medium text-foreground mb-2">
+          Date Achieved
+        </label>
+        <input 
+          type="date" 
+          id="milestoneDate" 
+          class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+        />
+        <p id="dateFieldHelp" class="text-xs text-foreground/60 mt-1"></p>
+      </div>
+
+      <div class="flex gap-3">
+        <button 
+          type="submit"
+          class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors"
+        >
+          Save
+        </button>
+        <button 
+          type="button"
+          onclick="closeMilestoneModal()"
+          class="flex-1 bg-muted hover:bg-muted/80 text-foreground px-6 py-2 rounded-lg font-medium transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Close modal when clicking outside
+  document.getElementById('milestoneModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'milestoneModal') {
+      closeMilestoneModal();
+    }
+  });
 </script>
 
