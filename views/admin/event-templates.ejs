@@ -332,7 +332,7 @@
 
   function openDeleteModal(name) {
     deleteTemplateName = name;
-    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This will not delete events using this template, but you won't be able to create new events with it.`;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This will permanently delete this event template and all associated event records. This action cannot be undone.`;
     document.getElementById('delete-modal').classList.remove('hidden');
     document.getElementById('delete-modal').classList.add('flex');
   }
@@ -366,12 +366,16 @@
     try {
       const response = await fetch(`/api/event-templates/${encodeURIComponent(deleteTemplateName)}`, { method: 'DELETE' });
       if (response.ok) {
-        showNotification('Template deleted successfully!', 'success', 'Success');
+        const result = await response.json();
+        const message = result.deletedEventsCount > 0 
+          ? `Event template and ${result.deletedEventsCount} associated event(s) deleted successfully.`
+          : 'Event template deleted successfully.';
+        showNotification(message, 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        showNotification('Error: ' + (error.message || 'Failed to delete. Make sure no events are using this template.'), 'error', 'Error');
+        showNotification('Error: ' + (error.message || 'Failed to delete template.'), 'error', 'Error');
       }
     } catch (err) {
       showNotification('Error deleting template', 'error', 'Error');

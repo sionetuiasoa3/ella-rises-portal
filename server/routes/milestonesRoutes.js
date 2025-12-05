@@ -147,23 +147,26 @@ router.put('/types/:id', requireAuth, requireRole('admin'), async (req, res, nex
   }
 });
 
-// Delete milestone type (admin only)
+// Delete milestone type (admin only) - cascade deletes related milestones
 router.delete('/types/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const milestoneId = parseInt(req.params.id);
     
-    // Check if any milestones use this type
-    const milestonesUsingType = await db('Milestones')
+    // Check if milestone type exists
+    const milestoneType = await db('MilestonesTypes')
       .where({ MilestoneID: milestoneId })
-      .count('* as count')
       .first();
 
-    if (parseInt(milestonesUsingType.count) > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete milestone type: milestones are using this type' 
-      });
+    if (!milestoneType) {
+      return res.status(404).json({ message: 'Milestone type not found' });
     }
 
+    // Cascade delete: First delete all milestones that use this type
+    const deletedMilestones = await db('Milestones')
+      .where({ MilestoneID: milestoneId })
+      .del();
+
+    // Then delete the milestone type itself
     const deleted = await db('MilestonesTypes')
       .where({ MilestoneID: milestoneId })
       .del();
@@ -172,8 +175,12 @@ router.delete('/types/:id', requireAuth, requireRole('admin'), async (req, res, 
       return res.status(404).json({ message: 'Milestone type not found' });
     }
 
-    res.json({ message: 'Milestone type deleted successfully' });
+    res.json({ 
+      message: 'Milestone type and associated milestones deleted successfully',
+      deletedMilestonesCount: deletedMilestones || 0
+    });
   } catch (error) {
+    console.error('Error deleting milestone type:', error);
     next(error);
   }
 });
