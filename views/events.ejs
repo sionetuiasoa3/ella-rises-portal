@@ -68,6 +68,7 @@
     </div>
   </div>
 </div>
+<%- include('partials/notification-modal') %>
 <%- include('partials/footer') %>
 <%- include('partials/footer-scripts') %>
 <script>
@@ -300,7 +301,7 @@
     const eventID = selectElement.value;
     
     if (!eventID) {
-      alert('Please select a date first.');
+      showNotification('Please select a date first.', 'warning', 'Selection Required');
       return;
     }
     
@@ -333,7 +334,7 @@
       if (status < 200 || status >= 300) {
         const error = await response.json().catch(() => ({ message: 'Failed to register for event' }));
         console.log('Registration error:', error);
-        alert(error.message || 'Failed to register for event. Please try again.');
+        showNotification(error.message || 'Failed to register for event. Please try again.', 'error', 'Registration Failed');
         return;
       }
       
@@ -345,7 +346,7 @@
       selectElement.value = '';
     } catch (error) {
       console.error('Error registering for event:', error);
-      alert('An error occurred. Please try again.');
+      showNotification('An error occurred. Please try again.', 'error', 'Error');
     }
   }
 

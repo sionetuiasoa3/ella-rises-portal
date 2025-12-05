@@ -97,6 +97,7 @@
     <% } %>
   </div>
 </div>
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <%- include('../partials/footer-scripts') %>
 <script>
@@ -124,10 +125,10 @@
       }
       
       // Show success and reload page
-      alert('Successfully registered for this event!');
+      showNotification('Successfully registered for this event!', 'success', 'Registration Successful');
       window.location.reload();
     } catch (error) {
-      alert('Error: ' + error.message);
+      showNotification('Error: ' + error.message, 'error', 'Error');
       btn.disabled = false;
       btn.innerHTML = originalText;
     }

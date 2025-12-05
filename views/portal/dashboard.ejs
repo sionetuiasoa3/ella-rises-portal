@@ -405,6 +405,7 @@
     </div>
   </div>
 </div>
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <%- include('../partials/footer-scripts') %>
 
@@ -655,16 +656,19 @@
       closeMilestoneModal();
       window.location.reload();
     } catch (error) {
-      alert('Error: ' + error.message);
+      showNotification('Error: ' + error.message, 'error', 'Error');
       console.error('Milestone save error:', error);
     }
   }
 
   // Delete milestone
   async function deleteMilestone(milestoneId) {
-    if (!confirm('Are you sure you want to delete this milestone?')) {
-      return;
-    }
+    showConfirmation('Are you sure you want to delete this milestone?', async () => {
+      await performDeleteMilestone(milestoneId);
+    }, 'Delete Milestone');
+  }
+  
+  async function performDeleteMilestone(milestoneId) {
 
     try {
       const element = document.querySelector(`[data-milestone-id="${milestoneId}"]`);
@@ -705,7 +709,7 @@
 
       window.location.reload();
     } catch (error) {
-      alert('Error: ' + error.message);
+      showNotification('Error: ' + error.message, 'error', 'Error');
       console.error('Delete milestone error:', error);
     }
   }
@@ -718,9 +722,12 @@
   });
 
   async function unregisterFromEvent(eventId) {
-    if (!confirm('Are you sure you want to unregister from this event?')) {
-      return;
-    }
+    showConfirmation('Are you sure you want to unregister from this event?', async () => {
+      await performUnregisterFromEvent(eventId);
+    }, 'Unregister from Event');
+  }
+  
+  async function performUnregisterFromEvent(eventId) {
 
     try {
       // Use the unregister endpoint
@@ -741,7 +748,7 @@
       // Reload the page to show updated events
       window.location.reload();
     } catch (error) {
-      alert('Error: ' + error.message);
+      showNotification('Error: ' + error.message, 'error', 'Error');
       console.error('Unregister error:', error);
     }
   }

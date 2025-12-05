@@ -350,6 +350,7 @@
   </div>
 </div>
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   // Load dashboard stats
@@ -552,15 +553,15 @@
     try {
       const response = await fetch(endpoint, { method: 'DELETE' });
       if (response.ok) {
-        alert(`${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} deleted successfully!`);
+        showNotification(`${deleteType.charAt(0).toUpperCase() + deleteType.slice(1)} deleted successfully!`, 'success', 'Success');
         closeDeleteModal();
         location.reload();
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to delete'));
+        showNotification('Error: ' + (error.message || 'Failed to delete'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error deleting ' + deleteType);
+      showNotification('Error deleting ' + deleteType, 'error', 'Error');
       console.error(err);
     }
   }
@@ -603,15 +604,15 @@
       });
       
       if (response.ok) {
-        alert(isEditing ? 'Participant updated successfully!' : 'Participant added successfully!');
+        showNotification(isEditing ? 'Participant updated successfully!' : 'Participant added successfully!', 'success', 'Success');
         closeAddParticipantModal();
         window.location.href = '/admin/participants';
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to save participant'));
+        showNotification('Error: ' + (error.message || 'Failed to save participant'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error saving participant');
+      showNotification('Error saving participant', 'error', 'Error');
       console.error(err);
     }
   });
@@ -638,15 +639,15 @@
       });
       
       if (response.ok) {
-        alert(isEditing ? 'Event updated successfully!' : 'Event added successfully!');
+        showNotification(isEditing ? 'Event updated successfully!' : 'Event added successfully!', 'success', 'Success');
         closeAddEventModal();
         window.location.href = '/admin/events';
       } else {
         const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to save event'));
+        showNotification('Error: ' + (error.message || 'Failed to save event'), 'error', 'Error');
       }
     } catch (err) {
-      alert('Error saving event');
+      showNotification('Error saving event', 'error', 'Error');
       console.error(err);
     }
   });

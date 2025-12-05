@@ -109,6 +109,7 @@
 </div>
 
 
+<%- include('../partials/notification-modal') %>
 <%- include('../partials/footer') %>
 <script>
   let donationsData = [];
@@ -262,7 +263,7 @@
     };
 
     if (!payload.DonationAmountRaw || isNaN(payload.DonationAmountRaw)) {
-      alert('Please enter a valid amount.');
+      showNotification('Please enter a valid amount.', 'error', 'Validation Error');
       return;
     }
 
@@ -281,23 +282,27 @@
       }
       closeDonationModal();
       await loadDonations();
+      showNotification('Donation saved successfully!', 'success', 'Success');
     } catch (error) {
-      alert(error.message || 'Error saving donation');
+      showNotification(error.message || 'Error saving donation', 'error', 'Error');
     }
   });
 
   async function deleteDonation(id) {
-    if (!confirm('Delete this donation?')) return;
-    try {
-      const res = await fetch(`/api/donations/${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Delete failed');
+    showConfirmation('Are you sure you want to delete this donation? This action cannot be undone.', async () => {
+      try {
+        const res = await fetch(`/api/donations/${id}`, { method: 'DELETE' });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || 'Delete failed');
+        }
+        await loadDonations();
+        await loadTotalOnly();
+        showNotification('Donation deleted successfully.', 'success', 'Success');
+      } catch (error) {
+        showNotification(error.message || 'Error deleting donation', 'error', 'Error');
       }
-      await loadDonations();
-    } catch (error) {
-      alert(error.message || 'Error deleting donation');
-    }
+    }, 'Delete Donation');
   }
 
   async function loadDonations() {

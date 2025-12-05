@@ -62,12 +62,13 @@
     </div>
   </main>
 </div>
+<%- include('partials/notification-modal') %>
 <%- include('partials/footer') %>
 <%- include('partials/footer-scripts') %>
 <script>
   document.getElementById('contact-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    alert('Thank you for your message! We\'ll get back to you soon.');
+    showNotification('Thank you for your message! We\'ll get back to you soon.', 'success', 'Message Sent');
     e.target.reset();
   });
 </script>
