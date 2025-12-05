@@ -2,8 +2,13 @@
 <%- include('../partials/navbar', { currentPath: '/admin/participants' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Participant Details</h1>
-    <div id="participant-detail" class="bg-card border border-border rounded-xl p-6">
+    <div class="flex items-center gap-4 mb-8">
+      <a href="/admin/participants" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      </a>
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground">Participant Details</h1>
+    </div>
+    <div id="participant-detail">
       <p class="text-foreground/60">Loading...</p>
     </div>
   </div>
@@ -11,16 +16,171 @@
 <%- include('../partials/footer') %>
 <script>
   const participantId = window.location.pathname.split('/').pop();
-  fetch(`/api/participants/${participantId}`)
-    .then(r => r.json())
-    .then(participant => {
-      document.getElementById('participant-detail').innerHTML = `
-        <h2 class="text-2xl font-serif mb-4">${participant.ParticipantFirstName} ${participant.ParticipantLastName}</h2>
-        <p><strong>Email:</strong> ${participant.ParticipantEmail}</p>
-        <p><strong>Role:</strong> ${participant.ParticipantRole}</p>
-        <p><strong>City:</strong> ${participant.ParticipantCity || 'N/A'}</p>
-        <p><strong>State:</strong> ${participant.ParticipantState || 'N/A'}</p>
-      `;
-    });
+  
+  // Load all participant data
+  Promise.all([
+    fetch(`/api/participants/${participantId}`).then(r => r.json()),
+    fetch(`/api/participants/${participantId}/registrations`).then(r => r.json()).catch(() => []),
+    fetch(`/api/participants/${participantId}/milestones`).then(r => r.json()).catch(() => []),
+    fetch(`/api/participants/${participantId}/donations`).then(r => r.json()).catch(() => ({ TotalDonations: 0 }))
+  ]).then(([participant, registrations, milestones, donations]) => {
+    const now = new Date();
+    
+    // Separate upcoming and past events
+    const upcomingEvents = registrations.filter(r => new Date(r.EventDateTimeStart) > now);
+    const pastEvents = registrations.filter(r => new Date(r.EventDateTimeStart) <= now);
+    
+    // Separate achieved and planned milestones
+    const achievedMilestones = milestones.filter(m => m.MilestoneStatus === 'achieved' || new Date(m.MilestoneDate) <= now);
+    const plannedMilestones = milestones.filter(m => m.MilestoneStatus === 'planned' || new Date(m.MilestoneDate) > now);
+    
+    const totalDonations = donations.TotalDonations || donations.reduce?.((sum, d) => sum + parseFloat(d.DonationAmount || 0), 0) || 0;
+    
+    document.getElementById('participant-detail').innerHTML = `
+      <!-- Profile Card & Donations Row -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Profile Card -->
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div class="flex items-center gap-6">
+            <div class="flex-shrink-0">
+              ${participant.ParticipantPhotoPath 
+                ? `<img src="${participant.ParticipantPhotoPath}" alt="Profile Photo" class="w-24 h-24 object-cover rounded-full border-2 border-border">`
+                : `<div class="w-24 h-24 rounded-full bg-muted border-2 border-border flex items-center justify-center">
+                    <span class="text-2xl text-foreground/40">${(participant.ParticipantFirstName || '').charAt(0)}${(participant.ParticipantLastName || '').charAt(0)}</span>
+                  </div>`
+              }
+            </div>
+            <div class="flex-1">
+              <h2 class="text-2xl font-serif text-foreground mb-1">${participant.ParticipantFirstName} ${participant.ParticipantLastName}</h2>
+              <p class="text-foreground/60 mb-1">${participant.ParticipantEmail}</p>
+              <span class="inline-block px-2 py-1 rounded-full text-xs font-medium ${participant.ParticipantRole === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}">
+                ${participant.ParticipantRole || 'participant'}
+              </span>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-4 text-sm">
+            <div><strong>Phone:</strong> ${participant.ParticipantPhone || 'N/A'}</div>
+            <div><strong>DOB:</strong> ${participant.ParticipantDOB ? new Date(participant.ParticipantDOB).toLocaleDateString() : 'N/A'}</div>
+            <div><strong>City:</strong> ${participant.ParticipantCity || 'N/A'}</div>
+            <div><strong>State:</strong> ${participant.ParticipantState || 'N/A'}</div>
+            <div><strong>Zip:</strong> ${participant.ParticipantZip || 'N/A'}</div>
+            <div><strong>Interest:</strong> ${participant.ParticipantFieldOfInterest || 'N/A'}</div>
+            <div class="col-span-2"><strong>School/Employer:</strong> ${participant.ParticipantSchoolOrEmployer || 'N/A'}</div>
+          </div>
+        </div>
+        
+        <!-- Donations Summary -->
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <h2 class="text-xl font-serif text-foreground mb-4">Donations</h2>
+          <p class="text-foreground/60 mb-2">Total contributed</p>
+          <p class="text-3xl font-semibold text-primary mb-4">$${parseFloat(totalDonations).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+          
+          <h3 class="text-lg font-medium mb-2">Stats</h3>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="bg-muted rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-primary">${registrations.length}</p>
+              <p class="text-foreground/60">Total Registrations</p>
+            </div>
+            <div class="bg-muted rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-primary">${milestones.length}</p>
+              <p class="text-foreground/60">Milestones</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Achieved Milestones -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-serif text-foreground mb-4">Achieved Milestones</h2>
+        ${achievedMilestones.length > 0 ? `
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${achievedMilestones.map(m => `
+              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <div class="flex items-start justify-between mb-2">
+                  <h3 class="font-medium text-foreground">${m.MilestoneTitle || m.MilestoneTypeName || 'Milestone'}</h3>
+                  <span class="text-green-600">✓</span>
+                </div>
+                <p class="text-sm text-foreground/60">${new Date(m.MilestoneDate).toLocaleDateString()}</p>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="bg-card border border-border rounded-xl p-6 text-center">
+            <p class="text-foreground/60">No milestones achieved yet.</p>
+          </div>
+        `}
+      </div>
+      
+      <!-- Planned Milestones -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-serif text-foreground mb-4">Planned Milestones</h2>
+        ${plannedMilestones.length > 0 ? `
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${plannedMilestones.map(m => `
+              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <div class="flex items-start justify-between mb-2">
+                  <h3 class="font-medium text-foreground">${m.MilestoneTitle || m.MilestoneTypeName || 'Milestone'}</h3>
+                  <span class="text-foreground/40">○</span>
+                </div>
+                <p class="text-sm text-foreground/60">${new Date(m.MilestoneDate).toLocaleDateString()}</p>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="bg-card border border-border rounded-xl p-6 text-center">
+            <p class="text-foreground/60">No planned milestones.</p>
+          </div>
+        `}
+      </div>
+      
+      <!-- Upcoming Events -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-serif text-foreground mb-4">Upcoming Events</h2>
+        ${upcomingEvents.length > 0 ? `
+          <div class="space-y-4">
+            ${upcomingEvents.map(e => `
+              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <h3 class="text-lg font-serif text-foreground mb-2">${e.EventName}</h3>
+                <div class="text-sm text-foreground/60">
+                  <p><strong>Date:</strong> ${new Date(e.EventDateTimeStart).toLocaleString()}</p>
+                  ${e.EventLocation ? `<p><strong>Location:</strong> ${e.EventLocation}</p>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="bg-card border border-border rounded-xl p-6 text-center">
+            <p class="text-foreground/60">No upcoming events.</p>
+          </div>
+        `}
+      </div>
+      
+      <!-- Past Events -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-serif text-foreground mb-4">Past Events</h2>
+        ${pastEvents.length > 0 ? `
+          <div class="space-y-4">
+            ${pastEvents.map(e => `
+              <div class="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <h3 class="text-lg font-serif text-foreground mb-2">${e.EventName}</h3>
+                <div class="text-sm text-foreground/60">
+                  <p><strong>Date:</strong> ${new Date(e.EventDateTimeStart).toLocaleString()}</p>
+                  ${e.EventLocation ? `<p><strong>Location:</strong> ${e.EventLocation}</p>` : ''}
+                  <p><strong>Attended:</strong> ${e.RegistrationAttendedFlag ? 'Yes' : 'No'}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="bg-card border border-border rounded-xl p-6 text-center">
+            <p class="text-foreground/60">No past events.</p>
+          </div>
+        `}
+      </div>
+    `;
+  }).catch(err => {
+    console.error('Error loading participant:', err);
+    document.getElementById('participant-detail').innerHTML = '<p class="text-red-600">Error loading participant details.</p>';
+  });
 </script>
 
