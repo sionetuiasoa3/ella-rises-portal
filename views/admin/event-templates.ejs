@@ -2,12 +2,26 @@
 <%- include('../partials/navbar', { currentPath: '/admin/event-templates' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
       <h1 class="text-4xl md:text-6xl font-serif text-foreground">Event Templates</h1>
-      <button onclick="openAddTemplateModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium flex items-center gap-2">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        Add Template
-      </button>
+      <div class="flex flex-wrap gap-3 w-full md:w-auto">
+        <div class="relative w-full md:w-64">
+          <input 
+            type="text" 
+            id="template-search" 
+            placeholder="Search templates..." 
+            class="w-full border border-border rounded-lg px-4 py-2 bg-background pr-10"
+            oninput="handleTemplateSearch(this.value)"
+          />
+          <svg class="h-4 w-4 text-foreground/50 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1117.5 9a7.5 7.5 0 01-.85 7.65z"></path>
+          </svg>
+        </div>
+        <button onclick="openAddTemplateModal()" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Add Template
+        </button>
+      </div>
     </div>
     <p class="text-foreground/60 mb-4">Event templates define reusable event types. Each event must be based on a template.</p>
     <div id="templates-container" class="bg-card border border-border rounded-xl overflow-hidden">
@@ -93,6 +107,48 @@
   </div>
 </div>
 
+<!-- Create Event Modal -->
+<div id="create-event-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif">Create Event</h3>
+      <button onclick="closeCreateEventModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form id="create-event-form" class="space-y-4">
+      <input type="hidden" id="event-template-name">
+      <p class="text-sm text-foreground/70">Template: <span id="event-template-label" class="font-semibold text-foreground"></span></p>
+      <div>
+        <label class="block text-sm font-medium mb-1">Start</label>
+        <input type="datetime-local" id="event-start" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">End</label>
+        <input type="datetime-local" id="event-end" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Location</label>
+        <input type="text" id="event-location" placeholder="e.g., Ella Rises HQ or Zoom link" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Capacity</label>
+          <input type="number" min="1" id="event-capacity" class="w-full border border-border rounded-lg px-3 py-2 bg-background" placeholder="Defaults to template capacity">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Registration Deadline</label>
+          <input type="datetime-local" id="event-deadline" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeCreateEventModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Create Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
   <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
@@ -112,6 +168,7 @@
   let deleteTemplateName = null;
   let currentTemplatePhoto = null;
   let pendingPhotoFile = null;
+  let currentCreateTemplate = null;
 
   // Load templates
   fetch('/api/event-templates')
@@ -120,6 +177,16 @@
       templatesData = templates;
       renderTemplates(templates);
     });
+
+  function handleTemplateSearch(value) {
+    const term = (value || '').toLowerCase().trim();
+    const filtered = templatesData.filter(t => {
+      return (t.EventName || '').toLowerCase().includes(term)
+        || (t.EventType || '').toLowerCase().includes(term)
+        || (t.EventDescription || '').toLowerCase().includes(term);
+    });
+    renderTemplates(filtered);
+  }
 
   // Photo preview on file select
   document.getElementById('t-photo').addEventListener('change', function(e) {
@@ -189,13 +256,25 @@
               </td>
               <td class="p-4 text-foreground/70">${t.EventRecurrencePattern || '-'}</td>
               <td class="p-4 text-foreground/70">${t.EventDefaultCapacity || 'Unlimited'}</td>
-              <td class="p-4 text-right">
-                <button onclick='openEditTemplateModal(${JSON.stringify(t).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
-                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                </button>
-                <button onclick="openDeleteModal('${t.EventName.replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-800" title="Delete">
-                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
+              <td class="p-4">
+                <div class="flex flex-wrap justify-end gap-2 items-center">
+                  <button onclick="viewTemplateEvents('${t.EventName.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-2 bg-white border border-border hover:bg-muted text-ella-charcoal rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    View Events
+                  </button>
+                  <button onclick="openCreateEventModal('${t.EventName.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-2 bg-ella-sage hover:bg-ella-sage/90 text-ella-charcoal rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Create Event
+                  </button>
+                  <button onclick='openEditTemplateModal(${JSON.stringify(t).replace(/'/g, "\\'")})' class="inline-flex items-center gap-2 bg-white border border-border hover:bg-muted text-blue-700 rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow" title="Edit">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Edit
+                  </button>
+                  <button onclick="openDeleteModal('${t.EventName.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-2 bg-white border border-border hover:bg-muted text-red-700 rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow" title="Delete">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           `).join('')}
@@ -255,6 +334,26 @@
     document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This will not delete events using this template, but you won't be able to create new events with it.`;
     document.getElementById('delete-modal').classList.remove('hidden');
     document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function openCreateEventModal(templateName) {
+    currentCreateTemplate = templateName;
+    document.getElementById('event-template-name').value = templateName;
+    document.getElementById('event-template-label').textContent = templateName;
+    document.getElementById('create-event-form').reset();
+    document.getElementById('create-event-modal').classList.remove('hidden');
+    document.getElementById('create-event-modal').classList.add('flex');
+  }
+
+  function viewTemplateEvents(templateName) {
+    const url = `/admin/events?template=${encodeURIComponent(templateName)}`;
+    window.location.href = url;
+  }
+
+  function closeCreateEventModal() {
+    currentCreateTemplate = null;
+    document.getElementById('create-event-modal').classList.add('hidden');
+    document.getElementById('create-event-modal').classList.remove('flex');
   }
 
   function closeDeleteModal() {
@@ -343,5 +442,54 @@
 
   document.getElementById('add-template-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddTemplateModal(); });
   document.getElementById('delete-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDeleteModal(); });
+
+  document.getElementById('create-event-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentCreateTemplate) {
+      alert('No template selected');
+      return;
+    }
+
+    const EventName = currentCreateTemplate;
+    const EventDateTimeStart = document.getElementById('event-start').value;
+    const EventDateTimeEnd = document.getElementById('event-end').value;
+    const EventLocation = document.getElementById('event-location').value;
+    const EventCapacity = document.getElementById('event-capacity').value;
+    const EventRegistrationDeadline = document.getElementById('event-deadline').value;
+
+    if (!EventDateTimeStart) {
+      alert('Start date/time is required');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          EventName,
+          EventDateTimeStart,
+          EventDateTimeEnd: EventDateTimeEnd || null,
+          EventLocation: EventLocation || null,
+          EventCapacity: EventCapacity || null,
+          EventRegistrationDeadline: EventRegistrationDeadline || null
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to create event');
+      }
+
+      alert('Event created!');
+      closeCreateEventModal();
+      location.reload();
+    } catch (error) {
+      console.error('Create event error:', error);
+      alert(error.message || 'Failed to create event');
+    }
+  });
 </script>
 
