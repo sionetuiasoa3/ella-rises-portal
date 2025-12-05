@@ -4,7 +4,7 @@
   <div class="container mx-auto px-6">
     <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">My Portal</h1>
     
-    <% if (updated) { %>
+    <% if (typeof updated !== 'undefined' && updated) { %>
       <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
         Profile updated successfully!
       </div>
