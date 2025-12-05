@@ -92,19 +92,31 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
       return res.status(400).json({ message: 'Event template not found' });
     }
 
+    // Explicitly exclude EventID - it should auto-increment (SERIAL)
+    // Convert date strings to proper Date objects if needed
+    const insertData = {
+      EventName,
+      EventDateTimeStart: EventDateTimeStart ? new Date(EventDateTimeStart) : null,
+      EventDateTimeEnd: EventDateTimeEnd ? new Date(EventDateTimeEnd) : null,
+      EventLocation: EventLocation || null,
+      EventCapacity: EventCapacity ? parseInt(EventCapacity, 10) : (template.EventDefaultCapacity || null),
+      EventRegistrationDeadline: EventRegistrationDeadline ? new Date(EventRegistrationDeadline) : null
+    };
+
+    // Remove any undefined values and explicitly exclude EventID
+    Object.keys(insertData).forEach(key => {
+      if (insertData[key] === undefined || key === 'EventID') {
+        delete insertData[key];
+      }
+    });
+
     const [event] = await db('Events')
-      .insert({
-        EventName,
-        EventDateTimeStart,
-        EventDateTimeEnd: EventDateTimeEnd || null,
-        EventLocation: EventLocation || null,
-        EventCapacity: EventCapacity || template.EventDefaultCapacity || null,
-        EventRegistrationDeadline: EventRegistrationDeadline || null
-      })
+      .insert(insertData)
       .returning('*');
 
     res.status(201).json(event);
   } catch (error) {
+    console.error('Error creating event:', error);
     next(error);
   }
 });
