@@ -71,6 +71,31 @@ router.post('/', requireAuth, async (req, res, next) => {
       return res.status(400).json({ message: 'Survey already submitted for this registration' });
     }
 
+    // Calculate overall score as average of the four scores (integer)
+    const scores = [
+      SurveySatisfactionScore,
+      SurveyUsefulnessScore,
+      SurveyInstructorScore,
+      SurveyRecommendationScore
+    ].filter(s => s != null).map(s => parseInt(s));
+    
+    const calculatedOverallScore = scores.length > 0 
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : null;
+
+    // Determine NPS bucket based on recommendation score
+    let calculatedNPSBucket = null;
+    if (SurveyRecommendationScore != null) {
+      const recScore = parseInt(SurveyRecommendationScore);
+      if (recScore <= 3) {
+        calculatedNPSBucket = 'Detractor';
+      } else if (recScore === 4) {
+        calculatedNPSBucket = 'Passive';
+      } else if (recScore === 5) {
+        calculatedNPSBucket = 'Promoter';
+      }
+    }
+
     const [survey] = await db('Surveys')
       .insert({
         RegistrationID,
@@ -78,8 +103,8 @@ router.post('/', requireAuth, async (req, res, next) => {
         SurveyUsefulnessScore: SurveyUsefulnessScore || null,
         SurveyInstructorScore: SurveyInstructorScore || null,
         SurveyRecommendationScore: SurveyRecommendationScore || null,
-        SurveyOverallScore: SurveyOverallScore || null,
-        SurveyNPSBucket: SurveyNPSBucket || null,
+        SurveyOverallScore: calculatedOverallScore,
+        SurveyNPSBucket: calculatedNPSBucket,
         SurveyComments: SurveyComments || null,
         SurveySubmissionDate: new Date()
       })

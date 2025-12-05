@@ -1,26 +1,271 @@
-<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/head', { title: 'Event Registrations - Ella Rises' }) %>
 <%- include('../partials/navbar', { currentPath: '/admin/events' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Event Registrations</h1>
-    <div id="registrations-container" class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Loading registrations...</p>
+    <!-- Back Link -->
+    <a href="/admin/events" class="inline-flex items-center gap-2 text-foreground/70 hover:text-primary mb-6 text-sm transition-colors">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      Back to Events
+    </a>
+
+    <!-- Event Info Header -->
+    <div id="event-header" class="mb-8">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-2">Loading...</h1>
+    </div>
+
+    <!-- Stats Summary -->
+    <div id="stats-summary" class="grid grid-cols-3 gap-4 mb-8">
+      <div class="bg-card border border-border rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-foreground" id="stat-total">-</div>
+        <div class="text-sm text-foreground/60">Registered</div>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-green-600" id="stat-attended">-</div>
+        <div class="text-sm text-foreground/60">Attended</div>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-red-600" id="stat-absent">-</div>
+        <div class="text-sm text-foreground/60">Did Not Attend</div>
+      </div>
+    </div>
+
+    <!-- Mark All Buttons (for past events) -->
+    <div id="bulk-actions" class="hidden mb-6 flex gap-4">
+      <button onclick="markAllAttended(true)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        Mark All Attended
+      </button>
+      <button onclick="markAllAttended(false)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        Mark All Did Not Attend
+      </button>
+    </div>
+
+    <!-- Registrations List -->
+    <div id="registrations-container" class="bg-card border border-border rounded-xl overflow-hidden">
+      <p class="text-foreground/60 p-6">Loading registrations...</p>
     </div>
   </div>
 </div>
 <%- include('../partials/footer') %>
 <script>
-  const eventId = window.location.pathname.split('/')[3];
-  fetch(`/api/events/${eventId}/registrations`)
-    .then(r => r.json())
-    .then(registrations => {
-      const container = document.getElementById('registrations-container');
-      container.innerHTML = registrations.map(r => `
-        <div class="border-b border-border py-4">
-          <p>${r.ParticipantFirstName} ${r.ParticipantLastName} (${r.ParticipantEmail})</p>
-          <p class="text-foreground/60">Status: ${r.RegistrationStatus}</p>
-        </div>
-      `).join('');
-    });
-</script>
+  const eventId = <%= eventId %>;
+  let registrationsData = [];
+  let eventData = null;
 
+  // Load registrations
+  async function loadRegistrations() {
+    try {
+      const response = await fetch(`/api/registrations/event/${eventId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load registrations');
+      }
+      const data = await response.json();
+      eventData = data.event;
+      registrationsData = data.registrations;
+      
+      renderEventHeader();
+      renderStats();
+      renderRegistrations();
+      
+      // Show bulk actions for past events
+      const eventDate = new Date(eventData.EventDateTimeStart);
+      if (eventDate < new Date()) {
+        document.getElementById('bulk-actions').classList.remove('hidden');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('registrations-container').innerHTML = 
+        '<p class="text-red-600 p-6">Error loading registrations. Please try again.</p>';
+    }
+  }
+
+  function renderEventHeader() {
+    const header = document.getElementById('event-header');
+    const eventDate = new Date(eventData.EventDateTimeStart);
+    const isPast = eventDate < new Date();
+    
+    header.innerHTML = `
+      <h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2">${eventData.EventName}</h1>
+      <div class="flex flex-wrap gap-4 text-foreground/70">
+        <span class="flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          ${eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </span>
+        ${eventData.EventLocation ? `
+          <span class="flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+            ${eventData.EventLocation}
+          </span>
+        ` : ''}
+        <span class="px-3 py-1 rounded-full text-sm font-medium ${isPast ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700'}">
+          ${isPast ? 'Past Event' : 'Upcoming Event'}
+        </span>
+      </div>
+    `;
+  }
+
+  function renderStats() {
+    const total = registrationsData.length;
+    const attended = registrationsData.filter(r => r.RegistrationAttendedFlag === true).length;
+    const notAttended = registrationsData.filter(r => r.RegistrationAttendedFlag === false).length;
+    
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-attended').textContent = attended;
+    document.getElementById('stat-absent').textContent = notAttended;
+  }
+
+  function renderRegistrations() {
+    const container = document.getElementById('registrations-container');
+    
+    if (registrationsData.length === 0) {
+      container.innerHTML = '<p class="text-foreground/60 p-6">No registrations for this event yet.</p>';
+      return;
+    }
+    
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Participant</th>
+            <th class="text-left p-4 font-medium">Email</th>
+            <th class="text-left p-4 font-medium">Phone</th>
+            <th class="text-left p-4 font-medium">Status</th>
+            <th class="text-center p-4 font-medium">Attendance</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${registrationsData.map(r => `
+            <tr class="border-t border-border hover:bg-muted/50" id="row-${r.RegistrationID}">
+              <td class="p-4">
+                <a href="/admin/participants/${r.ParticipantID}" class="font-medium text-primary hover:underline">
+                  ${r.ParticipantFirstName || ''} ${r.ParticipantLastName || ''}
+                </a>
+              </td>
+              <td class="p-4 text-foreground/70">${r.ParticipantEmail || '-'}</td>
+              <td class="p-4 text-foreground/70">${r.ParticipantPhone || '-'}</td>
+              <td class="p-4">
+                <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                  r.RegistrationStatus === 'registered' ? 'bg-blue-100 text-blue-800' :
+                  r.RegistrationStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }">
+                  ${r.RegistrationStatus || 'registered'}
+                </span>
+              </td>
+              <td class="p-4 text-center" id="attendance-${r.RegistrationID}">
+                ${renderAttendanceButtons(r)}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderAttendanceButtons(registration) {
+    const attended = registration.RegistrationAttendedFlag;
+    
+    if (attended === true) {
+      return `
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium text-sm">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Attended
+        </span>
+        <button onclick="updateAttendance(${registration.RegistrationID}, false)" class="ml-2 text-xs text-foreground/50 hover:text-red-600 underline">
+          Undo
+        </button>
+      `;
+    } else if (attended === false) {
+      // Check if it was explicitly set (check-in time exists but attended is false means explicit "did not attend")
+      const eventDate = new Date(eventData.EventDateTimeStart);
+      const isPast = eventDate < new Date();
+      
+      return `
+        <div class="flex items-center justify-center gap-2">
+          <button onclick="updateAttendance(${registration.RegistrationID}, true)" 
+            class="px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-colors">
+            Attended
+          </button>
+          <button onclick="updateAttendance(${registration.RegistrationID}, false)" 
+            class="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors">
+            Did Not Attend
+          </button>
+        </div>
+      `;
+    }
+    
+    // Default: show both buttons
+    return `
+      <div class="flex items-center justify-center gap-2">
+        <button onclick="updateAttendance(${registration.RegistrationID}, true)" 
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-colors">
+          Attended
+        </button>
+        <button onclick="updateAttendance(${registration.RegistrationID}, false)" 
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors">
+          Did Not Attend
+        </button>
+      </div>
+    `;
+  }
+
+  async function updateAttendance(registrationId, attended) {
+    try {
+      const response = await fetch(`/api/registrations/${registrationId}/attendance`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attended })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update attendance');
+      }
+      
+      // Update local data
+      const index = registrationsData.findIndex(r => r.RegistrationID === registrationId);
+      if (index !== -1) {
+        registrationsData[index].RegistrationAttendedFlag = attended;
+        
+        // Re-render just the attendance cell
+        document.getElementById(`attendance-${registrationId}`).innerHTML = 
+          renderAttendanceButtons(registrationsData[index]);
+        
+        // Update stats
+        renderStats();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update attendance. Please try again.');
+    }
+  }
+
+  async function markAllAttended(attended) {
+    const confirmMsg = attended 
+      ? 'Mark all participants as attended?' 
+      : 'Mark all participants as did not attend?';
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+      for (const registration of registrationsData) {
+        await fetch(`/api/registrations/${registration.RegistrationID}/attendance`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attended })
+        });
+        registration.RegistrationAttendedFlag = attended;
+      }
+      
+      renderRegistrations();
+      renderStats();
+      alert('All attendance records updated!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update some records. Please refresh and try again.');
+    }
+  }
+
+  // Load on page load
+  loadRegistrations();
+</script>

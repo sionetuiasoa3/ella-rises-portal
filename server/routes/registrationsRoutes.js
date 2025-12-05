@@ -16,6 +16,72 @@ router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   }
 });
 
+// Get registrations for a specific event (admin only)
+router.get('/event/:eventId', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const eventId = parseInt(req.params.eventId);
+    
+    // Get event details
+    const event = await db('Events')
+      .where({ EventID: eventId })
+      .first();
+    
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    // Get registrations with participant info
+    const registrations = await db('Registrations')
+      .join('Participants', 'Registrations.ParticipantID', 'Participants.ParticipantID')
+      .where({ 'Registrations.EventID': eventId })
+      .whereNot({ 'Participants.ParticipantRole': 'donor' })
+      .where({ 'Participants.IsDeleted': false })
+      .select(
+        'Registrations.*',
+        'Participants.ParticipantFirstName',
+        'Participants.ParticipantLastName',
+        'Participants.ParticipantEmail',
+        'Participants.ParticipantPhone'
+      )
+      .orderBy('Participants.ParticipantLastName', 'asc');
+    
+    res.json({
+      event,
+      registrations
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update attendance for a registration (admin only)
+router.patch('/:id/attendance', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const registrationId = parseInt(req.params.id);
+    const { attended } = req.body;
+    
+    if (typeof attended !== 'boolean') {
+      return res.status(400).json({ message: 'attended must be a boolean' });
+    }
+    
+    const [updated] = await db('Registrations')
+      .where({ RegistrationID: registrationId })
+      .update({ 
+        RegistrationAttendedFlag: attended,
+        RegistrationCheckInTime: attended ? new Date() : null
+      })
+      .returning('*');
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Registration not found' });
+    }
+    
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Create registration
 router.post('/', requireAuth, async (req, res, next) => {
   try {
