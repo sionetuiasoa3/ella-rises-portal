@@ -4,18 +4,39 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// List all events with optional filtering
+// List all events with optional filtering and registration/attendance counts
 router.get('/', async (req, res, next) => {
   try {
     const { type, time, location } = req.query;
 
+    const registrationsSub = db('Registrations')
+      .select('EventID')
+      .count('* as registrationCount')
+      .groupBy('EventID')
+      .as('reg');
+
+    const attendedSub = db('Registrations')
+      .select('EventID')
+      .count('* as attendedCount')
+      .where(builder => {
+        builder
+          .where('RegistrationAttendedFlag', true)
+          .orWhereRaw('LOWER("RegistrationStatus") = ?', ['attended']);
+      })
+      .groupBy('EventID')
+      .as('att');
+
     let query = db('Events')
-      .join('EventsTemplates', 'Events.EventName', 'EventsTemplates.EventName')
+      .leftJoin('EventsTemplates', 'Events.EventName', 'EventsTemplates.EventName')
+      .leftJoin(registrationsSub, 'Events.EventID', 'reg.EventID')
+      .leftJoin(attendedSub, 'Events.EventID', 'att.EventID')
       .select(
         'Events.*',
         'EventsTemplates.EventType',
         'EventsTemplates.EventDescription',
-        'EventsTemplates.EventTemplatePhotoPath'
+        'EventsTemplates.EventTemplatePhotoPath',
+        db.raw('COALESCE(reg.registrationCount, 0) as "registrationCount"'),
+        db.raw('COALESCE(att.attendedCount, 0) as "attendedCount"')
       );
 
     if (type && type !== 'all') {
@@ -60,6 +81,42 @@ router.get('/:id', async (req, res, next) => {
     }
 
     res.json(event);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get event stats (admin only)
+router.get('/:id/stats', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const eventId = parseInt(req.params.id);
+
+    const stats = await db('Events as e')
+      .leftJoin('Registrations as r', 'e.EventID', 'r.EventID')
+      .where('e.EventID', eventId)
+      .groupBy('e.EventID', 'e.EventName')
+      .select(
+        'e.EventID',
+        'e.EventName',
+        db.raw('COUNT(r.*) as "registrationCount"'),
+        db.raw(
+          `SUM(CASE WHEN r."RegistrationAttendedFlag" = true 
+                OR LOWER(r."RegistrationStatus") = 'attended' 
+              THEN 1 ELSE 0 END) as "attendedCount"`
+        )
+      )
+      .first();
+
+    if (!stats) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    res.json({
+      EventID: stats.EventID,
+      EventName: stats.EventName,
+      registrationCount: Number(stats.registrationCount) || 0,
+      attendedCount: Number(stats.attendedCount) || 0
+    });
   } catch (error) {
     next(error);
   }
