@@ -272,8 +272,8 @@
       </button>
     `;
       
-      // Re-attach event listener after innerHTML change (event delegation would be better, but this works)
-      form.addEventListener('submit', handleFormSubmit);
+      // Note: Event listener attached at line 204 persists through innerHTML changes
+      // because it's attached to the form element itself, not child elements
       
       // Update account link text
       const accountLink = document.querySelector('.mt-6');
