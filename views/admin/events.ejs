@@ -43,6 +43,15 @@
           onchange="filterEvents()">
       </div>
       <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Event Status</label>
+        <select id="status-filter" onchange="filterEvents()" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="all">All Events</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="w-48">
         <label class="block text-sm font-medium mb-1 text-foreground/70">Sort by date</label>
         <select id="sort-order" onchange="filterEvents()" 
           class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
@@ -83,9 +92,9 @@
         <div><label class="block text-sm font-medium mb-1">Start Date/Time *</label><input type="datetime-local" name="EventDateTimeStart" id="e-start" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
         <div><label class="block text-sm font-medium mb-1">End Date/Time</label><input type="datetime-local" name="EventDateTimeEnd" id="e-end" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       </div>
-      <div><label class="block text-sm font-medium mb-1">Location</label><input type="text" name="EventLocation" id="e-location" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+      <div><label class="block text-sm font-medium mb-1">Location *</label><input type="text" name="EventLocation" id="e-location" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium mb-1">Capacity</label><input type="number" name="EventCapacity" id="e-capacity" min="1" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div><label class="block text-sm font-medium mb-1">Capacity *</label><input type="number" name="EventCapacity" id="e-capacity" min="1" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
         <div><label class="block text-sm font-medium mb-1">Registration Deadline</label><input type="datetime-local" name="EventRegistrationDeadline" id="e-deadline" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       </div>
       <div class="flex gap-3 pt-2">
@@ -163,12 +172,21 @@
     const dateFrom = document.getElementById('search-date-from').value;
     const dateTo = document.getElementById('search-date-to').value;
     const sortOrder = document.getElementById('sort-order').value;
+    const statusFilter = document.getElementById('status-filter').value;
     
     let filtered = eventsData;
+    const now = new Date();
     
     // Filter by template
     if (selectedTemplate) {
       filtered = filtered.filter(e => e.EventName === selectedTemplate);
+    }
+    
+    // Filter by status (upcoming/completed)
+    if (statusFilter === 'upcoming') {
+      filtered = filtered.filter(e => new Date(e.EventDateTimeStart) >= now);
+    } else if (statusFilter === 'completed') {
+      filtered = filtered.filter(e => new Date(e.EventDateTimeStart) < now);
     }
     
     // Filter by search name
@@ -219,6 +237,7 @@
     document.getElementById('search-name').value = '';
     document.getElementById('search-date-from').value = '';
     document.getElementById('search-date-to').value = '';
+    document.getElementById('status-filter').value = 'all';
     document.getElementById('sort-order').value = 'newest';
     // Sort by newest first (default)
     const sorted = [...eventsData].sort((a, b) => {

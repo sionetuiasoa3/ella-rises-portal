@@ -83,6 +83,18 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
       });
     }
 
+    if (!EventLocation) {
+      return res.status(400).json({ 
+        message: 'Event location is required' 
+      });
+    }
+
+    if (!EventCapacity) {
+      return res.status(400).json({ 
+        message: 'Event capacity is required' 
+      });
+    }
+
     // Verify template exists
     const template = await db('EventsTemplates')
       .where({ EventName })
