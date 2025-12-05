@@ -104,12 +104,13 @@ async function createPasswordToken(participant, purpose = 'create_password') {
   const token = uuidv4();
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-  await db('PasswordTokens').insert({
-    ParticipantID: participant.ParticipantID,
-    Token: token,
-    Purpose: purpose,
-    ExpiresAt: expiresAt,
-  });
+  // Store token in Participants table (PasswordResetToken and PasswordResetExpires fields)
+  await db('Participants')
+    .where({ ParticipantID: participant.ParticipantID })
+    .update({
+      PasswordResetToken: token,
+      PasswordResetExpires: expiresAt,
+    });
 
   const baseUrl = APP_BASE_URL || `${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${process.env.APP_DOMAIN || 'localhost:' + (process.env.PORT || 8081)}`;
   const link = `${baseUrl}/account/create-password?token=${encodeURIComponent(token)}`;
@@ -471,18 +472,14 @@ accountRouter.get('/account/create-password', async (req, res, next) => {
       });
     }
 
-    const tokenRow = await db('PasswordTokens')
-      .where({ Token: token, Purpose: 'create_password' })
+    // Verify token by checking Participants table
+    const participant = await db('Participants')
+      .where({ PasswordResetToken: token })
+      .where('PasswordResetExpires', '>', new Date())
+      .where({ IsDeleted: false })
       .first();
 
-    const now = new Date();
-
-    if (
-      !tokenRow ||
-      tokenRow.UsedAt ||
-      !tokenRow.ExpiresAt ||
-      new Date(tokenRow.ExpiresAt) <= now
-    ) {
+    if (!participant) {
       return res.status(400).render('account/create-password', {
         title: 'Create Password',
         token: null,
@@ -537,18 +534,14 @@ accountRouter.post('/account/create-password', async (req, res, next) => {
       });
     }
 
-    const tokenRow = await db('PasswordTokens')
-      .where({ Token: token, Purpose: 'create_password' })
+    // Verify token by checking Participants table
+    const participant = await db('Participants')
+      .where({ PasswordResetToken: token })
+      .where('PasswordResetExpires', '>', new Date())
+      .where({ IsDeleted: false })
       .first();
 
-    const now = new Date();
-
-    if (
-      !tokenRow ||
-      tokenRow.UsedAt ||
-      !tokenRow.ExpiresAt ||
-      new Date(tokenRow.ExpiresAt) <= now
-    ) {
+    if (!participant) {
       return res.status(400).render('account/create-password', {
         title: 'Create Password',
         token: null,
@@ -556,28 +549,16 @@ accountRouter.post('/account/create-password', async (req, res, next) => {
       });
     }
 
-    const participant = await db('Participants')
-      .where({ ParticipantID: tokenRow.ParticipantID })
-      .where({ IsDeleted: false })
-      .first();
-
-    if (!participant) {
-      return res.status(404).render('account/create-password', {
-        title: 'Create Password',
-        token: null,
-        error: 'Participant record not found.',
-      });
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Update password and clear reset token
     await db('Participants')
       .where({ ParticipantID: participant.ParticipantID })
-      .update({ PasswordHash: passwordHash });
-
-    await db('PasswordTokens')
-      .where({ Id: tokenRow.Id })
-      .update({ UsedAt: db.fn.now() });
+      .update({ 
+        PasswordHash: passwordHash,
+        PasswordResetToken: null,
+        PasswordResetExpires: null
+      });
 
     // Auto-login after password creation
     req.session.user = {
