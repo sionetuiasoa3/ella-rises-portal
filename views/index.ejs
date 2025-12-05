@@ -4,7 +4,10 @@
   <!-- Hero Section -->
   <section class="relative pt-28 pb-8 md:pt-36 md:pb-12 overflow-hidden bg-cover bg-center">
     <div class="absolute inset-0 bg-gradient-to-b from-muted/60 via-background to-background"></div>
-    <div class="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-br from-ella-cream via-muted/40 to-ella-blush/30"></div>
+    <!-- Top left corner gradient - fills the whole hero section -->
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-ella-cream/75 via-ella-blush/50 to-transparent pointer-events-none"></div>
+    <!-- Additional subtle overlay for depth -->
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-ella-sage/20 via-transparent to-transparent pointer-events-none"></div>
     <div class="container mx-auto px-6 relative">
       <div class="max-w-4xl mx-auto text-center">
         <div class="inline-flex items-center gap-2 bg-ella-sage/30 border border-primary/30 text-foreground/80 px-5 py-2.5 rounded-full mb-10 text-sm font-medium">
@@ -31,7 +34,7 @@
   </section>
 
   <!-- Statistics Section -->
-  <section class="py-16 md:py-20 bg-background">
+  <section class="relative py-8 md:py-12 bg-background">
     <div class="container mx-auto px-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
         <div class="text-center">
@@ -55,37 +58,68 @@
   </section>
 
   <!-- Gallery Section -->
-  <section class="py-20">
-    <div class="container mx-auto px-6">
-      <div class="text-center mb-12">
-        <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-4 text-sm font-medium">
+  <section class="py-12 md:py-16 bg-background relative overflow-hidden">
+    <!-- Subtle decorative background pattern -->
+    <div class="absolute inset-0 opacity-5">
+      <div class="absolute top-0 left-0 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-ella-sage rounded-full blur-3xl"></div>
+    </div>
+    <!-- Subtle top border -->
+    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary/20 text-foreground/80 px-5 py-2 rounded-full mb-4 text-sm font-medium shadow-sm">
           <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
           Moments That Inspire
         </div>
         <h2 class="text-3xl md:text-5xl font-serif text-foreground">Our <span class="italic text-primary">Events</span></h2>
       </div>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-          <img src="/images/folklorico-dancer-1.png" alt="Traditional Mexican folk dance performance" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="absolute bottom-4 left-4 text-white">
-              <p class="text-sm font-medium">Cultural Heritage</p>
+      <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/folklorico-dancer-1.png" alt="Traditional Mexican folk dance performance" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Cultural Heritage</p>
             </div>
           </div>
         </div>
-        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-          <img src="/images/animation-workshop.jpg" alt="Animation workshop with participants" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="absolute bottom-4 left-4 text-white">
-              <p class="text-sm font-medium">Creative Workshops</p>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/animation-workshop.jpg" alt="Animation workshop with participants" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Creative Workshops</p>
             </div>
           </div>
         </div>
-        <div class="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-          <img src="/images/byu-group-photo.jpg" alt="Ella Rises group at BYU" class="aspect-video w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="absolute bottom-4 left-4 text-white">
-              <p class="text-sm font-medium">Campus Tours</p>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/byu-group-photo.jpg" alt="Ella Rises group at BYU" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Campus Tours</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/mariachi-performance.jpeg" alt="Mariachi performance" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Mariachi Performances</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/mentorship-talk.jpg" alt="Mentorship session" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Mentorship Programs</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 hover:border-primary/30">
+          <img src="/images/community-event.jpg" alt="Community event" class="aspect-video w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ella-charcoal/80 via-ella-charcoal/40 to-transparent">
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="text-base font-semibold drop-shadow-lg">Community Events</p>
             </div>
           </div>
         </div>
@@ -94,21 +128,23 @@
   </section>
 
   <!-- About Preview -->
-  <section class="py-20 md:py-28">
-    <div class="container mx-auto px-6">
+  <section class="py-12 md:py-16 relative overflow-hidden">
+    <!-- Subtle gradient background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-ella-blush/25 via-ella-cream/20 to-ella-peach/15 pointer-events-none"></div>
+    <div class="container mx-auto px-6 relative z-10">
       <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
         <div>
-          <div class="inline-flex items-center gap-2 bg-secondary/50 text-foreground/80 px-4 py-2 rounded-full mb-6 text-sm font-medium">
-            <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+          <div class="inline-flex items-center gap-2 bg-ella-sage/40 border border-ella-sage/30 text-foreground/80 px-5 py-3 rounded-full mb-6 text-base md:text-lg font-medium">
+            <svg class="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
             Our Mission
           </div>
-          <h2 class="text-3xl md:text-5xl font-serif text-foreground mb-6 leading-tight">
+          <h2 class="text-4xl md:text-6xl lg:text-7xl font-serif text-foreground mb-6 leading-tight">
             Every Girl Deserves to <span class="italic text-primary">Shine</span>
           </h2>
-          <p class="text-foreground/70 mb-6 leading-relaxed text-lg">
+          <p class="text-foreground/70 mb-6 leading-relaxed text-xl md:text-2xl">
             Ella Rises is dedicated to empowering young women through transformative programs that build confidence, develop leadership skills, and create lasting connections.
           </p>
-          <p class="text-foreground/70 mb-8 leading-relaxed">
+          <p class="text-foreground/70 mb-8 leading-relaxed text-lg md:text-xl">
             Through workshops, mentorship programs, and community events, we create safe spaces where teen girls can explore their potential and develop the skills they need to thrive.
           </p>
           <a href="/about" class="border-foreground/20 text-foreground hover:bg-foreground/5 rounded-lg px-6 py-3 inline-flex items-center border">

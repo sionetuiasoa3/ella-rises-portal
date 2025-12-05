@@ -92,100 +92,125 @@
 </div>
 <%- include('../partials/footer-scripts') %>
 <script>
-  // Password visibility toggle
-  const togglePassword = document.getElementById('toggle-password');
-  const passwordInput = document.getElementById('password-input');
-  const eyeIcon = document.getElementById('eye-icon');
-  const eyeOffIcon = document.getElementById('eye-off-icon');
+  document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password-input');
+    const eyeIcon = document.getElementById('eye-icon');
+    const eyeOffIcon = document.getElementById('eye-off-icon');
 
-  if (togglePassword && passwordInput) {
-    togglePassword.addEventListener('click', () => {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      eyeIcon.classList.toggle('hidden');
-      eyeOffIcon.classList.toggle('hidden');
-    });
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const isSignup = urlParams.get('signup') === 'true';
-  const prefillEmail = urlParams.get('email');
-  
-  // Form submission handler
-  async function handleFormSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-
-    // Determine if this is signup based on form fields
-    const isSignupForm = data.firstName !== undefined;
-
-    // Map form fields to API payload
-    let payload;
-    if (isSignupForm) {
-      const password = data.password || '';
-      const confirmPassword = data.confirmPassword || '';
-      if (password.length < 8) {
-        alert('Password must be at least 8 characters long.');
-        return;
-      }
-      if (password !== confirmPassword) {
-        alert('Passwords do not match. Please confirm your password.');
-        return;
-      }
-
-      // Backend expects PascalCase keys for signup
-      payload = {
-        Email: data.email,
-        Password: password,
-        FirstName: data.firstName,
-        LastName: data.lastName,
-        DateOfBirth: data.dateOfBirth || null,
-        PhoneNumber: data.phoneNumber || null,
-        City: data.city || null,
-        State: data.state || null,
-        Zip: data.zip || null,
-        SchoolOrEmployer: data.schoolOrEmployer || null,
-        FieldOfInterest: data.fieldOfInterest || 'Both'
-      };
-    } else {
-      // Login expects lowercase email/password
-      payload = {
-        email: data.email,
-        password: data.password
-      };
-    }
-    
-    try {
-      const endpoint = isSignupForm ? '/api/auth/signup' : '/api/auth/login';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    if (togglePassword && passwordInput) {
+      togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        if (eyeIcon) eyeIcon.classList.toggle('hidden');
+        if (eyeOffIcon) eyeOffIcon.classList.toggle('hidden');
       });
-      
-      if (response.ok) {
-        window.location.href = '/portal/dashboard';
-      } else {
-        const error = await response.json();
-        alert(error.message || (isSignupForm ? 'Signup failed' : 'Login failed'));
-      }
-    } catch (err) {
-      alert('An error occurred. Please try again.');
-      console.error(err);
     }
-  }
 
-  // Attach event listener to form
-  const form = document.getElementById('login-form');
-  form.addEventListener('submit', handleFormSubmit);
-  
-  if (isSignup) {
-    // Update heading and description for signup
-    document.querySelector('h1').textContent = 'Create Your Account';
-    document.querySelector('h1').nextElementSibling.textContent = 'Join the Ella Rises community and start your journey.';
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSignup = urlParams.get('signup') === 'true';
+    const prefillEmail = urlParams.get('email');
     
-    form.innerHTML = `
+    // Form submission handler
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+
+      // Determine if this is signup based on form fields
+      const isSignupForm = data.firstName !== undefined;
+
+      // Map form fields to API payload
+      let payload;
+      if (isSignupForm) {
+        const password = data.password || '';
+        const confirmPassword = data.confirmPassword || '';
+        if (password.length < 8) {
+          alert('Password must be at least 8 characters long.');
+          return;
+        }
+        if (password !== confirmPassword) {
+          alert('Passwords do not match. Please confirm your password.');
+          return;
+        }
+
+        // Backend expects PascalCase keys for signup
+        payload = {
+          Email: data.email,
+          Password: password,
+          FirstName: data.firstName,
+          LastName: data.lastName,
+          DateOfBirth: data.dateOfBirth || null,
+          PhoneNumber: data.phoneNumber || null,
+          City: data.city || null,
+          State: data.state || null,
+          Zip: data.zip || null,
+          SchoolOrEmployer: data.schoolOrEmployer || null,
+          FieldOfInterest: data.fieldOfInterest || 'Both'
+        };
+      } else {
+        // Login expects lowercase email/password
+        payload = {
+          email: data.email,
+          password: data.password
+        };
+      }
+      
+      // Show loading state
+      const submitButton = e.target.querySelector('button[type="submit"]');
+      const originalText = submitButton ? submitButton.innerHTML : '';
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Please wait...';
+      }
+      
+      try {
+        const endpoint = isSignupForm ? '/api/auth/signup' : '/api/auth/login';
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+          window.location.href = '/portal/dashboard';
+        } else {
+          const error = await response.json();
+          alert(error.message || (isSignupForm ? 'Signup failed' : 'Login failed'));
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
+          }
+        }
+      } catch (err) {
+        alert('An error occurred. Please try again.');
+        console.error(err);
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalText;
+        }
+      }
+    }
+
+    // Get form element
+    const form = document.getElementById('login-form');
+    if (!form) {
+      console.error('Login form not found!');
+      return;
+    }
+
+    // Attach event listener to form BEFORE any innerHTML changes
+    form.addEventListener('submit', handleFormSubmit);
+    
+    if (isSignup) {
+      // Update heading and description for signup
+      const h1 = document.querySelector('h1');
+      const subtitle = h1 ? h1.nextElementSibling : null;
+      if (h1) h1.textContent = 'Create Your Account';
+      if (subtitle) subtitle.textContent = 'Join the Ella Rises community and start your journey.';
+      
+      form.innerHTML = `
       <div class="grid md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-foreground mb-2">First Name *</label>
@@ -246,31 +271,34 @@
         Create Account
       </button>
     `;
-    
-    // Event listener persists because it's attached to the form element itself
-    // Update account link text
-    const accountLink = document.querySelector('.mt-6');
-    if (accountLink) {
-      accountLink.innerHTML = `
-        <p class="text-foreground/70 text-sm">
-          Already have an account? 
-          <a href="/portal/auth" class="text-primary hover:underline font-medium">Sign in</a>.
-        </p>
-        <p class="text-foreground/70 text-sm mt-2">
-          Not sure if you already have a participant record?
-          <a href="/account/start" class="text-primary hover:underline font-medium">Access or create your account</a>.
-        </p>
-      `;
+      
+      // Note: Event listener attached at line 204 persists through innerHTML changes
+      // because it's attached to the form element itself, not child elements
+      
+      // Update account link text
+      const accountLink = document.querySelector('.mt-6');
+      if (accountLink) {
+        accountLink.innerHTML = `
+          <p class="text-foreground/70 text-sm">
+            Already have an account? 
+            <a href="/portal/auth" class="text-primary hover:underline font-medium">Sign in</a>.
+          </p>
+          <p class="text-foreground/70 text-sm mt-2">
+            Not sure if you already have a participant record?
+            <a href="/account/start" class="text-primary hover:underline font-medium">Access or create your account</a>.
+          </p>
+        `;
+      }
     }
-  }
 
-  // Prefill email if provided in query string
-  if (prefillEmail) {
-    // Wait a bit for form to be ready, then prefill
-    setTimeout(() => {
-      const emailInput = document.querySelector('input[name="email"]');
-      if (emailInput) emailInput.value = prefillEmail;
-    }, 100);
-  }
+    // Prefill email if provided in query string
+    if (prefillEmail) {
+      // Wait a bit for form to be ready, then prefill
+      setTimeout(() => {
+        const emailInput = document.querySelector('input[name="email"]');
+        if (emailInput) emailInput.value = prefillEmail;
+      }, 100);
+    }
+  }); // End DOMContentLoaded
 </script>
 

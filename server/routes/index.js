@@ -157,7 +157,7 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
       plannedMilestones,
       upcomingEvents,
       pastEvents,
-      updated: req.query.updated === '1'
+      updated: req.query.updated === '1' || false
     });
   } catch (error) {
     next(error);
