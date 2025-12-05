@@ -42,6 +42,14 @@
           class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
           onchange="filterEvents()">
       </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Sort by date</label>
+        <select id="sort-order" onchange="filterEvents()" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </div>
       <button onclick="clearFilters()" class="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-foreground/70">
         Clear All
       </button>
@@ -154,6 +162,7 @@
     const searchName = document.getElementById('search-name').value.toLowerCase().trim();
     const dateFrom = document.getElementById('search-date-from').value;
     const dateTo = document.getElementById('search-date-to').value;
+    const sortOrder = document.getElementById('sort-order').value;
     
     let filtered = eventsData;
     
@@ -188,6 +197,13 @@
       });
     }
     
+    // Sort by date
+    filtered = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.EventDateTimeStart);
+      const dateB = new Date(b.EventDateTimeStart);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
     renderEvents(filtered);
     
     // Calculate base count based on template filter
@@ -203,7 +219,14 @@
     document.getElementById('search-name').value = '';
     document.getElementById('search-date-from').value = '';
     document.getElementById('search-date-to').value = '';
-    renderEvents(eventsData);
+    document.getElementById('sort-order').value = 'newest';
+    // Sort by newest first (default)
+    const sorted = [...eventsData].sort((a, b) => {
+      const dateA = new Date(a.EventDateTimeStart);
+      const dateB = new Date(b.EventDateTimeStart);
+      return dateB - dateA;
+    });
+    renderEvents(sorted);
     updateResultsCount(eventsData.length, eventsData.length);
   }
 
