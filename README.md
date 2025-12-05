@@ -1,3 +1,16 @@
+# TA Instructions for Use
+**URL** - https://rise.is404.net
+
+**Admin Login** - 
+username: admin@ellarises.org
+
+password: admin123
+
+**General User Login** - 
+username: user@ellarises.org
+
+password: user123!
+
 # Ella Rises Portal
 
 A Node.js + Express + EJS web application for managing the Ella Rises program, empowering young women through STEAM education, mentorship, and cultural programs.
