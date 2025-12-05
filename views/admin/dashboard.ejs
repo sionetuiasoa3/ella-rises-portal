@@ -141,7 +141,8 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Phone</label>
-          <input type="tel" name="ParticipantPhone" id="p-phone" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <input type="tel" name="ParticipantPhone" id="p-phone" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits" class="w-full border border-border rounded-lg px-3 py-2 bg-background" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          <p class="text-xs text-foreground/50 mt-1">10 digits only</p>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
@@ -164,11 +165,15 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">State</label>
-          <input type="text" name="ParticipantState" id="p-state" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <div class="relative">
+            <input type="text" id="p-state-search" placeholder="Search state..." class="w-full border border-border rounded-lg px-3 py-2 bg-background" onfocus="showStateDropdown()" oninput="filterStates(this.value)">
+            <input type="hidden" name="ParticipantState" id="p-state">
+            <div id="state-dropdown" class="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
+          </div>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Zip</label>
-          <input type="text" name="ParticipantZip" id="p-zip" class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+          <input type="text" name="ParticipantZip" id="p-zip" pattern="[0-9]{5}" maxlength="5" placeholder="5 digits" class="w-full border border-border rounded-lg px-3 py-2 bg-background" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
       </div>
       <div>
@@ -304,12 +309,69 @@
   let deleteType = null;
   let deleteId = null;
 
+  // US States and Territories
+  const states = [
+    { name: 'Alabama', abbr: 'AL' }, { name: 'Alaska', abbr: 'AK' }, { name: 'Arizona', abbr: 'AZ' },
+    { name: 'Arkansas', abbr: 'AR' }, { name: 'California', abbr: 'CA' }, { name: 'Colorado', abbr: 'CO' },
+    { name: 'Connecticut', abbr: 'CT' }, { name: 'Delaware', abbr: 'DE' }, { name: 'Florida', abbr: 'FL' },
+    { name: 'Georgia', abbr: 'GA' }, { name: 'Hawaii', abbr: 'HI' }, { name: 'Idaho', abbr: 'ID' },
+    { name: 'Illinois', abbr: 'IL' }, { name: 'Indiana', abbr: 'IN' }, { name: 'Iowa', abbr: 'IA' },
+    { name: 'Kansas', abbr: 'KS' }, { name: 'Kentucky', abbr: 'KY' }, { name: 'Louisiana', abbr: 'LA' },
+    { name: 'Maine', abbr: 'ME' }, { name: 'Maryland', abbr: 'MD' }, { name: 'Massachusetts', abbr: 'MA' },
+    { name: 'Michigan', abbr: 'MI' }, { name: 'Minnesota', abbr: 'MN' }, { name: 'Mississippi', abbr: 'MS' },
+    { name: 'Missouri', abbr: 'MO' }, { name: 'Montana', abbr: 'MT' }, { name: 'Nebraska', abbr: 'NE' },
+    { name: 'Nevada', abbr: 'NV' }, { name: 'New Hampshire', abbr: 'NH' }, { name: 'New Jersey', abbr: 'NJ' },
+    { name: 'New Mexico', abbr: 'NM' }, { name: 'New York', abbr: 'NY' }, { name: 'North Carolina', abbr: 'NC' },
+    { name: 'North Dakota', abbr: 'ND' }, { name: 'Ohio', abbr: 'OH' }, { name: 'Oklahoma', abbr: 'OK' },
+    { name: 'Oregon', abbr: 'OR' }, { name: 'Pennsylvania', abbr: 'PA' }, { name: 'Rhode Island', abbr: 'RI' },
+    { name: 'South Carolina', abbr: 'SC' }, { name: 'South Dakota', abbr: 'SD' }, { name: 'Tennessee', abbr: 'TN' },
+    { name: 'Texas', abbr: 'TX' }, { name: 'Utah', abbr: 'UT' }, { name: 'Vermont', abbr: 'VT' },
+    { name: 'Virginia', abbr: 'VA' }, { name: 'Washington', abbr: 'WA' }, { name: 'West Virginia', abbr: 'WV' },
+    { name: 'Wisconsin', abbr: 'WI' }, { name: 'Wyoming', abbr: 'WY' },
+    { name: 'American Samoa', abbr: 'AS' }, { name: 'District of Columbia', abbr: 'DC' },
+    { name: 'Guam', abbr: 'GU' }, { name: 'Northern Mariana Islands', abbr: 'MP' },
+    { name: 'Puerto Rico', abbr: 'PR' }, { name: 'U.S. Virgin Islands', abbr: 'VI' }
+  ];
+
+  function showStateDropdown() {
+    const dropdown = document.getElementById('state-dropdown');
+    dropdown.classList.remove('hidden');
+    filterStates('');
+  }
+
+  function filterStates(search) {
+    const dropdown = document.getElementById('state-dropdown');
+    const filtered = states.filter(s => 
+      s.name.toLowerCase().includes(search.toLowerCase()) || 
+      s.abbr.toLowerCase().includes(search.toLowerCase())
+    );
+    dropdown.innerHTML = filtered.map(s => `
+      <div class="px-3 py-2 hover:bg-muted cursor-pointer" onclick="selectState('${s.abbr}', '${s.name}')">
+        ${s.name} (${s.abbr})
+      </div>
+    `).join('') || '<div class="px-3 py-2 text-foreground/50">No states found</div>';
+  }
+
+  function selectState(abbr, name) {
+    document.getElementById('p-state').value = abbr;
+    document.getElementById('p-state-search').value = name;
+    document.getElementById('state-dropdown').classList.add('hidden');
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#p-state-search') && !e.target.closest('#state-dropdown')) {
+      document.getElementById('state-dropdown')?.classList.add('hidden');
+    }
+  });
+
   // ========== PARTICIPANT MODAL FUNCTIONS ==========
   function openAddParticipantModal() {
     editingParticipantId = null;
     document.getElementById('participant-modal-title').textContent = 'Add New Participant';
     document.getElementById('participant-submit-btn').textContent = 'Add Participant';
     document.getElementById('add-participant-form').reset();
+    document.getElementById('p-state-search').value = '';
+    document.getElementById('p-state').value = '';
     document.getElementById('add-participant-modal').classList.remove('hidden');
     document.getElementById('add-participant-modal').classList.add('flex');
   }
@@ -327,6 +389,8 @@
     document.getElementById('p-role').value = participant.ParticipantRole || 'participant';
     document.getElementById('p-city').value = participant.ParticipantCity || '';
     document.getElementById('p-state').value = participant.ParticipantState || '';
+    const stateObj = states.find(s => s.abbr === participant.ParticipantState);
+    document.getElementById('p-state-search').value = stateObj ? stateObj.name : (participant.ParticipantState || '');
     document.getElementById('p-zip').value = participant.ParticipantZip || '';
     document.getElementById('p-school').value = participant.ParticipantSchoolOrEmployer || '';
     document.getElementById('p-interest').value = participant.ParticipantFieldOfInterest || 'Both';

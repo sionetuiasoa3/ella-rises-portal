@@ -39,13 +39,30 @@
     </div>
     <form id="add-participant-form" class="space-y-4">
       <input type="hidden" name="ParticipantID" id="participant-id">
+      
+      <!-- Profile Photo Section -->
+      <div class="flex items-center gap-4 pb-4 border-b border-border">
+        <div id="photo-preview" class="w-20 h-20 rounded-full bg-muted border-2 border-border flex items-center justify-center overflow-hidden">
+          <span class="text-xl text-foreground/40" id="photo-initials">?</span>
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium mb-2">Profile Photo</label>
+          <input type="file" id="photo-input" accept="image/*" class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium file:cursor-pointer">
+          <p class="text-xs text-foreground/50 mt-1">JPG, PNG or GIF (max 5MB)</p>
+        </div>
+      </div>
+      
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-sm font-medium mb-1">First Name *</label><input type="text" name="ParticipantFirstName" id="p-firstname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
         <div><label class="block text-sm font-medium mb-1">Last Name *</label><input type="text" name="ParticipantLastName" id="p-lastname" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-sm font-medium mb-1">Email *</label><input type="email" name="ParticipantEmail" id="p-email" required class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
-        <div><label class="block text-sm font-medium mb-1">Phone</label><input type="tel" name="ParticipantPhone" id="p-phone" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone</label>
+          <input type="tel" name="ParticipantPhone" id="p-phone" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits" class="w-full border border-border rounded-lg px-3 py-2 bg-background" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          <p class="text-xs text-foreground/50 mt-1">10 digits only</p>
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-sm font-medium mb-1">Date of Birth</label><input type="date" name="ParticipantDOB" id="p-dob" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
@@ -53,8 +70,19 @@
       </div>
       <div class="grid grid-cols-3 gap-4">
         <div><label class="block text-sm font-medium mb-1">City</label><input type="text" name="ParticipantCity" id="p-city" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
-        <div><label class="block text-sm font-medium mb-1">State</label><input type="text" name="ParticipantState" id="p-state" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
-        <div><label class="block text-sm font-medium mb-1">Zip</label><input type="text" name="ParticipantZip" id="p-zip" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
+        <div>
+          <label class="block text-sm font-medium mb-1">State</label>
+          <div class="relative">
+            <input type="text" id="p-state-search" placeholder="Search state..." class="w-full border border-border rounded-lg px-3 py-2 bg-background" onfocus="showStateDropdown()" oninput="filterStates(this.value)">
+            <input type="hidden" name="ParticipantState" id="p-state">
+            <div id="state-dropdown" class="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Zip</label>
+          <input type="text" name="ParticipantZip" id="p-zip" pattern="[0-9]{5}" maxlength="5" placeholder="5 digits" class="w-full border border-border rounded-lg px-3 py-2 bg-background" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
       </div>
       <div><label class="block text-sm font-medium mb-1">School or Employer</label><input type="text" name="ParticipantSchoolOrEmployer" id="p-school" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></div>
       <div><label class="block text-sm font-medium mb-1">Field of Interest</label><select name="ParticipantFieldOfInterest" id="p-interest" class="w-full border border-border rounded-lg px-3 py-2 bg-background"><option value="Both">Both (STEAM & Arts)</option><option value="STEAM">STEAM</option><option value="Arts">Arts</option></select></div>
@@ -83,6 +111,70 @@
   let participantsData = [];
   let editingParticipantId = null;
   let deleteId = null;
+
+  // US States and Territories
+  const states = [
+    { name: 'Alabama', abbr: 'AL' }, { name: 'Alaska', abbr: 'AK' }, { name: 'Arizona', abbr: 'AZ' },
+    { name: 'Arkansas', abbr: 'AR' }, { name: 'California', abbr: 'CA' }, { name: 'Colorado', abbr: 'CO' },
+    { name: 'Connecticut', abbr: 'CT' }, { name: 'Delaware', abbr: 'DE' }, { name: 'Florida', abbr: 'FL' },
+    { name: 'Georgia', abbr: 'GA' }, { name: 'Hawaii', abbr: 'HI' }, { name: 'Idaho', abbr: 'ID' },
+    { name: 'Illinois', abbr: 'IL' }, { name: 'Indiana', abbr: 'IN' }, { name: 'Iowa', abbr: 'IA' },
+    { name: 'Kansas', abbr: 'KS' }, { name: 'Kentucky', abbr: 'KY' }, { name: 'Louisiana', abbr: 'LA' },
+    { name: 'Maine', abbr: 'ME' }, { name: 'Maryland', abbr: 'MD' }, { name: 'Massachusetts', abbr: 'MA' },
+    { name: 'Michigan', abbr: 'MI' }, { name: 'Minnesota', abbr: 'MN' }, { name: 'Mississippi', abbr: 'MS' },
+    { name: 'Missouri', abbr: 'MO' }, { name: 'Montana', abbr: 'MT' }, { name: 'Nebraska', abbr: 'NE' },
+    { name: 'Nevada', abbr: 'NV' }, { name: 'New Hampshire', abbr: 'NH' }, { name: 'New Jersey', abbr: 'NJ' },
+    { name: 'New Mexico', abbr: 'NM' }, { name: 'New York', abbr: 'NY' }, { name: 'North Carolina', abbr: 'NC' },
+    { name: 'North Dakota', abbr: 'ND' }, { name: 'Ohio', abbr: 'OH' }, { name: 'Oklahoma', abbr: 'OK' },
+    { name: 'Oregon', abbr: 'OR' }, { name: 'Pennsylvania', abbr: 'PA' }, { name: 'Rhode Island', abbr: 'RI' },
+    { name: 'South Carolina', abbr: 'SC' }, { name: 'South Dakota', abbr: 'SD' }, { name: 'Tennessee', abbr: 'TN' },
+    { name: 'Texas', abbr: 'TX' }, { name: 'Utah', abbr: 'UT' }, { name: 'Vermont', abbr: 'VT' },
+    { name: 'Virginia', abbr: 'VA' }, { name: 'Washington', abbr: 'WA' }, { name: 'West Virginia', abbr: 'WV' },
+    { name: 'Wisconsin', abbr: 'WI' }, { name: 'Wyoming', abbr: 'WY' },
+    // Territories
+    { name: 'American Samoa', abbr: 'AS' }, { name: 'District of Columbia', abbr: 'DC' },
+    { name: 'Guam', abbr: 'GU' }, { name: 'Northern Mariana Islands', abbr: 'MP' },
+    { name: 'Puerto Rico', abbr: 'PR' }, { name: 'U.S. Virgin Islands', abbr: 'VI' }
+  ];
+
+  function showStateDropdown() {
+    const dropdown = document.getElementById('state-dropdown');
+    dropdown.classList.remove('hidden');
+    filterStates('');
+  }
+
+  function hideStateDropdown() {
+    setTimeout(() => {
+      document.getElementById('state-dropdown').classList.add('hidden');
+    }, 200);
+  }
+
+  function filterStates(search) {
+    const dropdown = document.getElementById('state-dropdown');
+    const filtered = states.filter(s => 
+      s.name.toLowerCase().includes(search.toLowerCase()) || 
+      s.abbr.toLowerCase().includes(search.toLowerCase())
+    );
+    
+    dropdown.innerHTML = filtered.map(s => `
+      <div class="px-3 py-2 hover:bg-muted cursor-pointer" onclick="selectState('${s.abbr}', '${s.name}')">
+        ${s.name} (${s.abbr})
+      </div>
+    `).join('') || '<div class="px-3 py-2 text-foreground/50">No states found</div>';
+  }
+
+  function selectState(abbr, name) {
+    document.getElementById('p-state').value = abbr;
+    document.getElementById('p-state-search').value = name;
+    document.getElementById('state-dropdown').classList.add('hidden');
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#p-state-search') && !e.target.closest('#state-dropdown')) {
+      document.getElementById('state-dropdown')?.classList.add('hidden');
+    }
+  });
 
   // Load participants
   fetch('/api/participants')
@@ -172,16 +264,23 @@
     `;
   }
 
+  let currentParticipantPhoto = null;
+
   function openAddParticipantModal() {
     editingParticipantId = null;
+    currentParticipantPhoto = null;
     document.getElementById('participant-modal-title').textContent = 'Add New Participant';
     document.getElementById('participant-submit-btn').textContent = 'Add Participant';
     document.getElementById('add-participant-form').reset();
+    document.getElementById('photo-input').value = '';
+    document.getElementById('p-state-search').value = '';
+    document.getElementById('p-state').value = '';
+    updatePhotoPreview(null, '?');
     document.getElementById('add-participant-modal').classList.remove('hidden');
     document.getElementById('add-participant-modal').classList.add('flex');
   }
 
-  async function openEditParticipantModal(participantId) {
+async function openEditParticipantModal(participantId) {
     try {
       // Fetch the full participant data from the API
       const response = await fetch(`/api/participants/${participantId}`);
@@ -192,20 +291,30 @@
       const p = await response.json();
       
       editingParticipantId = p.ParticipantID;
+      currentParticipantPhoto = p.ParticipantPhotoPath;
       document.getElementById('participant-modal-title').textContent = 'Edit Participant';
       document.getElementById('participant-submit-btn').textContent = 'Save Changes';
       document.getElementById('participant-id').value = p.ParticipantID;
       document.getElementById('p-firstname').value = p.ParticipantFirstName || '';
       document.getElementById('p-lastname').value = p.ParticipantLastName || '';
       document.getElementById('p-email').value = p.ParticipantEmail || '';
-      document.getElementById('p-phone').value = p.ParticipantPhone || '';
+      // Strip dashes from phone for editing (stored as XXX-XXX-XXXX)
+      document.getElementById('p-phone').value = (p.ParticipantPhone || '').replace(/-/g, '');
       document.getElementById('p-dob').value = p.ParticipantDOB ? (p.ParticipantDOB.split('T')[0] || '') : '';
       document.getElementById('p-role').value = p.ParticipantRole || 'participant';
       document.getElementById('p-city').value = p.ParticipantCity || '';
       document.getElementById('p-state').value = p.ParticipantState || '';
+      // Find state name from abbreviation
+      const stateObj = states.find(s => s.abbr === p.ParticipantState);
+      document.getElementById('p-state-search').value = stateObj ? stateObj.name : (p.ParticipantState || '');
       document.getElementById('p-zip').value = p.ParticipantZip || '';
       document.getElementById('p-school').value = p.ParticipantSchoolOrEmployer || '';
       document.getElementById('p-interest').value = p.ParticipantFieldOfInterest || 'Both';
+      document.getElementById('photo-input').value = '';
+      
+      const initials = (p.ParticipantFirstName || '').charAt(0) + (p.ParticipantLastName || '').charAt(0);
+      updatePhotoPreview(p.ParticipantPhotoPath, initials);
+      
       document.getElementById('add-participant-modal').classList.remove('hidden');
       document.getElementById('add-participant-modal').classList.add('flex');
     } catch (error) {
@@ -213,6 +322,27 @@
       alert('Error loading participant data');
     }
   }
+
+  function updatePhotoPreview(photoPath, initials) {
+    const preview = document.getElementById('photo-preview');
+    if (photoPath) {
+      preview.innerHTML = `<img src="${photoPath}" alt="Profile" class="w-full h-full object-cover">`;
+    } else {
+      preview.innerHTML = `<span class="text-xl text-foreground/40">${initials || '?'}</span>`;
+    }
+  }
+
+  // Photo preview on file select
+  document.getElementById('photo-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('photo-preview').innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   function closeAddParticipantModal() {
     document.getElementById('add-participant-modal').classList.add('hidden');
@@ -258,16 +388,40 @@
     const url = isEditing ? `/api/participants/${editingParticipantId}` : '/api/participants';
     
     try {
+      // First save participant data
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      if (response.ok) {
-        alert(isEditing ? 'Participant updated!' : 'Participant added!');
-        closeAddParticipantModal();
-        location.reload();
-      } else {
+      if (!response.ok) {
         const error = await response.json();
         alert('Error: ' + (error.message || 'Failed to save'));
+        return;
       }
-    } catch (err) { alert('Error saving participant'); }
+      
+      const savedParticipant = await response.json();
+      const participantId = savedParticipant.ParticipantID || editingParticipantId;
+      
+      // Then upload photo if one was selected
+      const photoInput = document.getElementById('photo-input');
+      if (photoInput.files.length > 0) {
+        const photoFormData = new FormData();
+        photoFormData.append('photo', photoInput.files[0]);
+        
+        const photoResponse = await fetch(`/api/participants/${participantId}/photo`, {
+          method: 'POST',
+          body: photoFormData
+        });
+        
+        if (!photoResponse.ok) {
+          alert('Participant saved, but photo upload failed.');
+        }
+      }
+      
+      alert(isEditing ? 'Participant updated!' : 'Participant added!');
+      closeAddParticipantModal();
+      location.reload();
+    } catch (err) { 
+      console.error(err);
+      alert('Error saving participant'); 
+    }
   });
 
   document.getElementById('add-participant-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddParticipantModal(); });

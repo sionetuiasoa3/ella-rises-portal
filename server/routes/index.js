@@ -264,8 +264,46 @@ router.post('/portal/profile/edit', requireAuth, uploadParticipantPhoto, handleU
   }
 });
 
-router.get('/portal/events', requireAuth, (req, res) => {
-  res.render('portal/events', { title: 'Events - Ella Rises Portal' });
+router.get('/portal/events', requireAuth, async (req, res, next) => {
+  try {
+    const participantId = req.session.user.participantId;
+    console.log('[/portal/events] Fetching events for participant:', participantId);
+    
+    // Fetch all upcoming events
+    const allEvents = await db('Events')
+      .join('EventsTemplates', 'Events.EventName', 'EventsTemplates.EventName')
+      .where('Events.EventDateTimeStart', '>=', db.fn.now())
+      .select(
+        'Events.*',
+        'EventsTemplates.EventType',
+        'EventsTemplates.EventDescription',
+        'EventsTemplates.EventTemplatePhotoPath'
+      )
+      .orderBy('Events.EventDateTimeStart', 'asc');
+    
+    console.log('[/portal/events] Found', allEvents.length, 'upcoming events');
+    
+    // Fetch user's registrations
+    const registrations = await db('Registrations')
+      .where({ ParticipantID: participantId })
+      .select('EventID', 'RegistrationStatus');
+    
+    const registeredEventIds = new Set(registrations.map(r => r.EventID));
+    
+    // Mark which events the user is registered for
+    const eventsWithRegistration = allEvents.map(event => ({
+      ...event,
+      isRegistered: registeredEventIds.has(event.EventID)
+    }));
+    
+    res.render('portal/events', { 
+      title: 'Events - Ella Rises Portal',
+      events: eventsWithRegistration
+    });
+  } catch (error) {
+    console.error('[/portal/events] Error:', error);
+    next(error);
+  }
 });
 
 router.get('/portal/milestones', requireAuth, (req, res) => {

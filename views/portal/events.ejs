@@ -1,30 +1,135 @@
-<%- include('../partials/head', { title: 'Ella Rises' }) %>
+<%- include('../partials/head', { title: 'Events - Ella Rises Portal' }) %>
 <%- include('../partials/navbar', { currentPath: '/portal/events' }) %>
 <div class="min-h-screen bg-background pt-28 pb-20">
   <div class="container mx-auto px-6">
-    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">My Events</h1>
-    <div id="events-container" class="bg-card border border-border rounded-xl p-6">
-      <p class="text-foreground/60">Loading events...</p>
-    </div>
+    <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-8">Available Events</h1>
+    
+    <% if (events && events.length > 0) { %>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% events.forEach(event => { %>
+          <div class="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <% if (event.EventTemplatePhotoPath) { %>
+              <img 
+                src="<%= event.EventTemplatePhotoPath %>" 
+                alt="<%= event.EventName %>" 
+                class="w-full h-48 object-cover"
+                onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+              />
+            <% } else { %>
+              <div class="w-full h-48 bg-muted flex items-center justify-center">
+                <svg class="w-16 h-16 text-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            <% } %>
+            <div class="p-6">
+              <h3 class="text-xl font-serif text-foreground mb-2"><%= event.EventName %></h3>
+              <% if (event.EventType) { %>
+                <span class="inline-block bg-primary/10 text-primary text-xs px-2 py-1 rounded-full mb-3">
+                  <%= event.EventType %>
+                </span>
+              <% } %>
+              <div class="space-y-2 text-sm text-foreground/60 mb-4">
+                <p class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <%= new Date(event.EventDateTimeStart).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  }) %>
+                </p>
+                <% if (event.EventLocation) { %>
+                  <p class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <%= event.EventLocation %>
+                  </p>
+                <% } %>
+                <% if (event.EventCapacity) { %>
+                  <p class="text-xs">
+                    Capacity: <%= event.EventCapacity %> participants
+                  </p>
+                <% } %>
+              </div>
+              <% if (event.EventDescription) { %>
+                <p class="text-sm text-foreground/70 mb-4 line-clamp-2"><%= event.EventDescription %></p>
+              <% } %>
+              <% if (event.isRegistered) { %>
+                <button 
+                  disabled
+                  class="w-full bg-muted text-muted-foreground px-4 py-2 rounded-lg font-medium cursor-not-allowed"
+                >
+                  Already Registered
+                </button>
+              <% } else { %>
+                <button 
+                  onclick="registerForEvent(<%= event.EventID %>)"
+                  class="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+                  id="register-btn-<%= event.EventID %>"
+                >
+                  Register
+                </button>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="bg-card border border-border rounded-xl p-12 text-center">
+        <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-serif text-foreground mb-2">No Upcoming Events</h3>
+        <p class="text-foreground/60 mb-6">Check back soon for new events!</p>
+        <a href="/portal/dashboard" class="inline-block text-primary hover:underline font-medium">
+          ← Back to Dashboard
+        </a>
+      </div>
+    <% } %>
   </div>
 </div>
-<%- include('partials/footer') %>
+<%- include('../partials/footer') %>
+<%- include('../partials/footer-scripts') %>
 <script>
-  fetch('/api/auth/me')
-    .then(r => r.json())
-    .then(me => {
-      return fetch(`/api/participants/${me.ParticipantID}/registrations`);
-    })
-    .then(r => r.json())
-    .then(registrations => {
-      const container = document.getElementById('events-container');
-      container.innerHTML = registrations.map(r => `
-        <div class="border-b border-border py-4">
-          <h3 class="text-xl font-serif">${r.EventName}</h3>
-          <p class="text-foreground/60">${new Date(r.EventDateTimeStart).toLocaleDateString()}</p>
-          <p>Status: ${r.RegistrationStatus}</p>
-        </div>
-      `).join('');
-    });
+  async function registerForEvent(eventId) {
+    const btn = document.getElementById(`register-btn-${eventId}`);
+    if (!btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline-block" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Registering...';
+    
+    try {
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ EventID: eventId })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+      
+      // Show success and reload page
+      alert('Successfully registered for this event!');
+      window.location.reload();
+    } catch (error) {
+      alert('Error: ' + error.message);
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
 </script>
-

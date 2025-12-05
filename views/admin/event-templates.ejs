@@ -27,6 +27,22 @@
     </div>
     <form id="add-template-form" class="space-y-4">
       <input type="hidden" name="OriginalEventName" id="original-event-name">
+      
+      <!-- Photo Upload -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Template Photo *</label>
+        <div class="flex items-start gap-4">
+          <div id="photo-preview" class="w-32 h-32 rounded-lg bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
+            <span class="text-foreground/40 text-sm text-center px-2">No photo</span>
+          </div>
+          <div class="flex-1">
+            <input type="file" name="photo" id="t-photo" accept="image/*" class="w-full text-sm text-foreground/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium hover:file:bg-primary/90 file:cursor-pointer">
+            <p class="text-xs text-foreground/50 mt-2">This photo will be displayed on the events page. Max 5MB. JPG, PNG, GIF, or WebP.</p>
+            <button type="button" id="remove-photo-btn" onclick="removeTemplatePhoto()" class="hidden mt-2 text-sm text-red-600 hover:text-red-800">Remove photo</button>
+          </div>
+        </div>
+      </div>
+      
       <div>
         <label class="block text-sm font-medium mb-1">Template Name *</label>
         <input type="text" name="EventName" id="t-name" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
@@ -94,6 +110,8 @@
   let templatesData = [];
   let editingTemplateName = null;
   let deleteTemplateName = null;
+  let currentTemplatePhoto = null;
+  let pendingPhotoFile = null;
 
   // Load templates
   fetch('/api/event-templates')
@@ -102,6 +120,37 @@
       templatesData = templates;
       renderTemplates(templates);
     });
+
+  // Photo preview on file select
+  document.getElementById('t-photo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      pendingPhotoFile = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        updatePhotoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      document.getElementById('remove-photo-btn').classList.remove('hidden');
+    }
+  });
+
+  function updatePhotoPreview(src) {
+    const preview = document.getElementById('photo-preview');
+    if (src) {
+      preview.innerHTML = `<img src="${src}" alt="Template photo" class="w-full h-full object-cover">`;
+    } else {
+      preview.innerHTML = '<span class="text-foreground/40 text-sm text-center px-2">No photo</span>';
+    }
+  }
+
+  function removeTemplatePhoto() {
+    document.getElementById('t-photo').value = '';
+    pendingPhotoFile = null;
+    currentTemplatePhoto = null;
+    updatePhotoPreview(null);
+    document.getElementById('remove-photo-btn').classList.add('hidden');
+  }
 
   function renderTemplates(templates) {
     const container = document.getElementById('templates-container');
@@ -113,6 +162,7 @@
       <table class="w-full">
         <thead class="bg-muted">
           <tr>
+            <th class="text-left p-4 font-medium">Photo</th>
             <th class="text-left p-4 font-medium">Template Name</th>
             <th class="text-left p-4 font-medium">Type</th>
             <th class="text-left p-4 font-medium">Recurrence</th>
@@ -123,6 +173,11 @@
         <tbody>
           ${templates.map(t => `
             <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4">
+                ${t.EventTemplatePhotoPath 
+                  ? `<img src="${t.EventTemplatePhotoPath}" alt="${t.EventName}" class="w-16 h-16 object-cover rounded-lg">` 
+                  : `<div class="w-16 h-16 bg-muted rounded-lg flex items-center justify-center text-foreground/40 text-xs">No photo</div>`}
+              </td>
               <td class="p-4">
                 <div class="font-medium">${t.EventName}</div>
                 ${t.EventDescription ? `<div class="text-sm text-foreground/50 truncate max-w-xs">${t.EventDescription}</div>` : ''}
@@ -151,15 +206,22 @@
 
   function openAddTemplateModal() {
     editingTemplateName = null;
+    currentTemplatePhoto = null;
+    pendingPhotoFile = null;
     document.getElementById('template-modal-title').textContent = 'Add New Template';
     document.getElementById('template-submit-btn').textContent = 'Add Template';
     document.getElementById('add-template-form').reset();
+    document.getElementById('t-photo').value = '';
+    updatePhotoPreview(null);
+    document.getElementById('remove-photo-btn').classList.add('hidden');
     document.getElementById('add-template-modal').classList.remove('hidden');
     document.getElementById('add-template-modal').classList.add('flex');
   }
 
   function openEditTemplateModal(t) {
     editingTemplateName = t.EventName;
+    currentTemplatePhoto = t.EventTemplatePhotoPath;
+    pendingPhotoFile = null;
     document.getElementById('template-modal-title').textContent = 'Edit Template';
     document.getElementById('template-submit-btn').textContent = 'Save Changes';
     document.getElementById('original-event-name').value = t.EventName;
@@ -168,6 +230,17 @@
     document.getElementById('t-description').value = t.EventDescription || '';
     document.getElementById('t-recurrence').value = t.EventRecurrencePattern || '';
     document.getElementById('t-capacity').value = t.EventDefaultCapacity || '';
+    document.getElementById('t-photo').value = '';
+    
+    // Show existing photo
+    if (t.EventTemplatePhotoPath) {
+      updatePhotoPreview(t.EventTemplatePhotoPath);
+      document.getElementById('remove-photo-btn').classList.remove('hidden');
+    } else {
+      updatePhotoPreview(null);
+      document.getElementById('remove-photo-btn').classList.add('hidden');
+    }
+    
     document.getElementById('add-template-modal').classList.remove('hidden');
     document.getElementById('add-template-modal').classList.add('flex');
   }
@@ -209,23 +282,63 @@
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
+    
+    // Remove photo from JSON data (handled separately)
+    delete data.photo;
     Object.keys(data).forEach(key => { if (data[key] === '') delete data[key]; });
     
     const isEditing = !!editingTemplateName;
+    
+    // For new templates, require a photo
+    if (!isEditing && !pendingPhotoFile && !currentTemplatePhoto) {
+      alert('Please upload a photo for the template');
+      return;
+    }
+    
     const method = isEditing ? 'PUT' : 'POST';
     const url = isEditing ? `/api/event-templates/${encodeURIComponent(editingTemplateName)}` : '/api/event-templates';
     
     try {
+      // First save the template data
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      if (response.ok) {
-        alert(isEditing ? 'Template updated!' : 'Template added!');
-        closeAddTemplateModal();
-        location.reload();
-      } else {
+      if (!response.ok) {
         const error = await response.json();
         alert('Error: ' + (error.message || 'Failed to save'));
+        return;
       }
-    } catch (err) { alert('Error saving template'); }
+      
+      const savedTemplate = await response.json();
+      const templateName = savedTemplate.EventName || data.EventName;
+      
+      // If there's a pending photo, upload it
+      if (pendingPhotoFile) {
+        const photoFormData = new FormData();
+        photoFormData.append('photo', pendingPhotoFile);
+        
+        const photoResponse = await fetch(`/api/event-templates/${encodeURIComponent(templateName)}/photo`, {
+          method: 'POST',
+          body: photoFormData
+        });
+        
+        if (!photoResponse.ok) {
+          alert('Template saved but photo upload failed');
+        }
+      }
+      // If editing and photo was removed (currentTemplatePhoto is null but was originally set)
+      else if (isEditing && !currentTemplatePhoto) {
+        const originalTemplate = templatesData.find(t => t.EventName === editingTemplateName);
+        if (originalTemplate && originalTemplate.EventTemplatePhotoPath) {
+          await fetch(`/api/event-templates/${encodeURIComponent(templateName)}/photo`, { method: 'DELETE' });
+        }
+      }
+      
+      alert(isEditing ? 'Template updated!' : 'Template added!');
+      closeAddTemplateModal();
+      location.reload();
+    } catch (err) { 
+      console.error(err);
+      alert('Error saving template'); 
+    }
   });
 
   document.getElementById('add-template-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeAddTemplateModal(); });
