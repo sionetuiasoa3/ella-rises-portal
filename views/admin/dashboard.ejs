@@ -65,7 +65,7 @@
     </div>
     
     <!-- Quick Actions -->
-    <div class="grid md:grid-cols-2 gap-6 mb-10">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
       <!-- Manage Participants -->
       <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-32 h-32 bg-ella-sage/5 rounded-full -mr-16 -mt-16 group-hover:bg-ella-sage/10 transition-colors"></div>
@@ -121,6 +121,30 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
               </svg>
               Templates
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Manage Surveys -->
+      <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-ella-peach/5 rounded-full -mr-16 -mt-16 group-hover:bg-ella-peach/10 transition-colors"></div>
+        <div class="relative">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="bg-ella-peach/20 p-3 rounded-lg">
+              <svg class="h-6 w-6 text-ella-peach" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-serif text-foreground">Manage Surveys</h3>
+          </div>
+          <p class="text-foreground/60 mb-4">View, edit, or delete survey responses. Analyze participant feedback.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/admin/surveys" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-all shadow-md hover:shadow-lg">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              View All
             </a>
           </div>
         </div>

@@ -1,0 +1,324 @@
+<%- include('../partials/head', { title: 'Surveys - Ella Rises Admin' }) %>
+<%- include('../partials/navbar', { currentPath: '/admin/surveys' }) %>
+<div class="min-h-screen bg-background pt-28 pb-20">
+  <div class="container mx-auto px-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif text-foreground">Surveys</h1>
+    </div>
+    
+    <!-- Search & Filter Bar -->
+    <div class="mb-6 flex flex-wrap gap-4 items-end">
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Search</label>
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search by participant name, email, or event..." 
+            class="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+            oninput="filterSurveys()">
+        </div>
+      </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">Participant ID</label>
+        <input type="number" id="participant-id-filter" placeholder="Enter ID" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+          oninput="filterSurveys()">
+      </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium mb-1 text-foreground/70">NPS Bucket</label>
+        <select id="nps-filter" onchange="filterSurveys()" 
+          class="w-full px-3 py-2 border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="">All</option>
+          <option value="Promoter">Promoter</option>
+          <option value="Passive">Passive</option>
+          <option value="Detractor">Detractor</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" class="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-foreground/70">
+        Clear All
+      </button>
+    </div>
+    
+    <p class="text-sm text-foreground/50 mb-4" id="results-count"></p>
+    
+    <!-- Surveys Table -->
+    <div id="surveys-container" class="bg-card border border-border rounded-xl overflow-hidden">
+      <p class="text-foreground/60 p-6">Loading surveys...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Survey Modal -->
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-serif">Edit Survey</h3>
+      <button onclick="closeEditModal()" class="text-foreground/60 hover:text-foreground">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div id="edit-participant-info" class="mb-4 p-3 bg-muted rounded-lg text-sm"></div>
+    <form id="edit-form" class="space-y-4">
+      <input type="hidden" name="SurveyID" id="edit-survey-id">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Satisfaction (1-5)</label>
+          <input type="number" name="SurveySatisfactionScore" id="edit-satisfaction" min="1" max="5" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Usefulness (1-5)</label>
+          <input type="number" name="SurveyUsefulnessScore" id="edit-usefulness" min="1" max="5" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Instructor (1-5)</label>
+          <input type="number" name="SurveyInstructorScore" id="edit-instructor" min="1" max="5" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Recommendation (1-5)</label>
+          <input type="number" name="SurveyRecommendationScore" id="edit-recommendation" min="1" max="5" required class="w-full border border-border rounded-lg px-3 py-2 bg-background">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Comments</label>
+        <textarea name="SurveyComments" id="edit-comments" rows="3" class="w-full border border-border rounded-lg px-3 py-2 bg-background"></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeEditModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+  <div class="bg-card rounded-xl p-6 w-full max-w-md mx-4">
+    <h3 class="text-xl font-serif mb-4">Confirm Delete</h3>
+    <p class="text-foreground/70 mb-6" id="delete-message">Are you sure you want to delete this survey?</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 border border-border rounded-lg px-4 py-2 font-medium hover:bg-muted transition-colors">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-lg px-4 py-2 font-medium transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+<script>
+  let surveysData = [];
+  let editingSurveyId = null;
+  let deleteSurveyId = null;
+
+  // Load surveys
+  fetch('/api/surveys/all')
+    .then(r => r.json())
+    .then(surveys => {
+      surveysData = surveys;
+      renderSurveys(surveys);
+      updateResultsCount(surveys.length);
+    })
+    .catch(err => {
+      console.error('Error loading surveys:', err);
+      document.getElementById('surveys-container').innerHTML = 
+        '<p class="text-red-600 p-6">Error loading surveys. Please try again.</p>';
+    });
+
+  function filterSurveys() {
+    const search = document.getElementById('search-input').value.toLowerCase().trim();
+    const participantId = document.getElementById('participant-id-filter').value;
+    const npsBucket = document.getElementById('nps-filter').value;
+    
+    let filtered = surveysData;
+    
+    if (search) {
+      filtered = filtered.filter(s => 
+        (s.ParticipantFirstName || '').toLowerCase().includes(search) ||
+        (s.ParticipantLastName || '').toLowerCase().includes(search) ||
+        (s.ParticipantEmail || '').toLowerCase().includes(search) ||
+        (s.EventName || '').toLowerCase().includes(search)
+      );
+    }
+    
+    if (participantId) {
+      filtered = filtered.filter(s => s.ParticipantID === parseInt(participantId));
+    }
+    
+    if (npsBucket) {
+      filtered = filtered.filter(s => s.SurveyNPSBucket === npsBucket);
+    }
+    
+    renderSurveys(filtered);
+    updateResultsCount(filtered.length);
+  }
+
+  function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('participant-id-filter').value = '';
+    document.getElementById('nps-filter').value = '';
+    renderSurveys(surveysData);
+    updateResultsCount(surveysData.length);
+  }
+
+  function updateResultsCount(count) {
+    document.getElementById('results-count').textContent = `Showing ${count} survey${count !== 1 ? 's' : ''}`;
+  }
+
+  function getNPSBadgeClass(bucket) {
+    switch (bucket) {
+      case 'Promoter': return 'bg-green-100 text-green-800';
+      case 'Passive': return 'bg-yellow-100 text-yellow-800';
+      case 'Detractor': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function renderSurveys(surveys) {
+    const container = document.getElementById('surveys-container');
+    
+    if (surveys.length === 0) {
+      container.innerHTML = '<p class="text-foreground/60 p-6">No surveys found.</p>';
+      return;
+    }
+    
+    container.innerHTML = `
+      <table class="w-full">
+        <thead class="bg-muted">
+          <tr>
+            <th class="text-left p-4 font-medium">Participant</th>
+            <th class="text-left p-4 font-medium">Event</th>
+            <th class="text-left p-4 font-medium">Scores</th>
+            <th class="text-left p-4 font-medium">NPS</th>
+            <th class="text-left p-4 font-medium">Date</th>
+            <th class="text-right p-4 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${surveys.map(s => `
+            <tr class="border-t border-border hover:bg-muted/50">
+              <td class="p-4">
+                <div class="font-medium">${s.ParticipantFirstName || ''} ${s.ParticipantLastName || ''}</div>
+                <div class="text-sm text-foreground/60">${s.ParticipantEmail || ''}</div>
+                <div class="text-xs text-foreground/40">ID: ${s.ParticipantID}</div>
+              </td>
+              <td class="p-4">
+                <div class="font-medium">${s.EventName || '-'}</div>
+                <div class="text-sm text-foreground/60">${s.EventDateTimeStart ? new Date(s.EventDateTimeStart).toLocaleDateString() : ''}</div>
+              </td>
+              <td class="p-4">
+                <div class="text-sm space-y-1">
+                  <div>Sat: <span class="font-medium">${s.SurveySatisfactionScore || '-'}</span></div>
+                  <div>Use: <span class="font-medium">${s.SurveyUsefulnessScore || '-'}</span></div>
+                  <div>Inst: <span class="font-medium">${s.SurveyInstructorScore || '-'}</span></div>
+                  <div>Rec: <span class="font-medium">${s.SurveyRecommendationScore || '-'}</span></div>
+                </div>
+              </td>
+              <td class="p-4">
+                <span class="px-2 py-1 rounded-full text-xs font-medium ${getNPSBadgeClass(s.SurveyNPSBucket)}">
+                  ${s.SurveyNPSBucket || '-'}
+                </span>
+                <div class="text-sm text-foreground/60 mt-1">Overall: ${s.SurveyOverallScore || '-'}/5</div>
+              </td>
+              <td class="p-4 text-foreground/70 text-sm">
+                ${s.SurveySubmissionDate ? new Date(s.SurveySubmissionDate).toLocaleString() : '-'}
+              </td>
+              <td class="p-4 text-right">
+                <button onclick='openEditModal(${JSON.stringify(s).replace(/'/g, "\\'")})' class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="openDeleteModal(${s.SurveyID})" class="text-red-600 hover:text-red-800" title="Delete">
+                  <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openEditModal(survey) {
+    editingSurveyId = survey.SurveyID;
+    document.getElementById('edit-survey-id').value = survey.SurveyID;
+    document.getElementById('edit-participant-info').innerHTML = `
+      <strong>${survey.ParticipantFirstName || ''} ${survey.ParticipantLastName || ''}</strong><br>
+      Event: ${survey.EventName || '-'}<br>
+      Email: ${survey.ParticipantEmail || '-'}
+    `;
+    document.getElementById('edit-satisfaction').value = survey.SurveySatisfactionScore || '';
+    document.getElementById('edit-usefulness').value = survey.SurveyUsefulnessScore || '';
+    document.getElementById('edit-instructor').value = survey.SurveyInstructorScore || '';
+    document.getElementById('edit-recommendation').value = survey.SurveyRecommendationScore || '';
+    document.getElementById('edit-comments').value = survey.SurveyComments || '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.getElementById('edit-modal').classList.add('flex');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    document.getElementById('edit-modal').classList.remove('flex');
+  }
+
+  function openDeleteModal(surveyId) {
+    deleteSurveyId = surveyId;
+    document.getElementById('delete-message').textContent = 'Are you sure you want to delete this survey? This action cannot be undone.';
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+    document.getElementById('delete-modal').classList.remove('flex');
+  }
+
+  async function confirmDelete() {
+    try {
+      const response = await fetch(`/api/surveys/${deleteSurveyId}`, { method: 'DELETE' });
+      if (response.ok) {
+        alert('Survey deleted successfully!');
+        closeDeleteModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to delete'));
+      }
+    } catch (err) {
+      alert('Error deleting survey');
+    }
+  }
+
+  document.getElementById('edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      SurveySatisfactionScore: parseInt(formData.get('SurveySatisfactionScore')),
+      SurveyUsefulnessScore: parseInt(formData.get('SurveyUsefulnessScore')),
+      SurveyInstructorScore: parseInt(formData.get('SurveyInstructorScore')),
+      SurveyRecommendationScore: parseInt(formData.get('SurveyRecommendationScore')),
+      SurveyComments: formData.get('SurveyComments')
+    };
+    
+    try {
+      const response = await fetch(`/api/surveys/${editingSurveyId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        alert('Survey updated successfully!');
+        closeEditModal();
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to update'));
+      }
+    } catch (err) {
+      alert('Error updating survey');
+    }
+  });
+
+  // Close modals on background click
+  document.getElementById('edit-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeEditModal(); });
+  document.getElementById('delete-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDeleteModal(); });
+</script>
+

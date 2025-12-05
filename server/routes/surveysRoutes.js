@@ -4,7 +4,32 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get survey statistics (admin only)
+// Get all surveys with participant and event info (admin only)
+router.get('/all', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const surveys = await db('Surveys')
+      .join('Registrations', 'Surveys.RegistrationID', 'Registrations.RegistrationID')
+      .join('Events', 'Registrations.EventID', 'Events.EventID')
+      .join('Participants', 'Registrations.ParticipantID', 'Participants.ParticipantID')
+      .select(
+        'Surveys.*',
+        'Registrations.EventID',
+        'Registrations.ParticipantID',
+        'Events.EventName',
+        'Events.EventDateTimeStart',
+        'Participants.ParticipantFirstName',
+        'Participants.ParticipantLastName',
+        'Participants.ParticipantEmail'
+      )
+      .orderBy('Surveys.SurveySubmissionDate', 'desc');
+    
+    res.json(surveys);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get survey statistics (admin only) - MUST be before /:id
 router.get('/stats', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const stats = await db('Surveys')
@@ -24,6 +49,116 @@ router.get('/stats', requireAuth, requireRole('admin'), async (req, res, next) =
       avgOverall: parseFloat(stats.avgOverall) || 0,
       totalSurveys: parseInt(stats.totalSurveys) || 0
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get survey by ID (admin only)
+router.get('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const surveyId = parseInt(req.params.id);
+    
+    const survey = await db('Surveys')
+      .join('Registrations', 'Surveys.RegistrationID', 'Registrations.RegistrationID')
+      .join('Events', 'Registrations.EventID', 'Events.EventID')
+      .join('Participants', 'Registrations.ParticipantID', 'Participants.ParticipantID')
+      .where({ 'Surveys.SurveyID': surveyId })
+      .select(
+        'Surveys.*',
+        'Registrations.EventID',
+        'Registrations.ParticipantID',
+        'Events.EventName',
+        'Participants.ParticipantFirstName',
+        'Participants.ParticipantLastName',
+        'Participants.ParticipantEmail'
+      )
+      .first();
+    
+    if (!survey) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+    
+    res.json(survey);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update survey (admin only)
+router.put('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const surveyId = parseInt(req.params.id);
+    const {
+      SurveySatisfactionScore,
+      SurveyUsefulnessScore,
+      SurveyInstructorScore,
+      SurveyRecommendationScore,
+      SurveyComments
+    } = req.body;
+    
+    // Calculate overall score
+    const scores = [
+      SurveySatisfactionScore,
+      SurveyUsefulnessScore,
+      SurveyInstructorScore,
+      SurveyRecommendationScore
+    ].filter(s => s != null).map(s => parseInt(s));
+    
+    const calculatedOverallScore = scores.length > 0 
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : null;
+
+    // Determine NPS bucket
+    let calculatedNPSBucket = null;
+    if (SurveyRecommendationScore != null) {
+      const recScore = parseInt(SurveyRecommendationScore);
+      if (recScore <= 3) {
+        calculatedNPSBucket = 'Detractor';
+      } else if (recScore === 4) {
+        calculatedNPSBucket = 'Passive';
+      } else if (recScore === 5) {
+        calculatedNPSBucket = 'Promoter';
+      }
+    }
+    
+    const [updated] = await db('Surveys')
+      .where({ SurveyID: surveyId })
+      .update({
+        SurveySatisfactionScore,
+        SurveyUsefulnessScore,
+        SurveyInstructorScore,
+        SurveyRecommendationScore,
+        SurveyOverallScore: calculatedOverallScore,
+        SurveyNPSBucket: calculatedNPSBucket,
+        SurveyComments
+      })
+      .returning('*');
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+    
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete survey (admin only)
+router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const surveyId = parseInt(req.params.id);
+    
+    const deleted = await db('Surveys')
+      .where({ SurveyID: surveyId })
+      .del();
+    
+    if (!deleted) {
+      return res.status(404).json({ message: 'Survey not found' });
+    }
+    
+    res.json({ message: 'Survey deleted successfully' });
   } catch (error) {
     next(error);
   }

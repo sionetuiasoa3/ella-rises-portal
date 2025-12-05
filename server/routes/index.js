@@ -490,6 +490,10 @@ router.get('/admin/donations', requireAuth, requireRole('admin'), (req, res) => 
   res.render('admin/donations', { title: 'Donations - Admin' });
 });
 
+router.get('/admin/surveys', requireAuth, requireRole('admin'), (req, res) => {
+  res.render('admin/surveys', { title: 'Surveys - Admin' });
+});
+
 // Account / password creation routes (non-API, EJS views)
 router.use('/', accountRouter);
 
