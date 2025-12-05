@@ -291,15 +291,15 @@ router.post('/signup', async (req, res, next) => {
       // Existing participant with password -> must log in instead
       if (existing.PasswordHash) {
         return res.status(400).json({
-          message: 'You already have an account with this email. Please log in instead.',
+          error: 'EMAIL_EXISTS_WITH_PASSWORD',
+          message: 'This email is already associated with a participant account.',
         });
       }
 
-      // Existing participant without password -> send create-password email
-      await createPasswordToken(existing);
-      return res.status(200).json({
-        message:
-          'We found your participant record in our system. We have emailed you a link to create your password.',
+      // Existing participant without password -> return info so frontend can show create password option
+      return res.status(400).json({
+        error: 'EMAIL_EXISTS_NO_PASSWORD',
+        message: 'This email is already associated with a participant record, but no password has been set.',
       });
     }
 
@@ -362,6 +362,7 @@ router.post('/signup', async (req, res, next) => {
 accountRouter.get('/account/start', (req, res) => {
   res.render('account/start', {
     title: 'Access or Create Your Account',
+    query: req.query,
   });
 });
 
