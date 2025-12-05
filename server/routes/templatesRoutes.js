@@ -1,8 +1,44 @@
 import express from 'express';
 import { db } from '../db/connection.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+
+// Configure multer for template photo uploads
+const templatePhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../public/uploads/templates');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'template-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadTemplatePhoto = multer({
+  storage: templatePhotoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Only image files are allowed'));
+  }
+});
 
 // List all templates with their event dates
 router.get('/with-dates', async (req, res, next) => {
@@ -143,6 +179,82 @@ router.put('/:id', requireAuth, requireRole('admin'), async (req, res, next) => 
     if (!updated) {
       return res.status(404).json({ message: 'Event template not found' });
     }
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Upload template photo (admin only)
+router.post('/:id/photo', requireAuth, requireRole('admin'), uploadTemplatePhoto.single('photo'), async (req, res, next) => {
+  try {
+    const eventName = decodeURIComponent(req.params.id);
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No photo uploaded' });
+    }
+
+    const photoPath = '/uploads/templates/' + req.file.filename;
+
+    // Get existing template to check for old photo
+    const existing = await db('EventsTemplates')
+      .where({ EventName: eventName })
+      .first();
+
+    if (!existing) {
+      // Delete uploaded file
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({ message: 'Template not found' });
+    }
+
+    // Delete old photo if exists
+    if (existing.EventTemplatePhotoPath) {
+      const oldPath = path.join(__dirname, '../../public', existing.EventTemplatePhotoPath);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    // Update template with new photo path
+    const [updated] = await db('EventsTemplates')
+      .where({ EventName: eventName })
+      .update({ EventTemplatePhotoPath: photoPath })
+      .returning('*');
+
+    res.json(updated);
+  } catch (error) {
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    next(error);
+  }
+});
+
+// Delete template photo (admin only)
+router.delete('/:id/photo', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const eventName = decodeURIComponent(req.params.id);
+
+    const existing = await db('EventsTemplates')
+      .where({ EventName: eventName })
+      .first();
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+
+    if (existing.EventTemplatePhotoPath) {
+      const photoPath = path.join(__dirname, '../../public', existing.EventTemplatePhotoPath);
+      if (fs.existsSync(photoPath)) {
+        fs.unlinkSync(photoPath);
+      }
+    }
+
+    const [updated] = await db('EventsTemplates')
+      .where({ EventName: eventName })
+      .update({ EventTemplatePhotoPath: null })
+      .returning('*');
 
     res.json(updated);
   } catch (error) {
