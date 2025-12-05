@@ -365,6 +365,85 @@ router.get('/portal/donate', requireAuth, (req, res) => {
   res.render('portal/donate', { title: 'Donate - Ella Rises Portal' });
 });
 
+// Hidden easter egg returning HTTP 418 with a small styled page
+router.get('/bebida', (req, res) => {
+  res.status(418).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>418 - I'm a teapot</title>
+      <style>
+        :root {
+          color-scheme: light;
+        }
+        body {
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: linear-gradient(135deg, #fff7f3 0%, #f7fbff 100%);
+          color: #1f2933;
+        }
+        .card {
+          background: #fff;
+          border: 1px solid #eceff3;
+          border-radius: 14px;
+          padding: 28px 32px;
+          box-shadow: 0 12px 40px rgba(17, 24, 39, 0.08);
+          max-width: 360px;
+          text-align: center;
+        }
+        .emoji {
+          font-size: 48px;
+          display: inline-block;
+          margin-bottom: 12px;
+        }
+        h1 {
+          margin: 0 0 6px;
+          font-size: 28px;
+          font-weight: 700;
+          letter-spacing: -0.4px;
+        }
+        p {
+          margin: 4px 0;
+          color: #4b5563;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .code {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          border-radius: 9999px;
+          background: #fdf2f8;
+          color: #be185d;
+          font-weight: 600;
+          font-size: 13px;
+          margin-bottom: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="code">418 • I'm a teapot</div>
+        <div class="emoji">🫖</div>
+        <h1>Short and stout.</h1>
+        <p>The requested entity body is short and stout.</p>
+        <p>Tip me over and pour me out.</p>
+        <p style="margin-top:16px;">
+          <a href="/" style="color:#be185d; text-decoration:none; font-weight:600;">← Back to home</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
 // Admin routes
 router.get('/admin/login', (req, res) => {
   if (req.session.user?.role === 'admin') {
