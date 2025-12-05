@@ -141,7 +141,12 @@ router.get('/portal/dashboard', requireAuth, async (req, res, next) => {
     const pastEvents = registrations
       .filter(reg => {
         const eventDate = new Date(reg.EventDateTimeStart);
-        return eventDate <= now && reg.RegistrationAttendedFlag === true;
+        // Handle different database representations of boolean (true, 1, 't', 'true')
+        const attended = reg.RegistrationAttendedFlag === true || 
+                         reg.RegistrationAttendedFlag === 1 || 
+                         reg.RegistrationAttendedFlag === 't' || 
+                         reg.RegistrationAttendedFlag === 'true';
+        return eventDate <= now && attended;
       })
       .slice(0, 5); // Most recent 5
     
