@@ -31,22 +31,17 @@ router.post('/forgot-password', async (req, res, next) => {
       });
     }
 
-    // Generate reset token
+    // Generate reset token and expiry
     const token = uuidv4();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    // Delete any existing tokens for this user
-    await db('PasswordTokens')
+    // Store token directly in participant record
+    await db('Participants')
       .where({ ParticipantID: participant.ParticipantID })
-      .del();
-
-    // Create new token
-    await db('PasswordTokens').insert({
-      ParticipantID: participant.ParticipantID,
-      Token: token,
-      Purpose: 'password_reset',
-      ExpiresAt: expiresAt,
-    });
+      .update({
+        PasswordResetToken: token,
+        PasswordResetExpires: expiresAt
+      });
 
     // Generate reset link
     const baseUrl = APP_BASE_URL || `${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${process.env.APP_DOMAIN || 'localhost:' + (process.env.PORT || 8081)}`;
@@ -77,28 +72,26 @@ router.post('/reset-password', async (req, res, next) => {
       return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
 
-    // Find valid token
-    const tokenRecord = await db('PasswordTokens')
-      .where({ Token: token })
-      .where('ExpiresAt', '>', new Date())
+    // Find participant with valid token
+    const participant = await db('Participants')
+      .where({ PasswordResetToken: token })
+      .where('PasswordResetExpires', '>', new Date())
       .first();
 
-    if (!tokenRecord) {
+    if (!participant) {
       return res.status(400).json({ message: 'Invalid or expired reset link. Please request a new one.' });
     }
 
-    // Hash new password
+    // Hash new password and clear reset token
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Update participant's password
     await db('Participants')
-      .where({ ParticipantID: tokenRecord.ParticipantID })
-      .update({ PasswordHash: passwordHash });
-
-    // Delete used token
-    await db('PasswordTokens')
-      .where({ Token: token })
-      .del();
+      .where({ ParticipantID: participant.ParticipantID })
+      .update({ 
+        PasswordHash: passwordHash,
+        PasswordResetToken: null,
+        PasswordResetExpires: null
+      });
 
     res.json({ message: 'Password reset successfully. You can now log in with your new password.' });
   } catch (error) {
@@ -393,13 +386,13 @@ accountRouter.get('/account/reset-password', async (req, res, next) => {
       });
     }
 
-    // Verify token is valid
-    const tokenRecord = await db('PasswordTokens')
-      .where({ Token: token })
-      .where('ExpiresAt', '>', new Date())
+    // Verify token is valid by checking participant record
+    const participant = await db('Participants')
+      .where({ PasswordResetToken: token })
+      .where('PasswordResetExpires', '>', new Date())
       .first();
 
-    if (!tokenRecord) {
+    if (!participant) {
       return res.render('account/reset-password', {
         title: 'Reset Password',
         token: null,
