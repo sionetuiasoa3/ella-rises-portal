@@ -224,23 +224,31 @@ router.delete('/:id/photo', requireAuth, requireRole('admin'), async (req, res, 
   }
 });
 
-// Delete template (admin only)
+// Delete template (admin only) - cascade deletes associated events
 router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
-    const eventName = req.params.id; // EventName is the primary key
+    const eventName = decodeURIComponent(req.params.id); // EventName is the primary key
     
-    // Check if any events use this template
-    const eventsUsingTemplate = await db('Events')
+    // Check if template exists
+    const template = await db('EventsTemplates')
       .where({ EventName: eventName })
-      .count('* as count')
       .first();
 
-    if (parseInt(eventsUsingTemplate.count) > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete template: events are using this template' 
-      });
+    if (!template) {
+      return res.status(404).json({ message: 'Event template not found' });
     }
 
+    // Cascade delete: First delete all events that use this template
+    const deletedEvents = await db('Events')
+      .where({ EventName: eventName })
+      .del();
+
+    // Delete the template photo if it exists
+    if (template.EventTemplatePhotoPath) {
+      await deleteUploadedFile(template.EventTemplatePhotoPath);
+    }
+
+    // Then delete the template itself
     const deleted = await db('EventsTemplates')
       .where({ EventName: eventName })
       .del();
@@ -249,8 +257,12 @@ router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) 
       return res.status(404).json({ message: 'Event template not found' });
     }
 
-    res.json({ message: 'Event template deleted successfully' });
+    res.json({ 
+      message: 'Event template and associated events deleted successfully',
+      deletedEventsCount: deletedEvents || 0
+    });
   } catch (error) {
+    console.error('Error deleting event template:', error);
     next(error);
   }
 });

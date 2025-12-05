@@ -143,7 +143,7 @@
 
   function openDeleteModal(id, title) {
     deleteMilestoneId = id;
-    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${title}"? This action cannot be undone and will fail if any participants have this milestone.`;
+    document.getElementById('delete-message').textContent = `Are you sure you want to delete "${title}"? This will permanently delete this milestone type and all associated milestone records for all participants. This action cannot be undone.`;
     document.getElementById('delete-modal').classList.remove('hidden');
     document.getElementById('delete-modal').classList.add('flex');
   }
@@ -161,7 +161,11 @@
         const error = await res.json();
         throw new Error(error.message || 'Delete failed');
       }
-      showNotification('Milestone type deleted successfully.', 'success', 'Success');
+      const result = await res.json();
+      const message = result.deletedMilestonesCount > 0 
+        ? `Milestone type and ${result.deletedMilestonesCount} associated milestone record(s) deleted successfully.`
+        : 'Milestone type deleted successfully.';
+      showNotification(message, 'success', 'Success');
       closeDeleteModal();
       await loadMilestones();
     } catch (error) {
