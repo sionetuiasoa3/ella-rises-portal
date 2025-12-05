@@ -26,21 +26,12 @@
           <div class="bg-ella-blush rounded-2xl p-8 flex items-center justify-center">
             <img src="/images/ella-illustration.png" alt="Ella Rises" class="w-full max-w-md h-auto" onerror="this.onerror=null; this.src='/images/ella-rises-logo.png';" />
           </div>
-          <div class="bg-card border border-border rounded-xl p-6 space-y-4">
-            <div class="flex items-center justify-between text-sm">
-              <span class="font-semibold text-foreground" id="current-raised">$0</span>
-              <span class="text-muted-foreground text-xs" id="goal-percent">0% of $100,000 goal</span>
-            </div>
-            <div class="h-2 rounded-full bg-muted overflow-hidden">
-              <div class="h-full bg-primary rounded-full transition-all duration-500" id="progress-bar" style="width: 0%;"></div>
-            </div>
-            <div class="space-y-2">
-              <h2 class="text-xl font-serif text-foreground">Empowering Futures Together</h2>
-              <p class="text-foreground/70 text-sm leading-relaxed">
-                We believe in the power of community and the brilliance of our youth. Your donation helps provide
-                STEAM education, arts programs, and mentorship opportunities to young women across our community.
-              </p>
-            </div>
+          <div class="bg-card border border-border rounded-xl p-6 space-y-3">
+            <h2 class="text-2xl font-serif text-foreground">Empowering Futures Together</h2>
+            <p class="text-foreground/70 text-base leading-relaxed">
+              We believe in the power of community and the brilliance of our youth. Your donation helps provide
+              STEAM education, arts programs, and mentorship opportunities to young women across our community.
+            </p>
           </div>
         </div>
 
@@ -185,43 +176,6 @@
       });
     }
 
-    // Load total donations for goal display
-    (async function loadDonationTotal() {
-      try {
-        const res = await fetch('/api/donations/total');
-        if (!res.ok) {
-          console.error('Failed to fetch donation total:', res.status, res.statusText);
-          return;
-        }
-        const data = await res.json();
-        console.log('Donation total API response:', data);
-        
-        // Ensure total is a number
-        const total = typeof data.total === 'number' ? data.total : parseFloat(data.total) || 0;
-        console.log('Parsed total:', total);
-        
-        const goal = 100000;
-        const percent = Math.min((total / goal) * 100, 100);
-        
-        const currentRaisedEl = document.getElementById('current-raised');
-        const goalPercentEl = document.getElementById('goal-percent');
-        const progressBarEl = document.getElementById('progress-bar');
-        
-        if (currentRaisedEl) {
-          currentRaisedEl.textContent = '$' + Math.round(total).toLocaleString();
-          console.log('Updated current-raised element:', currentRaisedEl.textContent);
-        }
-        if (goalPercentEl) {
-          goalPercentEl.textContent = percent.toFixed(1) + '% of $' + goal.toLocaleString() + ' goal';
-        }
-        if (progressBarEl) {
-          progressBarEl.style.width = percent + '%';
-          console.log('Updated progress bar width:', progressBarEl.style.width);
-        }
-      } catch (err) {
-        console.error('Error loading donation total', err);
-      }
-    })();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

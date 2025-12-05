@@ -4,20 +4,90 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
+async function recalcDonationSummary(participantId) {
+  if (!participantId) return;
+  const totalRow = await db('Donations')
+    .where({ ParticipantID: participantId })
+    .sum('DonationAmountRaw as total')
+    .first();
+  const total = totalRow?.total ? parseFloat(totalRow.total) : 0;
+
+  const existing = await db('DonationSummary')
+    .where({ ParticipantID: participantId })
+    .first();
+
+  if (existing) {
+    if (total > 0) {
+      await db('DonationSummary')
+        .where({ ParticipantID: participantId })
+        .update({ TotalDonations: total });
+    } else {
+      await db('DonationSummary')
+        .where({ ParticipantID: participantId })
+        .del();
+    }
+  } else if (total > 0) {
+    await db('DonationSummary').insert({
+      ParticipantID: participantId,
+      TotalDonations: total
+    });
+  }
+}
+
+const DEFAULT_GOAL = 100000;
+let inMemoryGoal = DEFAULT_GOAL;
+
+async function getDonationGoalValue() {
+  try {
+    const row = await db('DonationGoal').first();
+    if (row && row.GoalAmount !== undefined && row.GoalAmount !== null) {
+      const goalVal = parseFloat(row.GoalAmount) || DEFAULT_GOAL;
+      inMemoryGoal = goalVal;
+      return goalVal;
+    }
+  } catch (err) {
+    // Table may not exist; fallback to in-memory/default without throwing
+    console.warn('DonationGoal table not found; using in-memory goal fallback.');
+  }
+  return inMemoryGoal || DEFAULT_GOAL;
+}
+
+async function setDonationGoalValue(goalAmount) {
+  const goal = parseFloat(goalAmount);
+  if (isNaN(goal) || goal <= 0) {
+    throw new Error('Goal must be a positive number');
+  }
+  // Upsert single-row table; if table missing, throw so caller can handle
+  try {
+    const existing = await db('DonationGoal').first();
+    if (existing) {
+      await db('DonationGoal').update({ GoalAmount: goal });
+    } else {
+      await db('DonationGoal').insert({ GoalAmount: goal });
+    }
+    inMemoryGoal = goal;
+  } catch (err) {
+    console.warn('DonationGoal table not found or write failed; storing goal in memory only.');
+    inMemoryGoal = goal;
+  }
+}
+
 // List all donations (admin only)
 router.get('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
-    const donations = await db('Donations')
-      .join('Participants', 'Donations.ParticipantID', 'Participants.ParticipantID')
-      .where({ 'Participants.IsDeleted': false })
+    const donations = await db('Donations as d')
+      .leftJoin('Participants as p', 'd.ParticipantID', 'p.ParticipantID')
+      .where(function () {
+        this.whereNull('p.IsDeleted').orWhere({ 'p.IsDeleted': false });
+      })
       .select(
-        'Donations.*',
-        'Participants.ParticipantFirstName',
-        'Participants.ParticipantLastName',
-        'Participants.ParticipantEmail',
-        'Participants.ParticipantRole'
+        'd.*',
+        'p.ParticipantFirstName',
+        'p.ParticipantLastName',
+        'p.ParticipantEmail',
+        'p.ParticipantRole'
       )
-      .orderBy('Donations.DonationDateRaw', 'desc');
+      .orderBy('d.DonationDateRaw', 'desc');
     
     // Mark anonymous donations (from donor role participants)
     const formattedDonations = donations.map(d => ({
@@ -131,36 +201,14 @@ router.post('/', async (req, res, next) => {
           ParticipantID: participantId,
           DonationNumber: nextDonationNumber,
           DonationDateRaw: DonationDateRaw || new Date(),
-          DonationAmountRaw
+          DonationAmountRaw,
+          Message: Message || null,
+          Anonymous: Anonymous || false
         })
         .returning('*');
 
       // Update or create summary - TotalDonations should reflect sum of all their donations
-      const summary = await db('DonationSummary')
-        .where({ ParticipantID: participantId })
-        .first();
-
-      if (summary) {
-        // Recalculate total from all donations to ensure accuracy
-        const allDonations = await db('Donations')
-          .where({ ParticipantID: participantId })
-          .sum('DonationAmountRaw as total')
-          .first();
-        
-        const newTotal = allDonations?.total ? parseFloat(allDonations.total) : 0;
-        
-        await db('DonationSummary')
-          .where({ ParticipantID: participantId })
-          .update({
-            TotalDonations: newTotal
-          });
-      } else {
-        await db('DonationSummary')
-          .insert({
-            ParticipantID: participantId,
-            TotalDonations: DonationAmountRaw
-          });
-      }
+      await recalcDonationSummary(participantId);
 
       res.status(201).json(donation);
     } else {
@@ -191,7 +239,9 @@ router.post('/', async (req, res, next) => {
           ParticipantID: donorId,
           DonationNumber: 1,
           DonationDateRaw: DonationDateRaw || new Date(),
-          DonationAmountRaw
+          DonationAmountRaw,
+          Message: Message || null,
+          Anonymous: Anonymous || false
         })
         .returning('*');
 
@@ -208,6 +258,59 @@ router.post('/', async (req, res, next) => {
         donationId: donation.DonationID
       });
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update donation (admin only)
+router.put('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const donationId = parseInt(req.params.id);
+    const { ParticipantID, DonationDateRaw, DonationAmountRaw, Message, Anonymous, DonorEmail } = req.body;
+
+    const existing = await db('Donations').where({ DonationID: donationId }).first();
+    if (!existing) {
+      return res.status(404).json({ message: 'Donation not found' });
+    }
+
+    const oldParticipantId = existing.ParticipantID;
+    const updateData = {};
+    if (ParticipantID !== undefined) updateData.ParticipantID = ParticipantID || null;
+    if (DonationDateRaw !== undefined) updateData.DonationDateRaw = DonationDateRaw || null;
+    if (DonationAmountRaw !== undefined) updateData.DonationAmountRaw = DonationAmountRaw;
+    if (Message !== undefined) updateData.Message = Message || null;
+    if (Anonymous !== undefined) updateData.Anonymous = Anonymous;
+    if (DonorEmail !== undefined) updateData.DonorEmail = DonorEmail || null;
+
+    const [updated] = await db('Donations')
+      .where({ DonationID: donationId })
+      .update(updateData)
+      .returning('*');
+
+    // Recalc summaries for old and new participant IDs
+    await recalcDonationSummary(oldParticipantId);
+    await recalcDonationSummary(updateData.ParticipantID || oldParticipantId);
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete donation (admin only)
+router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const donationId = parseInt(req.params.id);
+    const existing = await db('Donations').where({ DonationID: donationId }).first();
+    if (!existing) {
+      return res.status(404).json({ message: 'Donation not found' });
+    }
+
+    await db('Donations').where({ DonationID: donationId }).del();
+    await recalcDonationSummary(existing.ParticipantID);
+
+    res.json({ message: 'Donation deleted' });
   } catch (error) {
     next(error);
   }
