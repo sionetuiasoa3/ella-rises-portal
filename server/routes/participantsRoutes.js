@@ -138,6 +138,16 @@ router.put('/:id', requireAuth, async (req, res, next) => {
       return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
     }
 
+    // Check if participant exists and is not deleted before updating
+    const existing = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .where({ IsDeleted: false })
+      .first();
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
     const updateData = {};
     const allowedFields = [
       'ParticipantFirstName',
@@ -152,9 +162,30 @@ router.put('/:id', requireAuth, async (req, res, next) => {
       'ParticipantPhotoPath'
     ];
 
-    // Only admins can change role
-    if (req.session.user.role === 'admin' && req.body.ParticipantRole) {
-      updateData.ParticipantRole = req.body.ParticipantRole;
+    // Only admins can change email and role
+    if (req.session.user.role === 'admin') {
+      // Handle email update (only admins can change email)
+      if (req.body.ParticipantEmail !== undefined) {
+        // If email is being changed, check for duplicates
+        if (req.body.ParticipantEmail !== existing.ParticipantEmail) {
+          const emailExists = await db('Participants')
+            .where({ ParticipantEmail: req.body.ParticipantEmail })
+            .where({ IsDeleted: false })
+            .whereNot({ ParticipantID: participantId })
+            .first();
+
+          if (emailExists) {
+            return res.status(400).json({ message: 'A participant with this email already exists' });
+          }
+        }
+
+        updateData.ParticipantEmail = req.body.ParticipantEmail;
+      }
+
+      // Handle role update (only admins can change role)
+      if (req.body.ParticipantRole) {
+        updateData.ParticipantRole = req.body.ParticipantRole;
+      }
     }
 
     // Only allow password updates if provided
@@ -167,16 +198,6 @@ router.put('/:id', requireAuth, async (req, res, next) => {
         updateData[field] = req.body[field];
       }
     });
-
-    // Check if participant exists and is not deleted before updating
-    const existing = await db('Participants')
-      .where({ ParticipantID: participantId })
-      .where({ IsDeleted: false })
-      .first();
-
-    if (!existing) {
-      return res.status(404).json({ message: 'Participant not found' });
-    }
 
     const [updated] = await db('Participants')
       .where({ ParticipantID: participantId })
