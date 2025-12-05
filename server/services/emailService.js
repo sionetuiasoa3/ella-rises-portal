@@ -1,17 +1,28 @@
 import nodemailer from 'nodemailer';
 
+const EMAIL_USER = process.env.EMAIL_USER || 'ellarisescorporate@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS;
+
+console.log('📧 Email config loaded:', { 
+  user: EMAIL_USER, 
+  passConfigured: !!EMAIL_PASS,
+  passLength: EMAIL_PASS?.length 
+});
+
 // Create reusable transporter object using Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'ellarisescorporate@gmail.com',
-    pass: process.env.EMAIL_PASS // App password from Gmail (not regular password)
+    user: EMAIL_USER,
+    pass: EMAIL_PASS
   }
 });
 
 export async function sendEmail({ to, subject, html, text }) {
+  console.log('📧 Attempting to send email to:', to);
+  
   // If email credentials aren't configured, log and return mock
-  if (!process.env.EMAIL_PASS) {
+  if (!EMAIL_PASS) {
     console.log('📧 [EMAIL NOT CONFIGURED] Would send email:', {
       to,
       subject,
@@ -22,8 +33,9 @@ export async function sendEmail({ to, subject, html, text }) {
   }
 
   try {
+    console.log('📧 Sending via Gmail SMTP...');
     const info = await transporter.sendMail({
-      from: `"Ella Rises" <${process.env.EMAIL_USER || 'ellarisescorporate@gmail.com'}>`,
+      from: `"Ella Rises" <${EMAIL_USER}>`,
       to,
       subject,
       text,
@@ -31,9 +43,11 @@ export async function sendEmail({ to, subject, html, text }) {
     });
 
     console.log('📧 Email sent successfully:', info.messageId);
+    console.log('📧 Response:', info.response);
     return info;
   } catch (error) {
     console.error('📧 Error sending email:', error.message);
+    console.error('📧 Full error:', error);
     throw error;
   }
 }
