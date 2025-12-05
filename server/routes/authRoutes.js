@@ -175,6 +175,21 @@ router.post('/signup', async (req, res, next) => {
       });
     }
 
+// Validate phone number (10 digits only)
+    if (PhoneNumber && !/^\d{10}$/.test(PhoneNumber)) {
+      return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+    }
+
+    // Format phone number with dashes (XXX-XXX-XXXX)
+    const formattedPhone = PhoneNumber 
+      ? `${PhoneNumber.slice(0,3)}-${PhoneNumber.slice(3,6)}-${PhoneNumber.slice(6)}`
+      : null;
+
+    // Validate zip code (5 digits only)
+    if (Zip && !/^\d{5}$/.test(Zip)) {
+      return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
+    }
+
     // Check if email already exists (excluding deleted participants)
     const existing = await db('Participants')
       .where({ ParticipantEmail: Email })
@@ -208,7 +223,7 @@ router.post('/signup', async (req, res, next) => {
         ParticipantFirstName: FirstName,
         ParticipantLastName: LastName,
         ParticipantDOB: DateOfBirth || null,
-        ParticipantPhone: PhoneNumber || null,
+        ParticipantPhone: formattedPhone,
         ParticipantCity: City || null,
         ParticipantState: State || null,
         ParticipantZip: Zip || null,

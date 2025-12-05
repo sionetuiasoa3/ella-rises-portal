@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import { db } from '../db/connection.js';
 import { requireAuth, requireRole, requireOwnershipOrAdmin } from '../middleware/auth.js';
+import { uploadParticipantPhoto, getUploadPath, deleteUploadedFile, handleUploadError } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -39,6 +40,21 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
       return res.status(400).json({ message: 'First name, last name, and email are required' });
     }
 
+// Validate phone number (10 digits only)
+    if (ParticipantPhone && !/^\d{10}$/.test(ParticipantPhone)) {
+      return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+    }
+
+    // Format phone number with dashes (XXX-XXX-XXXX)
+    const formattedPhone = ParticipantPhone 
+      ? `${ParticipantPhone.slice(0,3)}-${ParticipantPhone.slice(3,6)}-${ParticipantPhone.slice(6)}`
+      : null;
+
+    // Validate zip code (5 digits only)
+    if (ParticipantZip && !/^\d{5}$/.test(ParticipantZip)) {
+      return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
+    }
+
     // Check if email already exists (excluding deleted participants)
     const existing = await db('Participants')
       .where({ ParticipantEmail })
@@ -54,7 +70,7 @@ router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
         ParticipantFirstName,
         ParticipantLastName,
         ParticipantEmail,
-        ParticipantPhone: ParticipantPhone || null,
+        ParticipantPhone: formattedPhone,
         ParticipantRole: ParticipantRole || 'participant',
         ParticipantDOB: ParticipantDOB || null,
         ParticipantCity: ParticipantCity || null,
@@ -104,6 +120,21 @@ router.put('/:id', requireAuth, async (req, res, next) => {
     // Check if user is admin or updating their own profile
     if (req.session.user.role !== 'admin' && req.session.user.participantId !== participantId) {
       return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Validate phone number (10 digits only)
+    if (req.body.ParticipantPhone && !/^\d{10}$/.test(req.body.ParticipantPhone)) {
+      return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+    }
+
+    // Format phone number with dashes (XXX-XXX-XXXX) if provided
+    if (req.body.ParticipantPhone) {
+      req.body.ParticipantPhone = `${req.body.ParticipantPhone.slice(0,3)}-${req.body.ParticipantPhone.slice(3,6)}-${req.body.ParticipantPhone.slice(6)}`;
+    }
+
+    // Validate zip code (5 digits only)
+    if (req.body.ParticipantZip && !/^\d{5}$/.test(req.body.ParticipantZip)) {
+      return res.status(400).json({ message: 'Zip code must be exactly 5 digits' });
     }
 
     const updateData = {};
@@ -287,6 +318,70 @@ router.put('/:id/toggle-admin', requireAuth, requireRole('admin'), async (req, r
     const [updated] = await db('Participants')
       .where({ ParticipantID: participantId })
       .update({ ParticipantRole: newRole })
+      .returning('*');
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Upload/update participant photo (admin only)
+router.post('/:id/photo', requireAuth, requireRole('admin'), uploadParticipantPhoto, handleUploadError, async (req, res, next) => {
+  try {
+    const participantId = parseInt(req.params.id);
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No photo file provided' });
+    }
+
+    // Get existing participant to check for old photo
+    const existing = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
+    // Delete old photo if it exists
+    if (existing.ParticipantPhotoPath) {
+      deleteUploadedFile(existing.ParticipantPhotoPath);
+    }
+
+    // Update with new photo path
+    const photoPath = getUploadPath('participants', req.file.filename);
+    const [updated] = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .update({ ParticipantPhotoPath: photoPath })
+      .returning('*');
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete participant photo (admin only)
+router.delete('/:id/photo', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    const participantId = parseInt(req.params.id);
+
+    const existing = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .first();
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
+    if (existing.ParticipantPhotoPath) {
+      deleteUploadedFile(existing.ParticipantPhotoPath);
+    }
+
+    const [updated] = await db('Participants')
+      .where({ ParticipantID: participantId })
+      .update({ ParticipantPhotoPath: null })
       .returning('*');
 
     res.json(updated);
