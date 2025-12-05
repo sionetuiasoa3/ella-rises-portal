@@ -2,12 +2,110 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/connection.js';
-import { sendEmail } from '../services/emailService.js';
+import { sendEmail, sendPasswordResetEmail } from '../services/emailService.js';
 
 const router = express.Router();
 export const accountRouter = express.Router();
 
 const APP_BASE_URL = process.env.APP_BASE_URL || '';
+
+// Forgot Password - Request password reset email
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Find participant by email
+    const participant = await db('Participants')
+      .where({ ParticipantEmail: email, IsDeleted: false })
+      .whereNot({ ParticipantRole: 'donor' })
+      .first();
+
+    // Always return success message to prevent email enumeration
+    if (!participant) {
+      return res.json({ 
+        message: 'If an account exists with this email, you will receive a password reset link shortly.' 
+      });
+    }
+
+    // Generate reset token
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Delete any existing tokens for this user
+    await db('PasswordTokens')
+      .where({ ParticipantID: participant.ParticipantID })
+      .del();
+
+    // Create new token
+    await db('PasswordTokens').insert({
+      ParticipantID: participant.ParticipantID,
+      Token: token,
+      Purpose: 'password_reset',
+      ExpiresAt: expiresAt,
+    });
+
+    // Generate reset link
+    const baseUrl = APP_BASE_URL || `${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${process.env.APP_DOMAIN || 'localhost:' + (process.env.PORT || 8081)}`;
+    const resetLink = `${baseUrl}/account/reset-password?token=${encodeURIComponent(token)}`;
+
+    // Send email
+    await sendPasswordResetEmail(participant, resetLink);
+
+    res.json({ 
+      message: 'If an account exists with this email, you will receive a password reset link shortly.' 
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    next(error);
+  }
+});
+
+// Reset Password - Set new password using token
+router.post('/reset-password', async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and password are required' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    // Find valid token
+    const tokenRecord = await db('PasswordTokens')
+      .where({ Token: token })
+      .where('ExpiresAt', '>', new Date())
+      .first();
+
+    if (!tokenRecord) {
+      return res.status(400).json({ message: 'Invalid or expired reset link. Please request a new one.' });
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Update participant's password
+    await db('Participants')
+      .where({ ParticipantID: tokenRecord.ParticipantID })
+      .update({ PasswordHash: passwordHash });
+
+    // Delete used token
+    await db('PasswordTokens')
+      .where({ Token: token })
+      .del();
+
+    res.json({ message: 'Password reset successfully. You can now log in with your new password.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    next(error);
+  }
+});
 
 async function createPasswordToken(participant, purpose = 'create_password') {
   const token = uuidv4();
@@ -272,6 +370,53 @@ accountRouter.get('/account/start', (req, res) => {
   res.render('account/start', {
     title: 'Access or Create Your Account',
   });
+});
+
+// Forgot Password page
+accountRouter.get('/account/forgot-password', (req, res) => {
+  res.render('account/forgot-password', {
+    title: 'Forgot Password',
+  });
+});
+
+// Reset Password page (with token)
+accountRouter.get('/account/reset-password', async (req, res, next) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.render('account/reset-password', {
+        title: 'Reset Password',
+        token: null,
+        error: 'This link is invalid or missing a token.',
+        valid: false
+      });
+    }
+
+    // Verify token is valid
+    const tokenRecord = await db('PasswordTokens')
+      .where({ Token: token })
+      .where('ExpiresAt', '>', new Date())
+      .first();
+
+    if (!tokenRecord) {
+      return res.render('account/reset-password', {
+        title: 'Reset Password',
+        token: null,
+        error: 'This reset link has expired or is invalid. Please request a new one.',
+        valid: false
+      });
+    }
+
+    res.render('account/reset-password', {
+      title: 'Reset Password',
+      token,
+      error: null,
+      valid: true
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Existing participant path – check email and branch on status
