@@ -346,11 +346,13 @@ router.post('/:id/photo', requireAuth, requireRole('admin'), uploadParticipantPh
 
     // Delete old photo if it exists
     if (existing.ParticipantPhotoPath) {
-      deleteUploadedFile(existing.ParticipantPhotoPath);
+      await deleteUploadedFile(existing.ParticipantPhotoPath);
     }
 
     // Update with new photo path
-    const photoPath = getUploadPath('participants', req.file.filename);
+    // For S3 uploads, req.file.location contains the full S3 URL
+    // For backward compatibility, also check req.file.key and construct URL if needed
+    const photoPath = req.file.location || getUploadPath('participants', req.file.key || req.file.filename);
     const [updated] = await db('Participants')
       .where({ ParticipantID: participantId })
       .update({ ParticipantPhotoPath: photoPath })
@@ -376,7 +378,7 @@ router.delete('/:id/photo', requireAuth, requireRole('admin'), async (req, res, 
     }
 
     if (existing.ParticipantPhotoPath) {
-      deleteUploadedFile(existing.ParticipantPhotoPath);
+      await deleteUploadedFile(existing.ParticipantPhotoPath);
     }
 
     const [updated] = await db('Participants')

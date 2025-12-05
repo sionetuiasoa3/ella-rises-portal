@@ -234,9 +234,11 @@ router.post('/portal/profile/edit', requireAuth, uploadParticipantPhoto, handleU
     if (req.file) {
       // Delete old photo if it exists
       if (existing.ParticipantPhotoPath) {
-        deleteUploadedFile(existing.ParticipantPhotoPath);
+        await deleteUploadedFile(existing.ParticipantPhotoPath);
       }
-      updateData.ParticipantPhotoPath = getUploadPath('participants', req.file.filename);
+      // For S3 uploads, req.file.location contains the full S3 URL
+      // For backward compatibility, also check req.file.key and construct URL if needed
+      updateData.ParticipantPhotoPath = req.file.location || getUploadPath('participants', req.file.key || req.file.filename);
     }
     // If no photo uploaded, keep existing ParticipantPhotoPath
     
