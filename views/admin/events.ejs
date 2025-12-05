@@ -108,6 +108,11 @@
   let deleteId = null;
   let selectedTemplate = '';
 
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+
   // Load events and templates
   Promise.all([
     fetch('/api/events').then(r => r.json()),
@@ -116,8 +121,20 @@
     eventsData = events;
     templatesData = templates;
     populateTemplateDropdown(templates);
-    renderEvents(events);
-    updateResultsCount(events.length, events.length);
+
+    // Preselect template from query param if present
+    const templateParam = getQueryParam('template');
+    if (templateParam) {
+      selectedTemplate = templateParam;
+      const select = document.getElementById('template-filter');
+      if (select) {
+        select.value = templateParam;
+      }
+      filterEvents();
+    } else {
+      renderEvents(events);
+      updateResultsCount(events.length, events.length);
+    }
   });
 
   function populateTemplateDropdown(templates) {

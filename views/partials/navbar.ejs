@@ -42,3 +42,51 @@
   </div>
 </nav>
 
+<!-- Global Back Buttons (shown only on sub-pages) -->
+<div id="global-back-left" class="fixed top-4 left-4 z-[60] hidden sm:block" style="display:none;">
+  <button
+    onclick="handleGlobalBack()"
+    class="inline-flex items-center gap-2 bg-white shadow-md border border-ella-charcoal/10 hover:shadow-lg px-3 py-1.5 rounded-lg text-sm font-medium text-ella-charcoal hover:bg-white transition-colors"
+  >
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    Back
+  </button>
+</div>
+<div id="global-back-right" class="fixed top-4 right-4 z-[60]" style="display:none;">
+  <button
+    onclick="handleGlobalBack()"
+    class="inline-flex items-center gap-2 bg-white shadow-md border border-ella-charcoal/10 hover:shadow-lg px-3 py-1.5 rounded-lg text-sm font-medium text-ella-charcoal hover:bg-white transition-colors"
+  >
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    Back
+  </button>
+</div>
+
+<script>
+  function handleGlobalBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
+  }
+
+  // Show back buttons only on "sub pages" (e.g., admin/participants, admin/events, portal subroutes)
+  (function toggleBackButtons() {
+    const path = window.location.pathname || '';
+    const isAdminSub = path.startsWith('/admin/') && path !== '/admin';
+    const isPortalSub = path.startsWith('/portal/') && !['/portal', '/portal/', '/portal/dashboard', '/portal/auth'].includes(path);
+    const isOtherSub = path.startsWith('/events/') || path.startsWith('/press/') || path.startsWith('/contact/');
+    const shouldShow = isAdminSub || isPortalSub || isOtherSub;
+
+    const left = document.getElementById('global-back-left');
+    const right = document.getElementById('global-back-right');
+    if (shouldShow) {
+      if (left) left.style.display = 'block';
+      if (right) right.style.display = 'block';
+    } else {
+      if (left) left.style.display = 'none';
+      if (right) right.style.display = 'none';
+    }
+  })();
+</script>
