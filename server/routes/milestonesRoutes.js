@@ -4,6 +4,93 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// List milestone types with participant counts (admin only) - MUST be before /types route
+router.get('/types/with-counts', requireAuth, requireRole('admin'), async (req, res, next) => {
+  try {
+    // Get all milestone types from MilestonesTypes table
+    const allTypes = await db('MilestonesTypes')
+      .select('MilestoneID', 'MilestoneTitle')
+      .orderBy('MilestoneTitle', 'asc');
+    
+    // Get participant counts for each milestone type, separated into achieved and goals
+    // Achieved: MilestoneDate < CURRENT_DATE (and not the placeholder date 2099-12-31)
+    // Goals: MilestoneDate >= CURRENT_DATE or is the placeholder date 2099-12-31
+    let counts = [];
+    try {
+      // First, let's check if there are any milestones at all
+      const totalMilestones = await db('Milestones').count('* as total').first();
+      console.log('Total milestones in database:', totalMilestones?.total);
+      
+      counts = await db('Milestones')
+        .join('Participants', 'Milestones.ParticipantID', 'Participants.ParticipantID')
+        .where('Participants.IsDeleted', false)
+        .groupBy('Milestones.MilestoneID')
+        .select(
+          'Milestones.MilestoneID',
+          db.raw(`COUNT(DISTINCT CASE 
+            WHEN "Milestones"."MilestoneDate"::date < CURRENT_DATE 
+            AND "Milestones"."MilestoneDate"::date != '2099-12-31'::date 
+            THEN "Milestones"."ParticipantID" 
+            ELSE NULL 
+          END) as achieved_count`),
+          db.raw(`COUNT(DISTINCT CASE 
+            WHEN "Milestones"."MilestoneDate"::date >= CURRENT_DATE 
+            OR "Milestones"."MilestoneDate"::date = '2099-12-31'::date 
+            THEN "Milestones"."ParticipantID" 
+            ELSE NULL 
+          END) as goals_count`)
+        );
+      
+      console.log('Counts query result:', JSON.stringify(counts, null, 2));
+    } catch (countError) {
+      console.error('Error fetching counts:', countError);
+      console.error('Count error details:', countError.message);
+      // If count query fails, just use empty array - all types will show 0
+      counts = [];
+    }
+    
+    // Create maps of milestone ID to counts
+    const achievedCountMap = {};
+    const goalsCountMap = {};
+    if (counts && Array.isArray(counts)) {
+      console.log('Processing counts array, length:', counts.length);
+      counts.forEach(c => {
+        if (c && c.MilestoneID !== null && c.MilestoneID !== undefined) {
+          const achieved = parseInt(c.achieved_count) || 0;
+          const goals = parseInt(c.goals_count) || 0;
+          achievedCountMap[c.MilestoneID] = achieved;
+          goalsCountMap[c.MilestoneID] = goals;
+          console.log(`MilestoneID ${c.MilestoneID}: achieved=${achieved}, goals=${goals}`);
+        }
+      });
+    } else {
+      console.log('No counts returned or counts is not an array');
+    }
+    
+    // Combine types with their counts - ensure all types are included even if count is 0
+    const formattedTypes = allTypes.map(type => ({
+      MilestoneID: type.MilestoneID,
+      MilestoneTitle: type.MilestoneTitle || '',
+      achieved_count: achievedCountMap[type.MilestoneID] || 0,
+      goals_count: goalsCountMap[type.MilestoneID] || 0,
+      participant_count: (achievedCountMap[type.MilestoneID] || 0) + (goalsCountMap[type.MilestoneID] || 0) // Total for backward compatibility
+    }));
+    
+    res.json(formattedTypes);
+  } catch (error) {
+    console.error('Error fetching milestone types with counts:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    if (error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
+    res.status(500).json({ 
+      message: 'Failed to load milestone types', 
+      error: error.message 
+    });
+  }
+});
+
 // List milestone types
 router.get('/types', async (req, res, next) => {
   try {
