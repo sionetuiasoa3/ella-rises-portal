@@ -24,9 +24,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Body parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing - increased limits for file uploads
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Sessions (MemoryStore is OK for now; add comment that it's not prod-grade)
 // TODO: In production, use a proper session store like Redis or PostgreSQL
