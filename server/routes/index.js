@@ -30,6 +30,10 @@ router.get('/contact', (req, res) => {
   res.render('contact', { title: 'Contact Us - Ella Rises' });
 });
 
+router.get('/press', (req, res) => {
+  res.render('press', { title: 'Press + Stories - Ella Rises' });
+});
+
 router.get('/donate', (req, res) => {
   res.render('donate', { title: 'Donate - Ella Rises' });
 });

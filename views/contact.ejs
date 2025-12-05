@@ -1,17 +1,43 @@
 <%- include('partials/head', { title: 'Ella Rises' }) %>
 <%- include('partials/navbar', { currentPath: '/contact' }) %>
-<div class="min-h-screen bg-background">
-  <main class="pt-28 pb-20">
+<div class="min-h-screen bg-background relative overflow-hidden">
+  <!-- Background decorative elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <!-- Gradient overlays -->
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-ella-cream/50 via-ella-blush/30 to-ella-sage/20"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-ella-sage/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-ella-pink/10 rounded-full blur-3xl"></div>
+    
+    <!-- Decorative shapes -->
+    <div class="absolute top-20 right-10 w-32 h-32 bg-ella-sage/5 rounded-full"></div>
+    <div class="absolute bottom-40 left-10 w-24 h-24 bg-ella-pink/5 rounded-full"></div>
+    <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-ella-peach/5 rounded-full"></div>
+  </div>
+
+  <main class="pt-28 pb-20 relative z-10">
     <div class="container mx-auto px-6">
       <div class="max-w-3xl mx-auto">
-        <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6 text-center">
-          Contact <span class="italic text-primary">Us</span>
-        </h1>
-        <p class="text-foreground/70 text-lg max-w-2xl mx-auto text-center mb-12">
-          We'd love to hear from you. Reach out to learn more about our programs or how you can support our mission.
-        </p>
-        <form id="contact-form" class="space-y-4">
-          <select name="option" class="w-full bg-ella-sage/30 border-ella-sage text-foreground/70 h-14 px-4 rounded-lg" required>
+        <!-- Header Section with enhanced styling -->
+        <div class="text-center mb-12 relative">
+          <div class="inline-flex items-center gap-2 bg-ella-sage/40 border border-ella-sage/30 text-foreground/80 px-5 py-3 rounded-full mb-6 text-base md:text-lg font-medium">
+            <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            Get in Touch
+          </div>
+          <h1 class="text-4xl md:text-6xl font-serif text-foreground mb-6">
+            Contact <span class="italic text-primary">Us</span>
+          </h1>
+          <p class="text-foreground/70 text-lg max-w-2xl mx-auto">
+            We'd love to hear from you. Reach out to learn more about our programs or how you can support our mission.
+          </p>
+        </div>
+
+        <!-- Form Card with enhanced styling -->
+        <div class="bg-white/80 backdrop-blur-sm border border-ella-charcoal/5 rounded-3xl shadow-xl p-8 md:p-12 relative">
+          <!-- Subtle decorative border accent -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-ella-sage via-ella-pink to-ella-peach rounded-t-3xl"></div>
+          
+          <form id="contact-form" class="space-y-5">
+          <select name="option" class="w-full bg-ella-sage/30 border border-ella-sage/50 text-foreground/70 h-14 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" required>
             <option value="">Select an option</option>
             <option value="general">General Inquiry</option>
             <option value="volunteer">Volunteer Opportunities</option>
@@ -20,21 +46,22 @@
             <option value="partnership">Partnership Opportunities</option>
           </select>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="firstName" placeholder="First Name" class="bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
-            <input type="text" name="lastName" placeholder="Last Name" class="bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
+            <input type="text" name="firstName" placeholder="First Name" class="bg-ella-sage/30 border border-ella-sage/50 text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" required />
+            <input type="text" name="lastName" placeholder="Last Name" class="bg-ella-sage/30 border border-ella-sage/50 text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" required />
           </div>
-          <input type="email" name="email" placeholder="Email" class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" required />
-          <textarea name="message" placeholder="Type your message here..." class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 min-h-[120px] resize-none px-4 py-3 rounded-lg" required></textarea>
-          <div class="pt-4">
-            <p class="text-foreground mb-3">Enter your phone number if you would like to receive reminder messages.</p>
-            <input type="tel" name="phone" placeholder="Phone" class="w-full bg-ella-sage/30 border-ella-sage text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg" />
+          <input type="email" name="email" placeholder="Email" class="w-full bg-ella-sage/30 border border-ella-sage/50 text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" required />
+          <textarea name="message" placeholder="Type your message here..." class="w-full bg-ella-sage/30 border border-ella-sage/50 text-foreground placeholder:text-foreground/50 min-h-[120px] resize-none px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" required></textarea>
+          <div class="pt-4 border-t border-ella-charcoal/10">
+            <p class="text-foreground/70 text-sm mb-3">Enter your phone number if you would like to receive reminder messages.</p>
+            <input type="tel" name="phone" placeholder="Phone" class="w-full bg-ella-sage/30 border border-ella-sage/50 text-foreground placeholder:text-foreground/50 h-14 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-ella-sage/50 focus:border-ella-sage transition-all" />
           </div>
           <div class="flex justify-end pt-4">
-            <button type="submit" class="bg-ella-sage hover:bg-ella-sage/90 text-foreground px-10 py-6 rounded-full text-base font-medium">
+            <button type="submit" class="bg-ella-sage hover:bg-ella-sage/90 text-foreground px-10 py-6 rounded-full text-base font-medium shadow-md hover:shadow-lg transition-all">
               Submit
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   </main>
